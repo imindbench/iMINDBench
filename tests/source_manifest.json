@@ -1,0 +1,226 @@
+{
+  "source_repository": "git@github.com:glchau/torch_brain.git",
+  "source_commit": "726d96978c3e573c7a31e2e63b18c905e4c15d6b",
+  "source_tree": "tests/test_neuroprobe_eval_pipelines",
+  "source_path_count": 29,
+  "selection_policy": "Small high-value subset covering retained legacy HTNet and BrainBERT, BaRISTA, shared region pooling, runtime/config validation, and metrics.",
+  "entries": [
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_barista.py",
+      "blob_oid": "7e1e3a7093a8e9f9f13118df6edae65b120d8195",
+      "mode": "100644",
+      "size_bytes": 6188,
+      "selected": true,
+      "destination": "tests/test_neuroprobe_eval_pipelines/test_barista.py",
+      "deviation": "CONF path changed from examples/neuroprobe_eval/conf to neuroprobe_eval/conf for the repository-root package layout."
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_brainbert_encoder_preprocessor_variable.py",
+      "blob_oid": "ec96bffed83295045867adae3e848d7ad033601e",
+      "mode": "100644",
+      "size_bytes": 3390,
+      "selected": true,
+      "destination": "tests/test_neuroprobe_eval_pipelines/test_brainbert_encoder_preprocessor_variable.py",
+      "deviation": null
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_brant_model.py",
+      "blob_oid": "da960bc04f02c4c92c1bc309771037b904d3d3f9",
+      "mode": "100644",
+      "size_bytes": 10114,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_diver_cleanup_contracts.py",
+      "blob_oid": "11ef9d186c082bdd6cc46c9c0b420b9598b88d63",
+      "mode": "100644",
+      "size_bytes": 4883,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_clean_laplacian.py",
+      "blob_oid": "86a4ddb6e273c4e3a16e00113b9a165e206e646b",
+      "mode": "100644",
+      "size_bytes": 4162,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_cnn_channel_concat_model.py",
+      "blob_oid": "52c4bead529d16a47db86089dab130866966bfa6",
+      "mode": "100644",
+      "size_bytes": 3360,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_deepnn_baseline_model.py",
+      "blob_oid": "f10e6fbac0fe5f3db6b94b71c1f58c2d6ecf9df3",
+      "mode": "100644",
+      "size_bytes": 3240,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_base_runner.py",
+      "blob_oid": "30ce843f5987820ef9a7ad590c92c722caa8bf7d",
+      "mode": "100644",
+      "size_bytes": 1735,
+      "selected": true,
+      "destination": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_base_runner.py",
+      "deviation": null
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_htnet_public_contract.py",
+      "blob_oid": "f759a46eedbfec36cb4654c9e6976fa9238e015f",
+      "mode": "100644",
+      "size_bytes": 1350,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_logging_utils.py",
+      "blob_oid": "f86e3a11e58f91b259495be5e7757dc3f866d3a5",
+      "mode": "100644",
+      "size_bytes": 5422,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_mlp_model.py",
+      "blob_oid": "0b1393de8023d194bd8403dee195b2d8c5e59b68",
+      "mode": "100644",
+      "size_bytes": 631,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_model_utils.py",
+      "blob_oid": "77359f28e87407086dad012cebf54fd337447715",
+      "mode": "100644",
+      "size_bytes": 2936,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_pipeline_contracts.py",
+      "blob_oid": "dc8b361604cc3d5197a5ee780330c4f6068fa866",
+      "mode": "100644",
+      "size_bytes": 3383,
+      "selected": true,
+      "destination": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_pipeline_contracts.py",
+      "deviation": null
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_run_eval.py",
+      "blob_oid": "97f15f929f9628fa31a859914c854500eb0c0a26",
+      "mode": "100644",
+      "size_bytes": 4007,
+      "selected": true,
+      "destination": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_run_eval.py",
+      "deviation": null
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_run_eval_processed_mode.py",
+      "blob_oid": "ada1b86301dc03f34b930ba5d25f5efe2c076fc6",
+      "mode": "100644",
+      "size_bytes": 60134,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_sklearn_runner.py",
+      "blob_oid": "b1291d3bd32cfdb298325fd1fab57c935a7cbb98",
+      "mode": "100644",
+      "size_bytes": 3973,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_torch_runner.py",
+      "blob_oid": "8e791f4889d3c5313895c83fac9e7515e1e1d8b3",
+      "mode": "100644",
+      "size_bytes": 25672,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_variable_channel_standardization.py",
+      "blob_oid": "06f6b80c82514cda3fd40b69c7cd71a2f6df625d",
+      "mode": "100644",
+      "size_bytes": 14358,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_htnet_model.py",
+      "blob_oid": "3052e2b2803f85295ece84b516785ae26dbf605b",
+      "mode": "100644",
+      "size_bytes": 4068,
+      "selected": true,
+      "destination": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_htnet_model.py",
+      "deviation": null
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_popt_head_input_mode.py",
+      "blob_oid": "7435111d1e146a23cdc9a2257cf852841d7d8d95",
+      "mode": "100644",
+      "size_bytes": 7978,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_processed_backend.py",
+      "blob_oid": "9988f466806d76c3ed62208e102b742fe8101926",
+      "mode": "100644",
+      "size_bytes": 30981,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_region_intersection_pool_preprocessor.py",
+      "blob_oid": "e027ed86477dd3498cae5f85d82dae2fd6fdaf76",
+      "mode": "100644",
+      "size_bytes": 3577,
+      "selected": true,
+      "destination": "tests/test_neuroprobe_eval_pipelines/test_region_intersection_pool_preprocessor.py",
+      "deviation": null
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_shared_coordinate_routing.py",
+      "blob_oid": "cf59a000fc5c2d2b514f46b58b09c2d5f3131e98",
+      "mode": "100644",
+      "size_bytes": 10203,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_shared_preprocessor_stages.py",
+      "blob_oid": "18fd2b5e1b02378d9d7ca3ef0f208e51e626ef9d",
+      "mode": "100644",
+      "size_bytes": 8331,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_standardization.py",
+      "blob_oid": "a21067d9dcd837fab7e285f3ccda10ef153d8eaa",
+      "mode": "100644",
+      "size_bytes": 12533,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_upsampler_preprocessor.py",
+      "blob_oid": "5600565f9c7d1ba08d2d873561b3c177ac3c7308",
+      "mode": "100644",
+      "size_bytes": 3440,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_variable_channel_adapter.py",
+      "blob_oid": "d31b173eeafd164f459684123d619a72b888a41d",
+      "mode": "100644",
+      "size_bytes": 158033,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_variable_channel_collate.py",
+      "blob_oid": "ed4fa38766ae5ca25a9a3d908dc0d97969d99b2e",
+      "mode": "100644",
+      "size_bytes": 26209,
+      "selected": false
+    },
+    {
+      "path": "tests/test_neuroprobe_eval_pipelines/test_variable_channel_sample_local_preprocessors.py",
+      "blob_oid": "15ebde9152e42053e4081442acd7dbd5725e6aa1",
+      "mode": "100644",
+      "size_bytes": 57381,
+      "selected": false
+    }
+  ]
+}

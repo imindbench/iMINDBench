@@ -36,4 +36,17 @@ corresponding change.
 
 ## Changes
 
-No post-baseline migration changes have been made yet.
+### 2026-08-30 — Port retained source tests
+
+- Change ID/commit subject: `test: port retained neuroprobe evaluation coverage`
+- Files changed: `tests/source_manifest.json`, `tests/test_neuroprobe_eval_pipelines/**`
+- Classification: test/docs
+- Reason: preserve high-value BaRISTA, legacy-model, runner, and preprocessor coverage before simplification.
+- Behavioral effect: no runtime change; six tests are byte-identical to source and the BaRISTA test changes only its config-root path for the repository layout.
+- Smoke cases affected: retained baseline unit/integration gates.
+- Before: relevant tests existed only in the TorchBrain source repository.
+- After: 25 tests pass; 7 BaRISTA implementation tests skip when `xformers` is unavailable.
+- Metric/config deltas: none.
+- Evidence/report ID: `tests/source_manifest.json`; `conda run -n tb_buildathon python -m pytest -q -rs tests/test_neuroprobe_eval_pipelines`
+- Reviewer/disposition: root reviewed; accepted.
+- Follow-up or user review needed: rerun skipped BaRISTA tests in the final `imindbench` environment with `xformers` installed.
