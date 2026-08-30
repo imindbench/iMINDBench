@@ -1,0 +1,61 @@
+# Example processed-mode dataset config with NeuroprobeV2 evaluation and
+# multi-source training. Validation/test remain tied to the top-level target
+# dataset; only training uses the additional train_sources entries.
+root: ${paths.dataset_root}
+dirname: ${paths.dataset_dirname}
+provider: neuroprobev2
+subset_tier: lite  # full|lite|nano
+label_mode: binary  # binary|multiclass
+task: onset
+test_subject: 1
+test_session: 1
+regime: within-session  # within-session|hold-in-session|hold-out-session|hold-out-subject
+coordinate_profile: popt_lip  # Shared by all eval and train_sources.
+train_same_subject_only: false  # Must stay false when train_sources is set.
+train_sample_fraction: 1.0  # Must stay 1.0 when train_sources is set.
+# Maximum train samples each subject/session can contribute per dataset source.
+# null disables capping; auto uses the target test subject/session's effective
+# train count as the shared subject/session cap; train_sources entries may
+# override it. Auto requires dataset.provider to be included and remain active
+# after filtering.
+max_train_samples_per_subject: null
+# When true, each train source keeps only subject/session pairs listed in the
+# provider-specific decodable manifest for dataset.task.
+# With train_sources, decodable filtering requires every source regime to be
+# hold-in-session so training means all valid task-decodable sessions per source.
+train_decodable_subject_sessions_only: false
+brain_area_key: localization_DesikanKilliany
+uniquify_channel_ids_with_subject: true
+uniquify_channel_ids_with_session: true
+merge_val_into_test: false
+
+train_sources:
+  - provider: neuroprobev2
+    preprocessor: laplacian_multi_stft_2048Hz
+    root: ${paths.dataset_root}
+    dirname: neuroprobe_2025
+    subset_tier: lite
+    test_subject: ${dataset.test_subject}
+    test_session: ${dataset.test_session}
+    regime: hold-in-session
+    train_sample_fraction: 1.0
+
+  - provider: kelesbyd2024
+    preprocessor: laplacian_multi_stft_1000Hz
+    root: ${paths.dataset_root}
+    dirname: keles_byd_2024
+    subset_tier: full
+    test_subject: 41
+    test_session: 1
+    regime: hold-in-session
+    train_sample_fraction: 1.0
+
+  - provider: berezutskayapippi2022
+    preprocessor: laplacian_multi_stft_2048Hz
+    root: ${paths.dataset_root}
+    dirname: berezutskaya_pippi_2022
+    subset_tier: high-cov
+    test_subject: 1
+    test_session: 1
+    regime: hold-in-session
+    train_sample_fraction: 1.0

@@ -1,0 +1,171 @@
+{
+  "dataset_name": "neuroprobev2_stft_sweep_with_val",
+  "decodable_threshold": 0.55,
+  "fold_label": "all_folds",
+  "selection_metric": "val_roc_auc",
+  "tasks": {
+    "delta_volume": {
+      "max_test_roc_auc": 0.830930064888248,
+      "mean_test_roc_auc": 0.757875231366122,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "face_num": {
+      "max_test_roc_auc": 0.6003442943272417,
+      "mean_test_roc_auc": 0.6003442943272417,
+      "n_subject_sessions": 1,
+      "subject_sessions": [
+        "sub1_sess1"
+      ]
+    },
+    "frame_brightness": {
+      "max_test_roc_auc": 0.5777735260770975,
+      "mean_test_roc_auc": 0.5661181455448443,
+      "n_subject_sessions": 2,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub4_sess0"
+      ]
+    },
+    "global_flow": {
+      "max_test_roc_auc": 0.7209544110424961,
+      "mean_test_roc_auc": 0.6591401713495394,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "gpt2_surprisal": {
+      "max_test_roc_auc": 0.677473537924621,
+      "mean_test_roc_auc": 0.6059578987049716,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "local_flow": {
+      "max_test_roc_auc": 0.6504960317460318,
+      "mean_test_roc_auc": 0.6189077059397052,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "onset": {
+      "max_test_roc_auc": 0.9228836942940442,
+      "mean_test_roc_auc": 0.8916953993816896,
+      "n_subject_sessions": 5,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub7_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "pitch": {
+      "max_test_roc_auc": 0.6435926773455378,
+      "mean_test_roc_auc": 0.5891562108762505,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub7_sess0"
+      ]
+    },
+    "speech": {
+      "max_test_roc_auc": 0.9300466025098482,
+      "mean_test_roc_auc": 0.8671055243827258,
+      "n_subject_sessions": 5,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub7_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "volume": {
+      "max_test_roc_auc": 0.7927651170809693,
+      "mean_test_roc_auc": 0.6976355234423164,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub7_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "word_gap": {
+      "max_test_roc_auc": 0.6449980669362507,
+      "mean_test_roc_auc": 0.6263597126922968,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "word_head_pos": {
+      "max_test_roc_auc": 0.6316677638109568,
+      "mean_test_roc_auc": 0.6057591585425744,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "word_index": {
+      "max_test_roc_auc": 0.825055207189334,
+      "mean_test_roc_auc": 0.7546054216114167,
+      "n_subject_sessions": 5,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0",
+        "sub7_sess0",
+        "sub10_sess0"
+      ]
+    },
+    "word_length": {
+      "max_test_roc_auc": 0.6298548634839033,
+      "mean_test_roc_auc": 0.6140744246340962,
+      "n_subject_sessions": 3,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub4_sess0"
+      ]
+    },
+    "word_part_speech": {
+      "max_test_roc_auc": 0.6691881434848187,
+      "mean_test_roc_auc": 0.6192959244663359,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub3_sess0",
+        "sub7_sess0",
+        "sub10_sess0"
+      ]
+    }
+  },
+  "test_metric": "test_roc_auc"
+}

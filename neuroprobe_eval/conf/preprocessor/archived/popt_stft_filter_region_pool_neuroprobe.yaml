@@ -1,0 +1,41 @@
+# Neuroprobe2025 DS-DM release PopT STFT chain.
+# Includes mandatory region-intersection pooling.
+name: popt_stft
+chain:
+  # Time-domain filtering to match PopT-BYD-BTB (notch + optional bandpass).
+  - name: time_domain_filter
+    sampling_rate: 2048
+    high_gamma: false
+    notch_q: 30
+    bandpass_q: 5
+    bandpass_low: 70
+    bandpass_high: 250
+
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+
+  - name: channel_subselect
+    allowed_electrodes: null  # Can override with JSON path
+    subject: null
+
+  - name: stft
+    # Parity option: match PopT SciPy STFT behavior.
+    use_scipy: false
+    nperseg: 512
+    poverlap: 0.75  # noverlap=384 -> 384/512 = 0.75
+    sampling_rate: 2048
+    max_frequency: 150
+    min_frequency: 0
+    clip_k: 0  # Edge clipping for STFT (0 = no clipping)
+    freq_channel_cutoff: 40  # If > 0, use bin-based cutoff instead of Hz-based filtering. 0 = disabled (use Hz-based filtering)
+    normalizing: none
+    boundary: zeros
+    padded: true
+    pad_mode: constant
+    torch_dtype: float64
+
+  - name: region_intersection_pool
+    # Brain-area source key is configured at dataset.brain_area_key.
+
+  - name: standardize
+    mode: per_channel_samples_time_pooled

@@ -1,0 +1,23 @@
+# 1000 Hz Laplacian with Notch Filter + 0.5 Hz high-pass, resampled to 1024 Hz,
+# plus sample-local per-channel time standardization. The resample lets 1000 Hz
+# recordings feed models whose tokenizer expects a power-of-two rate (e.g.
+# BaRISTA at 1024 Hz).
+name: laplacian_wav
+chain:
+  - name: time_domain_filter
+    sampling_rate: 1000
+    high_gamma: false
+    notch_q: 30
+    high_pass_hz: 0.5
+    high_pass_order: 4
+    high_pass_zero_phase: true
+
+  - name: upsampler
+    source_rate: 1000
+    target_rate: 1024
+
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+
+  - name: standardize
+    mode: sample_per_channel_time

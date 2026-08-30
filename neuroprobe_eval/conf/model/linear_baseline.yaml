@@ -1,0 +1,24 @@
+# Linear baseline model from PopT-BYD-BTB
+name: linear_baseline
+requires_aligned_channels: true
+batch_norm: false
+dropout: 0.0
+sensor_dropout: 0.0
+batch_size: 128
+learning_rate: 0.0005
+optimizer: AdamW
+weight_decay: 0.01
+total_steps: 1000
+validation_interval: 100
+training_mode: steps_based
+random_state: 42
+device: auto
+requires_coords: false  # Optional; set true only for models that require channel coordinates
+grad_clip: 1.0
+
+# Scheduler configuration.
+scheduler:
+  name: ramp_up
+  total_steps: ${model.total_steps}
+  warmup: 0.025
+  gamma: 1.0  # or 0.99 for slight decay

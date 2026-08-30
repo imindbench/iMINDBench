@@ -1,0 +1,29 @@
+# Example paths config. Copy to conf/paths/server_<name>.yaml, fill in the
+# values, and select it with paths=server_<name>. That filename is gitignored,
+# so machine-local paths stay out of the repository.
+#
+# conf/paths/default.yaml leaves every path null, so it cannot drive a run.
+# Every key below must be present even when unused: conf/runtime/default.yaml
+# interpolates preprocessed_split_cache_dir, and a missing key raises
+# InterpolationKeyError before the run starts.
+
+# Root holding the processed brainsets, and the directory name under it.
+dataset_root: /path/to/brainsets/processed
+dataset_dirname: neuroprobe_2025
+
+# Pretrained checkpoints. Only the one your model needs has to be real.
+barista_checkpoint: /path/to/barista.ckpt
+brainbert_checkpoint: null
+popt_checkpoint: null
+brant_checkpoint_dir: null
+
+# Caches. train_source_cache_dir is written during multi-source training;
+# preprocessed_split_cache_dir is optional but the key is mandatory.
+train_source_cache_dir: /path/to/brainsets/cache
+preprocessed_split_cache_dir: null
+
+# Optional inputs, null unless you are using the feature that reads them.
+clean_laplacian_path: null
+electrode_dir_btb: null
+electrode_dir_byd: null
+decodable_subject_sessions_dir: null

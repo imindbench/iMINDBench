@@ -1,0 +1,28 @@
+# Private processed-mode dataset configuration.
+# Keeps the same config surface as neuroprobe2025 while selecting NeuroprobeV2.
+root: ${paths.dataset_root}
+dirname: ${paths.dataset_dirname}
+provider: neuroprobev2
+subset_tier: lite  # full|lite|nano
+label_mode: binary  # binary|multiclass
+task: onset
+test_subject: 1
+test_session: 1
+regime: within-session  # within-session|hold-in-session|hold-out-session|hold-out-subject
+coordinate_profile: popt_lip  # popt_lip|diver_mni
+# When true, hold-in/hold-out session train splits keep only recordings from test_subject.
+train_same_subject_only: false
+# Fraction of train windows to keep via random subsampling per fold (0, 1].
+train_sample_fraction: 1.0
+# Maximum train samples each subject/session can contribute per dataset source.
+# null disables capping; auto uses the target test subject/session's effective
+# train count as the shared subject/session cap. With dataset.train_sources, auto
+# requires dataset.provider to be included and remain active after filtering.
+max_train_samples_per_subject: null
+# When true, train splits keep only subject/session pairs listed in the
+# provider-specific decodable manifest for dataset.task.
+train_decodable_subject_sessions_only: false
+brain_area_key: localization_DesikanKilliany
+uniquify_channel_ids_with_subject: true
+uniquify_channel_ids_with_session: true
+merge_val_into_test: false

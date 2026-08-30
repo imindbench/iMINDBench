@@ -1,0 +1,243 @@
+"""Enums for the various spatial scales explored.
+
+Useful references for the atlas parcels:
+    https://pmc.ncbi.nlm.nih.gov/articles/PMC2937159/pdf/nihms213933.pdf
+    https://surfer.nmr.mgh.harvard.edu/pub/articles/HBM09-Destrieux-Sulcal.pdf
+
+Useful references for mapping atlas parcels to lobes (see below):
+    https://surfer.nmr.mgh.harvard.edu/fswiki/CorticalParcellation
+    https://www.frontiersin.org/journals/neuroscience/articles/10.3389/fnins.2012.00171/full#h12
+"""
+
+# Ported from BaRISTA: https://github.com/ShanechiLab/BaRISTA
+# USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
+import enum
+import re
+
+UNKNWON_STR = "UNKNOWN"
+
+
+class EnumWithUnknown(enum.Enum):
+    @classmethod
+    def get_enum(cls, value):
+        value = (value or UNKNWON_STR).upper()
+        try:
+            return cls[value]
+        except KeyError as e:
+            raise NotImplementedError(
+                f"Unknown value '{value}' for enum {cls.__name__}"
+            ) from e
+
+
+class DestrieuxAseg(EnumWithUnknown):
+    """Atlas used in pretraining"""
+
+    UNKNOWN = 0
+    LEFT_AMYGDALA = 1
+    LEFT_HIPPOCAMPUS = 2
+    LEFT_INF_LAT_VENT = 3
+    LEFT_PUTAMEN = 4
+    RIGHT_AMYGDALA = 5
+    RIGHT_HIPPOCAMPUS = 6
+    RIGHT_INF_LAT_VENT = 7
+    RIGHT_PUTAMEN = 8
+    CTX_LH_G_INS_LG_AND_S_CENT_INS = 9
+    CTX_LH_G_AND_S_CINGUL_ANT = 10
+    CTX_LH_G_AND_S_CINGUL_MID_ANT = 11
+    CTX_LH_G_AND_S_CINGUL_MID_POST = 12
+    CTX_LH_G_AND_S_SUBCENTRAL = 13
+    CTX_LH_G_CINGUL_POST_DORSAL = 14
+    CTX_LH_G_FRONT_INF_OPERCULAR = 15
+    CTX_LH_G_FRONT_INF_ORBITAL = 16
+    CTX_LH_G_FRONT_INF_TRIANGUL = 17
+    CTX_LH_G_FRONT_MIDDLE = 18
+    CTX_LH_G_FRONT_SUP = 19
+    CTX_LH_G_INSULAR_SHORT = 20
+    CTX_LH_G_OC_TEMP_MED_PARAHIP = 21
+    CTX_LH_G_OCCIPITAL_MIDDLE = 22
+    CTX_LH_G_ORBITAL = 23
+    CTX_LH_G_PARIET_INF_ANGULAR = 24
+    CTX_LH_G_PARIET_INF_SUPRAMAR = 25
+    CTX_LH_G_PARIETAL_SUP = 26
+    CTX_LH_G_POSTCENTRAL = 27
+    CTX_LH_G_PRECENTRAL = 28
+    CTX_LH_G_PRECUNEUS = 29
+    CTX_LH_G_RECTUS = 30
+    CTX_LH_G_TEMP_SUP_G_T_TRANSV = 31
+    CTX_LH_G_TEMP_SUP_LATERAL = 32
+    CTX_LH_G_TEMP_SUP_PLAN_POLAR = 33
+    CTX_LH_G_TEMP_SUP_PLAN_TEMPO = 34
+    CTX_LH_G_TEMPORAL_INF = 35
+    CTX_LH_G_TEMPORAL_MIDDLE = 36
+    CTX_LH_LAT_FIS_ANT_HORIZONT = 37
+    CTX_LH_LAT_FIS_ANT_VERTICAL = 38
+    CTX_LH_LAT_FIS_POST = 39
+    CTX_LH_POLE_TEMPORAL = 40
+    CTX_LH_S_CALCARINE = 41
+    CTX_LH_S_CENTRAL = 42
+    CTX_LH_S_CINGUL_MARGINALIS = 43
+    CTX_LH_S_CIRCULAR_INSULA_ANT = 44
+    CTX_LH_S_CIRCULAR_INSULA_INF = 45
+    CTX_LH_S_CIRCULAR_INSULA_SUP = 46
+    CTX_LH_S_COLLAT_TRANSV_ANT = 47
+    CTX_LH_S_FRONT_INF = 48
+    CTX_LH_S_FRONT_MIDDLE = 49
+    CTX_LH_S_FRONT_SUP = 50
+    CTX_LH_S_INTRAPARIET_AND_P_TRANS = 51
+    CTX_LH_S_OC_TEMP_MED_AND_LINGUAL = 52
+    CTX_LH_S_ORBITAL_H_SHAPED = 53
+    CTX_LH_S_ORBITAL_LATERAL = 54
+    CTX_LH_S_ORBITAL_MED_OLFACT = 55
+    CTX_LH_S_PARIETO_OCCIPITAL = 56
+    CTX_LH_S_PERICALLOSAL = 57
+    CTX_LH_S_POSTCENTRAL = 58
+    CTX_LH_S_PRECENTRAL_INF_PART = 59
+    CTX_LH_S_PRECENTRAL_SUP_PART = 60
+    CTX_LH_S_SUBORBITAL = 61
+    CTX_LH_S_SUBPARIETAL = 62
+    CTX_LH_S_TEMPORAL_INF = 63
+    CTX_LH_S_TEMPORAL_SUP = 64
+    CTX_LH_S_TEMPORAL_TRANSVERSE = 65
+    CTX_RH_G_INS_LG_AND_S_CENT_INS = 66
+    CTX_RH_G_AND_S_CINGUL_ANT = 67
+    CTX_RH_G_AND_S_CINGUL_MID_ANT = 68
+    CTX_RH_G_AND_S_CINGUL_MID_POST = 69
+    CTX_RH_G_AND_S_FRONTOMARGIN = 70
+    CTX_RH_G_AND_S_PARACENTRAL = 71
+    CTX_RH_G_AND_S_SUBCENTRAL = 72
+    CTX_RH_G_CINGUL_POST_DORSAL = 73
+    CTX_RH_G_FRONT_INF_OPERCULAR = 74
+    CTX_RH_G_FRONT_INF_ORBITAL = 75
+    CTX_RH_G_FRONT_INF_TRIANGUL = 76
+    CTX_RH_G_FRONT_MIDDLE = 77
+    CTX_RH_G_FRONT_SUP = 78
+    CTX_RH_G_INSULAR_SHORT = 79
+    CTX_RH_G_OC_TEMP_LAT_FUSIFOR = 80
+    CTX_RH_G_OC_TEMP_MED_PARAHIP = 81
+    CTX_RH_G_ORBITAL = 82
+    CTX_RH_G_PARIET_INF_ANGULAR = 83
+    CTX_RH_G_PARIET_INF_SUPRAMAR = 84
+    CTX_RH_G_PRECENTRAL = 85
+    CTX_RH_G_RECTUS = 86
+    CTX_RH_G_TEMP_SUP_G_T_TRANSV = 87
+    CTX_RH_G_TEMP_SUP_LATERAL = 88
+    CTX_RH_G_TEMP_SUP_PLAN_POLAR = 89
+    CTX_RH_G_TEMP_SUP_PLAN_TEMPO = 90
+    CTX_RH_G_TEMPORAL_INF = 91
+    CTX_RH_G_TEMPORAL_MIDDLE = 92
+    CTX_RH_LAT_FIS_ANT_HORIZONT = 93
+    CTX_RH_LAT_FIS_ANT_VERTICAL = 94
+    CTX_RH_LAT_FIS_POST = 95
+    CTX_RH_POLE_TEMPORAL = 96
+    CTX_RH_S_CENTRAL = 97
+    CTX_RH_S_CINGUL_MARGINALIS = 98
+    CTX_RH_S_CIRCULAR_INSULA_ANT = 99
+    CTX_RH_S_CIRCULAR_INSULA_INF = 100
+    CTX_RH_S_CIRCULAR_INSULA_SUP = 101
+    CTX_RH_S_COLLAT_TRANSV_ANT = 102
+    CTX_RH_S_FRONT_INF = 103
+    CTX_RH_S_FRONT_MIDDLE = 104
+    CTX_RH_S_FRONT_SUP = 105
+    CTX_RH_S_INTRAPARIET_AND_P_TRANS = 106
+    CTX_RH_S_OC_TEMP_LAT = 107
+    CTX_RH_S_OC_TEMP_MED_AND_LINGUAL = 108
+    CTX_RH_S_ORBITAL_H_SHAPED = 109
+    CTX_RH_S_ORBITAL_LATERAL = 110
+    CTX_RH_S_ORBITAL_MED_OLFACT = 111
+    CTX_RH_S_PERICALLOSAL = 112
+    CTX_RH_S_POSTCENTRAL = 113
+    CTX_RH_S_PRECENTRAL_INF_PART = 114
+    CTX_RH_S_PRECENTRAL_SUP_PART = 115
+    CTX_RH_S_SUBORBITAL = 116
+    CTX_RH_S_SUBPARIETAL = 117
+    CTX_RH_S_TEMPORAL_INF = 118
+    CTX_RH_S_TEMPORAL_SUP = 119
+    CTX_RH_S_TEMPORAL_TRANSVERSE = 120
+
+    CTX_RH_G_POSTCENTRAL = 121
+    CTX_RH_G_OCCIPITAL_SUP = 122
+    CTX_RH_G_OCCIPITAL_MIDDLE = 123
+    CTX_RH_S_CALCARINE = 124
+    CTX_RH_LATERALOCCIPITAL = 125
+    CTX_LH_POLE_OCCIPITAL = 126
+    CTX_LH_G_AND_S_TRANSV_FRONTOPOL = 127
+    CTX_LH_G_AND_S_PARACENTRAL = 128
+    CTX_LH_G_OC_TEMP_LAT_FUSIFOR = 129
+    CTX_LH_G_OCCIPITAL_SUP = 130
+    CTX_RH_POLE_OCCIPITAL = 131
+    CTX_LH_S_OC_TEMP_LAT = 132
+    CTX_RH_G_CINGUL_POST_VENTRAL = 133
+    CTX_RH_G_PARIETAL_SUP = 134
+    CTX_RH_G_AND_S_OCCIPITAL_INF = 135
+    CTX_LH_G_CINGUL_POST_VENTRAL = 136
+    CTX_LH_G_AND_S_OCCIPITAL_INF = 137
+
+    # --- Subcortical Nuclei (Aseg-style additions) ---
+    # https://surfer.nmr.mgh.harvard.edu/fswiki/FsTutorial/AnatomicalROI/FreeSurferColorLUT
+    LEFT_CAUDATE = 138
+    RIGHT_CAUDATE = 139
+    LEFT_ACCUMBENS = 140
+    RIGHT_ACCUMBENS = 141
+    LEFT_PALLIDUM = 142
+    RIGHT_PALLIDUM = 143
+    LEFT_THALAMUS = 144
+    LEFT_THALAMUS_PROPER = 144
+    RIGHT_THALAMUS = 145
+    LEFT_SUBSTANTIA_NIGRA = 146
+    RIGHT_SUBSTANTIA_NIGRA = 147
+
+    SUBTHALAMIC_NUCLEUS = 148
+    ZONA_INCERTA = 149
+    SUBSTANTIA_INNOMINATA = 150
+
+    LEFT_CEREBRAL_WHITE_MATTER = 151
+    RIGHT_CEREBRAL_WHITE_MATTER = 152
+    INTERNAL_CAPSULE = 153
+    EXTERNAL_CAPSULE = 154
+    CORONA_RADIATA = 155
+
+    CSF = 156
+    DURA = 157
+    BONE = 158
+    BRAIN_STEM = 159
+    LEFT_LATERAL_VENTRICLE = 160
+
+    CTX_LH_G_SUBCALLOSAL = 161
+    CTX_RH_S_OC_SUP_AND_TRANSVERSAL = 162
+    CTX_RH_G_PRECUNEUS = 163
+    CTX_RH_G_CUNEUS = 164
+    CTX_RH_S_INTERM_PRIM_JENSEN = 165
+    CTX_LH_S_INTERM_PRIM_JENSEN = 166
+    CTX_RH_S_OCCIPITAL_ANT = 167
+    CTX_LH_G_OC_TEMP_MED_LINGUAL = 168
+    CTX_RH_G_OC_TEMP_MED_LINGUAL = 169
+    CTX_RH_S_OC_MIDDLE_AND_LUNATUS = 170
+    CTX_RH_S_PARIETO_OCCIPITAL = 171
+
+
+byd_brain_region_map = {
+    "Left vmPFC": "CTX_LH_G_RECTUS",
+    "Left ACC": "CTX_LH_G_AND_S_CINGUL_ANT",
+    "Left preSMA": "CTX_LH_G_AND_S_PARACENTRAL",
+    "Left amygdala": "LEFT_AMYGDALA",
+    "Left hippocampus": "LEFT_HIPPOCAMPUS",
+    "Right vmPFC": "CTX_RH_G_RECTUS",
+    "Right ACC": "CTX_RH_G_AND_S_CINGUL_ANT",
+    "Right preSMA": "CTX_RH_G_AND_S_PARACENTRAL",
+    "Right amygdala": "RIGHT_AMYGDALA",
+    "Right hippocampus": "RIGHT_HIPPOCAMPUS",
+    "LSPE": "UNKNOWN",
+    "RSPE": "UNKNOWN",
+}
+
+
+def destrieux_label_to_region_enum(label):
+    if label in byd_brain_region_map:
+        label = byd_brain_region_map[label]
+
+    label = label.replace("-", "_").upper()
+
+    try:
+        return DestrieuxAseg.get_enum(label).value
+    except NotImplementedError:
+        return DestrieuxAseg.UNKNOWN.value

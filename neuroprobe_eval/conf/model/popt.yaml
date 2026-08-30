@@ -1,0 +1,46 @@
+name: popt
+requires_aligned_channels: false
+upstream_ckpt: ${paths.popt_checkpoint}  # Path to pretrained PopT checkpoint
+frozen_upstream: false  # Easy toggle: true = frozen encoder, false = full fine-tuning
+
+# Learning rates (from PopT-BYD-BTB AdamW_finetune)
+# Base LR: 5e-4, upstream gets 0.1x = 5e-5
+upstream_lr: 5e-5  # Transformer encoder learning rate
+head_lr: 5e-4      # Classification head learning rate
+learning_rate: 5e-4  # Base learning rate (only used for logging, actual LRs come from upstream_lr/head_lr)
+
+# Optimizer settings (matching PopT-BYD-BTB)
+optimizer: AdamW
+weight_decay: 0.01
+grad_clip: 1.0
+
+# Training mode: steps_based (PopT replication) or epoch_based (default with early stopping)
+training_mode: steps_based  # Use steps_based for exact PopT-BYD-BTB replication
+total_steps: 1000  # Total training steps (for steps_based mode)
+validation_interval: 100  # Validate every N steps (for steps_based mode)
+
+# For epoch_based mode (alternative to steps_based)
+max_iter: 100     # Max epochs (for epoch_based mode)
+patience: 10       # Early stopping patience (for epoch_based mode)
+tol: 1e-4          # Early stopping tolerance (for epoch_based mode)
+
+# LR Scheduler (RampUp from PopT-BYD-BTB)
+scheduler:
+  name: ramp_up
+  total_steps: ${model.total_steps}
+  warmup: 0.025  # 2.5% warmup (50 steps for 2000 total steps)
+  gamma: 0.99    # Decay factor for StepLR after warmup
+
+# Training settings
+batch_size: 128    # Match PopT-BYD-BTB train_batch_size
+random_state: 42
+device: auto
+
+# Data settings
+# Variable-channel release contract:
+# - Supported mode: cls_only
+# - flatten_output_tokens and cls_plus_input_residual assume a fixed token/channel
+#   count across samples and may fail when channel counts vary.
+head_input_mode: cls_only  # cls_only | flatten_output_tokens | cls_plus_input_residual
+position_table_max_len: 5000  # Positional table length for coord clamp in variable-channel mode
+requires_coords: true  # Enforce channel coordinate presence during variable-channel materialization

@@ -1,0 +1,43 @@
+name: popt_brainbert
+chain:
+  # Time-domain filtering to match PopT-BYD-BTB (notch + optional bandpass).
+  - name: time_domain_filter
+    sampling_rate: 1000
+    high_gamma: false
+    notch_q: 30
+    bandpass_q: 5
+    bandpass_low: 70
+    bandpass_high: 250
+    
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+  
+  - name: channel_subselect
+    allowed_electrodes: null  # Can override with JSON path
+    subject: null
+  
+  - name: stft
+    # Parity option: match PopT SciPy STFT behavior.
+    use_scipy: true
+    nperseg: 195
+    poverlap: 0.8717948717948718  # noverlap=170 -> 170/195
+    sampling_rate: 1000
+    max_frequency: 250
+    min_frequency: 0
+    clip_k: 10
+    freq_channel_cutoff: 40
+    normalizing: zscore
+    boundary: zeros
+    padded: true
+    pad_mode: constant
+    torch_dtype: float64
+  
+  - name: brainbert_encoder
+    upstream_ckpt: ${paths.brainbert_checkpoint}  # Defaults from paths; override when needed
+    device: cuda:0
+    clip_emb_k: 5  # Center time clipping after encoder
+    pool: mean  # Options: mean, max, raw
+    # Adaptive batching parameters
+    max_memory_fraction: 0.5  # Use up to 75% of available GPU memory
+    encoder_batch_size: null   # null = auto-detect, or set manual (e.g., 512)
+    min_batch_size: 32         # Minimum safe batch size

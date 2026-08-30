@@ -1,0 +1,137 @@
+{
+  "dataset_name": "berezutskayapippi2022_stft_sweep_with_nonword_tercile",
+  "decodable_threshold": 0.55,
+  "fold_label": "all_folds",
+  "selection_metric": "val_roc_auc",
+  "tasks": {
+    "delta_volume": {
+      "max_test_roc_auc": 0.5709235052632935,
+      "mean_test_roc_auc": 0.5709235052632935,
+      "n_subject_sessions": 1,
+      "subject_sessions": [
+        "sub9_sess2"
+      ]
+    },
+    "face_num": {
+      "max_test_roc_auc": 0.6384083044982699,
+      "mean_test_roc_auc": 0.6361976163014225,
+      "n_subject_sessions": 2,
+      "subject_sessions": [
+        "sub9_sess2",
+        "sub23_sess1"
+      ]
+    },
+    "frame_brightness": {
+      "max_test_roc_auc": null,
+      "mean_test_roc_auc": null,
+      "n_subject_sessions": 0,
+      "subject_sessions": []
+    },
+    "global_flow": {
+      "max_test_roc_auc": null,
+      "mean_test_roc_auc": null,
+      "n_subject_sessions": 0,
+      "subject_sessions": []
+    },
+    "gpt2_surprisal": {
+      "max_test_roc_auc": 0.5887842379763544,
+      "mean_test_roc_auc": 0.5887842379763544,
+      "n_subject_sessions": 1,
+      "subject_sessions": [
+        "sub23_sess1"
+      ]
+    },
+    "local_flow": {
+      "max_test_roc_auc": 0.8095929215307522,
+      "mean_test_roc_auc": 0.721137480841102,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub9_sess2",
+        "sub21_sess1",
+        "sub23_sess1",
+        "sub42_sess1"
+      ]
+    },
+    "onset": {
+      "max_test_roc_auc": 0.7998611111111111,
+      "mean_test_roc_auc": 0.7169444444444443,
+      "n_subject_sessions": 3,
+      "subject_sessions": [
+        "sub21_sess1",
+        "sub23_sess1",
+        "sub42_sess1"
+      ]
+    },
+    "pitch": {
+      "max_test_roc_auc": 0.6106771484375,
+      "mean_test_roc_auc": 0.59276279296875,
+      "n_subject_sessions": 2,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub21_sess1"
+      ]
+    },
+    "speech": {
+      "max_test_roc_auc": 0.834325396825397,
+      "mean_test_roc_auc": 0.7534438775510204,
+      "n_subject_sessions": 5,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub9_sess2",
+        "sub21_sess1",
+        "sub23_sess1",
+        "sub42_sess1"
+      ]
+    },
+    "volume": {
+      "max_test_roc_auc": 0.628607983157312,
+      "mean_test_roc_auc": 0.6015906578446533,
+      "n_subject_sessions": 2,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub9_sess2"
+      ]
+    },
+    "word_gap": {
+      "max_test_roc_auc": null,
+      "mean_test_roc_auc": null,
+      "n_subject_sessions": 0,
+      "subject_sessions": []
+    },
+    "word_head_pos": {
+      "max_test_roc_auc": null,
+      "mean_test_roc_auc": null,
+      "n_subject_sessions": 0,
+      "subject_sessions": []
+    },
+    "word_index": {
+      "max_test_roc_auc": 0.7052375637755102,
+      "mean_test_roc_auc": 0.6230966996173469,
+      "n_subject_sessions": 4,
+      "subject_sessions": [
+        "sub1_sess1",
+        "sub9_sess2",
+        "sub21_sess1",
+        "sub23_sess1"
+      ]
+    },
+    "word_length": {
+      "max_test_roc_auc": 0.567843250889934,
+      "mean_test_roc_auc": 0.567843250889934,
+      "n_subject_sessions": 1,
+      "subject_sessions": [
+        "sub1_sess1"
+      ]
+    },
+    "word_part_speech": {
+      "max_test_roc_auc": 0.5983911193701403,
+      "mean_test_roc_auc": 0.5892830945278498,
+      "n_subject_sessions": 2,
+      "subject_sessions": [
+        "sub9_sess2",
+        "sub23_sess1"
+      ]
+    }
+  },
+  "test_metric": "test_roc_auc"
+}

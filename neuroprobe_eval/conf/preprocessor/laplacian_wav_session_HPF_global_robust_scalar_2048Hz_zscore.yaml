@@ -1,0 +1,19 @@
+# BaRISTA waveform recipe: filter each recording's windows together, then apply
+# robust global scaling and per-window channel/time z-scoring.
+name: laplacian_wav
+chain:
+  - name: time_domain_filter
+    sampling_rate: 2048
+    high_gamma: false
+    session_wise: true
+    notch_q: 30
+    notch_zero_phase: true
+    high_pass_hz: 0.5
+    high_pass_order: 4
+    high_pass_zero_phase: true
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+  - name: standardize
+    mode: global_robust_scalar
+  - name: standardize
+    mode: sample_per_channel_time

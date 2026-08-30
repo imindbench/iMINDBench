@@ -1,0 +1,33 @@
+name: popt_brainbert_extra_standardization
+chain:
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+  
+  - name: channel_subselect
+    allowed_electrodes: null  # Can override with JSON path
+    subject: null
+  
+  - name: stft
+    nperseg: 400
+    poverlap: 0.875  # noverlap=350 -> 350/400 = 0.875
+    sampling_rate: 2048
+    max_frequency: 250
+    min_frequency: 0
+    clip_k: 1  # Edge clipping for STFT (0 = no clipping)
+    freq_channel_cutoff: 40  # If > 0, use bin-based cutoff instead of Hz-based filtering. 0 = disabled (use Hz-based filtering)
+  
+  - name: standardize
+    mode: per_channel_samples_time_pooled
+  
+  - name: brainbert_encoder
+    upstream_ckpt: ???  # Must be provided at runtime
+    device: cuda:0
+    clip_emb_k: 5  # Center time clipping after encoder
+    pool: mean  # Options: mean, max, raw
+    # Adaptive batching parameters
+    max_memory_fraction: 0.75  # Use up to 75% of available GPU memory
+    encoder_batch_size: null   # null = auto-detect, or set manual (e.g., 512)
+    min_batch_size: 32         # Minimum safe batch size
+
+  - name: standardize
+    mode: per_channel_feature

@@ -1,0 +1,13 @@
+# 2048 Hz Laplacian with Notch Filter + Standardization
+name: laplacian_wav
+chain:
+  - name: time_domain_filter
+    sampling_rate: 2048
+    high_gamma: false
+    notch_q: 30
+
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+
+  - name: standardize
+    mode: per_channel_samples_time_pooled

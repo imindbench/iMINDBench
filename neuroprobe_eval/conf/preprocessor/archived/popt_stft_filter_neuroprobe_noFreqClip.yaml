@@ -1,0 +1,35 @@
+name: popt_stft
+chain:
+  # Time-domain filtering to match PopT-BYD-BTB (notch + optional bandpass).
+  - name: time_domain_filter
+    sampling_rate: 2048
+    high_gamma: false
+    notch_q: 30
+    bandpass_q: 5
+    bandpass_low: 70
+    bandpass_high: 250
+    
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+  
+  - name: channel_subselect
+    allowed_electrodes: null  # Can override with JSON path
+    subject: null
+  
+  - name: stft
+    # Parity option: match PopT SciPy STFT behavior.
+    use_scipy: false
+    nperseg: 512
+    poverlap: 0.75  # noverlap=384 -> 384/512 = 0.75
+    sampling_rate: 2048
+    max_frequency: 150
+    min_frequency: 0
+    clip_k: 0  # Edge clipping for STFT (0 = no clipping)
+    normalizing: none
+    boundary: zeros
+    padded: true
+    pad_mode: constant
+    torch_dtype: float64
+
+  - name: standardize
+    mode: per_channel_samples_time_pooled

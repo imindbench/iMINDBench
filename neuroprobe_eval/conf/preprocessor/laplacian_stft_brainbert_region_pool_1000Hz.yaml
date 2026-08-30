@@ -1,0 +1,34 @@
+# 1000 Hz Laplacian STFT BrainBERT chain with region-intersection pooling.
+name: laplacian_stft_brainbert_region_pool
+chain:
+  - name: time_domain_filter
+    sampling_rate: 1000
+    high_gamma: false
+    notch_q: 30
+    
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+
+  - name: stft
+    nperseg: 250
+    poverlap: 0.75
+    window: hann
+    max_frequency: 150
+    min_frequency: 0
+    sampling_rate: 1000
+    normalizing: none
+    freq_channel_cutoff: 40
+
+  - name: standardize
+    mode: per_channel_samples_time_pooled
+
+  - name: brainbert_encoder
+    upstream_ckpt: ${paths.brainbert_checkpoint}
+    device: cuda:0
+    clip_emb_k: 5
+    pool: mean
+    max_memory_fraction: 0.5
+    encoder_batch_size: null
+    min_batch_size: 32
+
+  - name: region_intersection_pool

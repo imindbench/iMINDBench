@@ -1,0 +1,118 @@
+name: barista
+
+# BaRISTA has no aligned-channel requirement; it tokenizes per channel and
+# attends over a variable-length token sequence.
+requires_aligned_channels: false
+# Channel coordinates must be present during variable-channel materialization.
+requires_coords: true
+
+# Pretrained upstream weights. There is no usable default: the model raises at
+# construction unless this resolves, or model.random_init=true for an
+# untrained control.
+upstream_ckpt: ${paths.barista_checkpoint}
+random_init: false
+
+frozen_upstream: false  # true = freeze tokenizer + backbone
+# true keeps the tokenizer CNN/pooler frozen and trains only spatial_encoder;
+# false finetunes the whole tokenizer.
+freeze_tokenizer_temporal: true
+
+# Learning rates (BaRISTA paper, Finetuning):
+#   "Our learning rate was 1e-4 for the pretrained model and 1e-3 for the
+#    downstream linear layers."
+# upstream_lr and head_lr are applied via Barista.get_parameter_groups().
+# learning_rate is only a fallback, used when no parameter groups are returned
+# (e.g. eval-only runs).
+upstream_lr: 1e-4
+head_lr: 1e-3
+learning_rate: 1e-4
+
+# Optimizer (BaRISTA paper, Finetuning: AdamW, weight_decay = 1e-2)
+optimizer: AdamW
+weight_decay: 0.01
+grad_clip: 1.0
+
+# epoch_based (early stopping) or steps_based.
+training_mode: epoch_based
+
+# steps_based only; inert under epoch_based.
+total_steps: 1000
+validation_interval: 100
+
+# epoch_based. The paper trains 30 epochs with 15-epoch early stopping; the
+# generous max_iter here lets early stopping decide, so a slow-converging
+# variant is not truncated. For paper parity pass
+# ++model.max_iter=30 ++model.patience=15.
+max_iter: 100
+patience: 15
+tol: 1e-4
+
+# LR schedule (BaRISTA paper, Finetuning):
+#   "5-epoch linear warm-up to a target learning rate followed by an
+#    exponential decay with decay factor gamma = 0.99."
+# RampUp is GradualWarmup -> StepLR(step_size=(total_steps-warmup)/100, gamma),
+# counted in optimizer updates.
+#
+# NOTE: under epoch_based training the runner overwrites scheduler.total_steps
+# with max_iter * steps_per_epoch (torch_runner._train_epoch_based), so the
+# value below is normally ignored and warmup resolves to 5% of the real budget.
+# To pin the schedule instead -- e.g. to reproduce runs recorded before that
+# override existed -- set scheduler.warmup_steps and
+# scheduler.step_size_updates, which take precedence over both.
+scheduler:
+  name: ramp_up
+  total_steps: 10000
+  warmup: 0.05
+  gamma: 0.99
+
+batch_size: 128  # BaRISTA paper: effective batch size = 128
+random_state: 42
+device: auto
+
+# Minimum fraction of a recording's channels that must resolve to a Destrieux
+# region before training proceeds. Guards against dataset.brain_area_key
+# pointing at a different parcellation, which otherwise collapses the whole
+# spatial encoding to UNKNOWN without failing.
+min_resolved_region_fraction: 0.5
+
+backbone:
+  num_layers: 12
+  d_hidden: 64
+  mlp_ratio: 4
+  norm: rmsnorm
+  norm_eps: 1e-8
+  activation: gelu
+  num_heads: 4
+  max_position: 1024
+  dropout: 0.1
+
+tokenizer:
+  kind: region
+
+  # input_dims/output_dims are forced to 1 by Tokenizer._build_temporal_encoder
+  # before TSEncoder2D is constructed, so only the remaining fields matter here.
+  # depth=4 gives 4 hidden blocks plus the output block = 5 conv blocks.
+  temporal_encoder:
+    input_dims: 1
+    output_dims: 1
+    hidden_dims: 5
+    depth: 4
+    kernel_size: 3
+    stride: 1
+    enable_checkpointing: false
+
+  # Non-overlapping sub-segments: 2048 samples / 512 = 4 tokens per channel.
+  # BYD records at 1000 Hz upsampled to 1024, so it needs
+  # ++model.tokenizer.samp_frequency=1024.
+  temporal_subsegment_len: 512
+  temporal_subsegment_step: 512
+  samp_frequency: 2048
+  num_seconds: 1
+
+  d_hidden: ${model.backbone.d_hidden}
+
+  add_spatial_encoding: true
+  spatial_grouping: destrieux  # coords | destrieux | lobes
+
+  embedding_max_dim:  # leave empty for no normalization of embeddings
+  embedding_init_scale: 1.0

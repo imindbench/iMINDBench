@@ -1,0 +1,34 @@
+# 1000 Hz Laplacian STFT chain.
+name: laplacian_multi_stft
+chain:
+  - name: time_domain_filter
+    sampling_rate: 1000
+    high_gamma: false
+    notch_q: 30
+
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+
+  - name: multi_stft
+    sampling_rate: 1000
+    hop_length: 62        # ~62 ms, closest to 128 / 2048 = 62.5 ms
+    window: hann
+    normalizing: none
+    windows:
+      - label: low
+        nperseg: 500      # 500 ms
+        min_frequency: 2
+        max_frequency: 40
+
+      - label: mid
+        nperseg: 250      # 250 ms
+        min_frequency: 20
+        max_frequency: 150
+
+      - label: high
+        nperseg: 125      # 125 ms
+        min_frequency: 80
+        max_frequency: 250
+
+  - name: standardize
+    mode: per_channel_samples_time_pooled

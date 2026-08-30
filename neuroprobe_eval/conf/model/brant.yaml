@@ -1,0 +1,43 @@
+name: brant
+requires_aligned_channels: false
+requires_coords: false
+
+# BaRISTA-style adaptation:
+# resample each whole short window to one 1500-sample BRANT pseudo-patch.
+upstream_ckpt_dir: ${paths.brant_checkpoint_dir}
+random_init: false
+frozen_upstream: false
+upstream_lr: 1e-7
+head_lr: 1e-4
+head_type: mlp_token  # linear_pooled | mlp_pooled | mlp_token
+head_hidden_dims: [1024, 512]
+
+# Inactive for BRANT because get_parameter_groups() sets explicit per-group LRs.
+learning_rate: null
+optimizer: Adam
+weight_decay: 0.0
+grad_clip: 1.0
+training_mode: epoch_based
+max_iter: 20
+# Archived BRANT fine-tuning runs for the full epoch budget rather than stopping
+# early, so keep patience at max_iter to preserve that behavior here.
+patience: 20
+tol: 0.0
+batch_size: 4
+random_state: 42
+device: auto
+
+seg_len: 1500
+seq_len: 1
+d_model: 2048
+dim_feedforward: 3072
+time_ar_layer: 12
+time_ar_head: 16
+ch_ar_layer: 5
+ch_ar_head: 16
+band_num: 8
+band_edges: [4, 8, 13, 30, 50, 70, 90, 110, 128]
+project_mode: linear
+learnable_mask: true
+dropout: 0.1
+power_sampling_rate: 256

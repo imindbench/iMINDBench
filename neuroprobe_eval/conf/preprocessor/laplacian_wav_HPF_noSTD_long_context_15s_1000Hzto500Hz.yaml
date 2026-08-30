@@ -1,0 +1,23 @@
+# 1000 Hz Laplacian with 15s context before HPF, crop to target window, then downsample to 500 Hz
+name: laplacian_wav_long_context_15s_noSTD
+chain:
+  - name: context_window
+    context_window_sec: 15.0
+    sampling_rate: 1000
+
+  - name: time_domain_filter
+    sampling_rate: 1000
+    high_gamma: false
+    notch_q: 30
+    high_pass_hz: 0.5
+    high_pass_order: 4
+    high_pass_zero_phase: true
+
+  - name: crop_to_target_window
+
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+
+  - name: downsample
+    source_rate: 1000
+    target_rate: 500
