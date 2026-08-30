@@ -261,7 +261,7 @@ def build_processed_split_provider(
 
 VALID_LABEL_MODES = {"binary", "multiclass"}
 VALID_SUBSET_TIERS = {"full", "lite", "nano"}
-VALID_COORDINATE_PROFILES = {"popt_lip", "diver_mni", "seegnificant_mni"}
+VALID_COORDINATE_PROFILES = {"popt_lip", "diver_mni"}
 
 
 def _validate_label_mode(label_mode: str) -> None:

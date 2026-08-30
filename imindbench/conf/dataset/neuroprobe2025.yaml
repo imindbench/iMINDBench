@@ -9,7 +9,7 @@ task: onset
 test_subject: 1
 test_session: 1
 regime: SS-SM  # SS-SM|SS-DM|DS-DM
-coordinate_profile: popt_lip  # popt_lip|diver_mni|seegnificant_mni
+coordinate_profile: popt_lip  # popt_lip|diver_mni
 # Supported only for hold-in-session/hold-out-session style regimes.
 train_same_subject_only: false
 # Fraction of train windows to keep via random subsampling per fold (0, 1].

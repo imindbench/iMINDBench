@@ -7,7 +7,7 @@ LABEL_MODE="binary"
 PREPROCESSOR="laplacian_multi_stft_1000Hz"
 DEVICE="cuda:1"
 OUTPUT_GROUP="kelesbyd2024_tercile"
-PATHS_CFG="server_ml6_popt_multi_stft_time_pool"
+PATHS_CFG="${PATHS_CFG:-default}"
 DATASET_CFG="kelesbyd2024"
 # Optional train-set controls:
 # - true: for hold-in/hold-out-session, keep only sessions from test_subject in train split.

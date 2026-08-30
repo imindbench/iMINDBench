@@ -1,0 +1,203 @@
+source_path	reason	reachability
+.gitignore	repository metadata	controls public source selection
+CHANGELOG_PARITY.md	release documentation	public repository documentation
+LICENSE.txt	license metadata	distributed with the release
+LICENSES/BaRISTA-LICENSE.md	license metadata	distributed with the release
+RELEASE_MIGRATION_PLAN.md	release documentation	public repository documentation
+THIRD_PARTY.md	license metadata	distributed with the release
+artifacts/parity_reference/README.md	release documentation	public repository documentation
+artifacts/parity_reference/cases/byd_mlp_multistft_global_flow_sub41_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
+artifacts/parity_reference/cases/neuroprobev2_barista_waveform_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
+artifacts/parity_reference/cases/neuroprobev2_logistic_multistft_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
+artifacts/parity_reference/cases/neuroprobev2_popt_multistft_holdin_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
+artifacts/parity_reference/cases/pippi_popt_multistft_speech_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
+artifacts/parity_reference/manifest.json	canonical parity reference	consumed by scripts/parity_tools.py
+config/brainsets_smoke_manifest.json	public validation configuration	consumed by validation tooling
+environment.yml	build and environment metadata	used for installation
+imindbench/.gitignore	repository metadata	controls public source selection
+imindbench/README.md	release documentation	public repository documentation
+imindbench/__init__.py	evaluation runtime	imported by the imindbench package
+imindbench/base_runner.py	evaluation runtime	imported by the imindbench package
+imindbench/conf/config.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/dataset/berezutskayapippi2022.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/dataset/berezutskayapippi2022_multisource_train.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/dataset/kelesbyd2024.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/dataset/kelesbyd2024_multisource_train.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/dataset/neuroprobe2025.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/dataset/neuroprobev2.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/dataset/neuroprobev2_multisource_train.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/barista.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/cnn.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/diver.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/htnet_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/htnet_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/htnet_500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/linear_baseline.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/logistic.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/mlp.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/model/popt.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/paths/default.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/paths/example.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_multi_stft_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_multi_stft_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_1000Hz_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_brainbert_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_brainbert_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_brainbert_region_pool_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_brainbert_region_pool_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_region_pool_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_stft_region_pool_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_global_robust_scalar_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_global_robust_scalar_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_global_scalar_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_global_scalar_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_noSTD_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_noSTD_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_noSTD_long_context_15s_1000Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_noSTD_long_context_15s_2048Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_sample_per_channel_time_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_sample_per_channel_time_1000Hz_1024Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_HPF_sample_per_channel_time_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_diverstyle_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_diverstyle_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_1000Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_2048Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_global_robust_scalar_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_global_robust_scalar_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_sample_per_channel_time_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_sample_per_channel_time_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_session_HPF_global_robust_scalar_1000Hz_2048Hz_zscore.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/preprocessor/laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/runtime/default.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/conf/submitter/default.yaml	runtime configuration	composed by imindbench.run_eval
+imindbench/decodable_subject_sessions/README.md	release documentation	public repository documentation
+imindbench/decodable_subject_sessions/berezutskayapippi2022.json	stable evaluation artifact	consumed by retained launchers
+imindbench/decodable_subject_sessions/kelesbyd2024.json	stable evaluation artifact	consumed by retained launchers
+imindbench/decodable_subject_sessions/neuroprobev2.json	stable evaluation artifact	consumed by retained launchers
+imindbench/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/README.md	release documentation	public repository documentation
+imindbench/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/berezutskayapippi2022.json	stable evaluation artifact	consumed by retained launchers
+imindbench/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/kelesbyd2024.json	stable evaluation artifact	consumed by retained launchers
+imindbench/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/neuroprobev2.json	stable evaluation artifact	consumed by retained launchers
+imindbench/models/__init__.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/TSEncoder2D.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/__init__.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/atlas.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/mlp.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/spatial_encoder.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/tokenized_batched_item.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/tokenizer.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/transformer.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_components/utils.py	retained model implementation	registered by imindbench.models
+imindbench/models/barista_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/base_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/cnn_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/__init__.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/checkpoint_utils.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/diver.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/embedder.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/finetune_builders.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/finetune_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/head_components.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/header.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/layers.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/model_builders.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/mup_utils.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/original_moirai_encoder.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/special_token.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_components/target_representation_functions.py	retained model implementation	registered by imindbench.models
+imindbench/models/diver_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/htnet_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/linear_baseline_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/logistic_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/mlp_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/model_utils.py	retained model implementation	registered by imindbench.models
+imindbench/models/popt_components/__init__.py	retained model implementation	registered by imindbench.models
+imindbench/models/popt_components/brainbert_encoder.py	retained model implementation	registered by imindbench.models
+imindbench/models/popt_components/positional_encoding.py	retained model implementation	registered by imindbench.models
+imindbench/models/popt_components/transformer_input.py	retained model implementation	registered by imindbench.models
+imindbench/models/popt_components/transformer_layers.py	retained model implementation	registered by imindbench.models
+imindbench/models/popt_model.py	retained model implementation	registered by imindbench.models
+imindbench/models/torch_base_model.py	retained model implementation	registered by imindbench.models
+imindbench/preprocessors/__init__.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/base_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/brainbert_encoder_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/context_window_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/crop_to_target_window_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/downsample_preprocessors.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/laplacian_stft_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/multi_stft_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/preprocessor_utils.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/raw_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/region_intersection_pool_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/standardization_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/stft_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/time_domain_filter_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/time_domain_filter_preprocessor_diver_style.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/preprocessors/upsampler_preprocessor.py	retained preprocessing implementation	registered by imindbench.preprocessors
+imindbench/run_eval.py	evaluation runtime	imported by the imindbench package
+imindbench/schedulers/__init__.py	evaluation runtime	imported by the imindbench package
+imindbench/schedulers/base_scheduler.py	evaluation runtime	imported by the imindbench package
+imindbench/schedulers/cosine_annealing.py	evaluation runtime	imported by the imindbench package
+imindbench/schedulers/ramp_up.py	evaluation runtime	imported by the imindbench package
+imindbench/scripts/decodable_subject_sessions.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_brainbert_byd.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_brainbert_neuroprobev2.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_brainbert_pippi.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_byd.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_byd_barista.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_byd_decodable_subjects_hold_in.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_byd_decodable_subjects_hold_in_stft_or_htnet_500hz_val_mean0p60.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_byd_decodable_subjects_multisource.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_byd_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_byd_stft_sweep.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_neuroprobev2.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_neuroprobev2_barista.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_neuroprobev2_decodable_subjects_hold_in.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_neuroprobev2_decodable_subjects_hold_in_stft_or_htnet_500hz_val_mean0p60.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_neuroprobev2_decodable_subjects_multisource.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_neuroprobev2_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_neuroprobev2_stft_sweep.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_pippi.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_pippi_barista.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_pippi_decodable_subjects_hold_in.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_pippi_decodable_subjects_hold_in_stft_or_htnet_500hz_val_mean0p60.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_pippi_decodable_subjects_multisource.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_pippi_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/run_pippi_stft_sweep.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/sklearn_runner.py	evaluation runtime	imported by the imindbench package
+imindbench/torch_runner.py	evaluation runtime	imported by the imindbench package
+imindbench/utils/__init__.py	evaluation runtime	imported by the imindbench package
+imindbench/utils/collate.py	evaluation runtime	imported by the imindbench package
+imindbench/utils/data_adapter.py	evaluation runtime	imported by the imindbench package
+imindbench/utils/fold_helpers.py	evaluation runtime	imported by the imindbench package
+imindbench/utils/logging_utils.py	evaluation runtime	imported by the imindbench package
+imindbench/utils/pipeline_contracts.py	evaluation runtime	imported by the imindbench package
+provenance/AUDIT.md	release documentation	public repository documentation
+provenance/consulted_artifacts.tsv	release provenance	audit and retained-surface evidence
+provenance/paper_figs_provenance.json	release provenance	audit and retained-surface evidence
+provenance/surface/generate_retained_manifest.py	release provenance	audit and retained-surface evidence
+provenance/surface/removed.tsv	release provenance	audit and retained-surface evidence
+provenance/surface/retained.tsv	release provenance	audit and retained-surface evidence
+pyproject.toml	build and environment metadata	used for installation
+scripts/parity_tools.py	parity validation tooling	public dry-run and comparison entrypoint
+scripts/validate_brainsets_smoke.py	release validation tooling	public validation entrypoint
+tests/source_manifest.json	verification and source identity	exercised by the test suite
+tests/test_brainsets_public_contract.py	verification and source identity	exercised by the test suite
+tests/test_imindbench_pipelines/test_barista.py	verification and source identity	exercised by the test suite
+tests/test_imindbench_pipelines/test_brainbert_encoder_preprocessor_variable.py	verification and source identity	exercised by the test suite
+tests/test_imindbench_pipelines/test_imindbench_base_runner.py	verification and source identity	exercised by the test suite
+tests/test_imindbench_pipelines/test_imindbench_pipeline_contracts.py	verification and source identity	exercised by the test suite
+tests/test_imindbench_pipelines/test_imindbench_run_eval.py	verification and source identity	exercised by the test suite
+tests/test_imindbench_pipelines/test_neuroprobe_htnet_model.py	verification and source identity	exercised by the test suite
+tests/test_imindbench_pipelines/test_region_intersection_pool_preprocessor.py	verification and source identity	exercised by the test suite
+tests/test_imindbench_pipelines/test_torch_brain_dataset_imports.py	verification and source identity	exercised by the test suite
+tests/test_neuroprobe_shared_artifacts.py	verification and source identity	exercised by the test suite
+tests/test_parity_tools.py	verification and source identity	exercised by the test suite

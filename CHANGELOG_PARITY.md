@@ -170,3 +170,18 @@ corresponding change.
 - Evidence/report ID: `conda run -n tb_buildathon env PYTHONPATH=/home/geeling/Projects/ieeg_project/torch_brain-public python -m pytest -q tests/test_brainsets_public_contract.py tests/test_neuroprobe_shared_artifacts.py` (21 passed).
 - Reviewer/disposition: two implementation review/fix passes plus an independent review; parser optionality and real `Pipeline.process()` routing were added before commit.
 - Follow-up or user review needed: push TorchBrain commit `c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c` so the immutable pin is publicly reachable, then run the network-backed preparation matrix.
+
+### 2026-08-30 — Reduce the public runtime to the retained paper surface
+
+- Change ID/commit subject: `refactor: remove unsupported migration surface`
+- Files changed: unsupported models/configs, archived preprocessors, obsolete/private launchers, retained launcher path defaults, runtime contract tests, `tests/source_manifest.json`, `provenance/surface/**`, and `CHANGELOG_PARITY.md`
+- Classification: deletion/no-behavior-change for retained cases
+- Reason: remove BRANT, unused baselines, archived preprocessing, cluster-only wrappers, and SEEGnificant-only coordinate support while preserving every paper-linked model/config family and BaRISTA.
+- Behavioral effect: removed families and historical wrappers are no longer executable; retained launchers use the shipped `default` paths group unless callers set `PATHS_CFG`.
+- Smoke cases affected: retained Logistic, MLP, CNN, linear, HTNet, PopT, BrainBERT, DIVER, and BaRISTA configuration/launcher surfaces.
+- Before: the package shipped broken/private path defaults and unsupported historical runtime surface.
+- After: retained and removed inventories are explicit, all retained launchers compose from public configs, and historical consulted hashes remain frozen in provenance.
+- Metric/config deltas: none for retained cases; deleted unsupported cases intentionally have no runtime parity claim.
+- Evidence/report ID: exhaustive `provenance/surface/{retained,removed}.tsv`; full CPU suite against pinned TorchBrain (72 passed, 7 expected BaRISTA/xformers skips).
+- Reviewer/disposition: two implementation review/fix passes plus independent paper-provenance reachability review; broken BRANT launcher, stale path configs, source-manifest deviations, and environment guidance fixed before commit.
+- Follow-up or user review needed: translate remaining launcher matrices into canonical declarative run manifests before any further script deletion.

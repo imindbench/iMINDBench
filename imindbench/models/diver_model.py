@@ -128,9 +128,9 @@ class DIVERModel(TorchBaseModel):
             )
         except ModuleNotFoundError as exc:
             raise ModuleNotFoundError(
-                "The DIVER model requires optional DIVER dependencies. Install the "
-                "examples/imindbench/environment.yml environment before using "
-                "model=diver."
+                "The DIVER model requires optional DIVER dependencies. Install "
+                "dependencies from the repository-root environment.yml and the "
+                "pinned public torch_brain package before using model=diver."
             ) from exc
 
         if self.ft_head_style == "flatten_linear":

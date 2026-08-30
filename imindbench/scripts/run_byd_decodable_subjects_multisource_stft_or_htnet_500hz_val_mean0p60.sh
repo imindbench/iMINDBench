@@ -14,7 +14,7 @@ if ! flock -n 9; then
   exit 0
 fi
 
-export PATHS_CFG="${PATHS_CFG:-processed_1_1_0}"
+export PATHS_CFG="${PATHS_CFG:-default}"
 export OUTPUT_GROUP="${OUTPUT_GROUP:-kelesbyd2024_tercile_multisource_${RULE_NAME}}"
 export DECODABLE_SUBJECT_SESSIONS_DIR="${DECODABLE_SUBJECT_SESSIONS_DIR:-${PROJECT_DIR}/decodable_subject_sessions/${RULE_NAME}}"
 

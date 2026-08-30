@@ -6,7 +6,7 @@ LABEL_MODE="binary"
 PREPROCESSOR="laplacian_stft_brainbert_2048Hz"
 DEVICE="cuda:0"
 OUTPUT_GROUP="berezutskayapippi2022"
-PATHS_CFG="server_ml7_popt_bb"
+PATHS_CFG="${PATHS_CFG:-default}"
 DATASET_CFG="berezutskayapippi2022"
 SUBSET_TIER="high-cov"
 TRAIN_SAME_SUBJECT_ONLY="false"
@@ -15,7 +15,6 @@ TRAIN_SAMPLE_FRACTION="1.0"
 DECODABLE_TRAIN_SUBJECT_SESSIONS_ONLY="false"
 MODELS=(
   "linear_baseline"
-  "deepnn_baseline"
 )
 REGIMES=(
   "within-session"

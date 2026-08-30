@@ -6,7 +6,7 @@ LABEL_MODE="binary"
 PREPROCESSOR="laplacian_multi_stft_2048Hz"
 DEVICE="${DEVICE:-cuda:3}"
 OUTPUT_GROUP="${OUTPUT_GROUP:-berezutskayapippi2022_tercile}"
-PATHS_CFG="${PATHS_CFG:-server_ml6_popt_multi_stft_time_pool}"
+PATHS_CFG="${PATHS_CFG:-default}"
 DATASET_CFG="berezutskayapippi2022"
 SUBSET_TIER="high-cov"
 # Optional train-set controls:

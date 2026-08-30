@@ -36,8 +36,8 @@ def build_model(cfg: DictConfig, dataset_cfg: DictConfig | None = None):
         if missing is not None:
             raise ImportError(
                 f"Model {model_name} needs {missing}, which is not installed. "
-                f"Install {missing} (see examples/imindbench/environment.yml) "
-                "or choose another model."
+                f"Install {missing} using the repository-root environment.yml "
+                "and public installation guidance, or choose another model."
             )
         raise ValueError(
             f"Model {model_name} not found in registry. Available: {list(MODEL_REGISTRY.keys())}"

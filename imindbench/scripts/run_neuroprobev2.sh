@@ -7,7 +7,7 @@ LABEL_MODE="binary"
 PREPROCESSOR="laplacian_multi_stft_2048Hz"
 DEVICE="cuda:0"
 OUTPUT_GROUP="neuroprobev2"
-PATHS_CFG="server_ml6_popt_multi_stft_time_pool"
+PATHS_CFG="${PATHS_CFG:-default}"
 DATASET_CFG="neuroprobev2"
 # Optional train-set controls:
 # - true: for hold-in/hold-out-session, keep only sessions from test_subject in train split.

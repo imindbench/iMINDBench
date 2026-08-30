@@ -1,0 +1,59 @@
+source_path	reason	reachability
+imindbench/models/brant_model.py	unsupported model family	no retained runtime config; historical launcher preserved as provenance evidence
+imindbench/conf/model/brant.yaml	unsupported model family	no retained runtime entrypoint
+imindbench/conf/model/brant_barista-style.yaml	unsupported model family	no retained runtime entrypoint
+imindbench/models/cnn_channel_concat_model.py	unreferenced model	no retained config or launcher
+imindbench/conf/model/cnn_channel_concat.yaml	unreferenced model	no retained launcher
+imindbench/models/deepnn_baseline_model.py	unsupported baseline	removed from retained BrainBERT launcher model arrays
+imindbench/conf/model/deepnn_baseline.yaml	unsupported baseline	removed from retained BrainBERT launcher model arrays
+imindbench/conf/preprocessor/archived/laplacian_filter_neuroprobe.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_match_popt.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_neuroprobe.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_neuroprobe_byd.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_neuroprobe_byd_paper_parity.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_neuroprobe_pippi_highcov.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_neuroprobe_pippi_lowcov.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_region_pool_neuroprobe.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_region_pool_neuroprobe_byd.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_region_pool_neuroprobe_pippi_highcov.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_filter_region_pool_neuroprobe_pippi_lowcov.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_region_pool.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/laplacian_stft_samples_time.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_brainbert.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_brainbert_extra_standardization.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_brainbert_filter.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_brainbert_filter_neuroprobe.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_brainbert_filter_public_parity.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_brainbert_filter_public_parity_1000Hz.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_brainbert_neuroprobe.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_neuroprobe.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_neuroprobe_byd.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_neuroprobe_noFreqClip.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_neuroprobe_noFreqClip_per_feature.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_neuroprobe_pippi_highcov.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_neuroprobe_pippi_lowcov.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_region_pool_neuroprobe.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_region_pool_neuroprobe_pippi_highcov.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/popt_stft_filter_region_pool_neuroprobe_pippi_lowcov.yaml	archived config	outside retained Hydra surface
+imindbench/conf/preprocessor/archived/raw.yaml	archived config	outside retained Hydra surface; raw implementation retained for programmatic contract
+imindbench/preprocessors/channel_subselect_preprocessor.py	unreferenced preprocessor	only archived configs referenced it
+imindbench/preprocessors/downsample_pad_preprocessor.py	unreferenced preprocessor	no retained config, script, or test reference
+imindbench/scripts/decodable_task_shards.sh	cluster orchestration helper	no retained launcher depends on it
+imindbench/scripts/run_neuroprobe2025.sh	obsolete provider launcher	canonical retained provider launchers use neuroprobev2
+imindbench/scripts/run_brainbert_neuroprobe2025.sh	obsolete provider launcher	canonical retained BrainBERT launcher uses neuroprobev2
+imindbench/scripts/run_byd_decodable_subjects_same_sub.sh	redundant experiment wrapper	no paper output family requires it
+imindbench/scripts/run_byd_public_popt_bb.sh	cluster-specific backfill wrapper	no retained paper output family requires it
+imindbench/scripts/run_neuroprobe2025_public_popt_bb.sh	cluster-specific backfill wrapper	no retained paper output family requires it
+imindbench/scripts/run_neuroprobev2_public_popt_bb.sh	cluster-specific backfill wrapper	no retained paper output family requires it
+imindbench/scripts/run_neuroprobev2_brant.sh	unsupported historical launcher	immutable provenance preserves its script URI and SHA; removed model and path groups make it non-operational
+imindbench/scripts/run_pippi_public_popt_bb.sh	cluster-specific backfill wrapper	no retained paper output family requires it
+imindbench/scripts/run_byd_diver_slurm.sh	cluster wrapper	DIVER runtime/config retained independently
+imindbench/scripts/run_neuroprobev2_diver_slurm.sh	cluster wrapper	DIVER runtime/config retained independently
+imindbench/scripts/run_pippi_diver_slurm.sh	cluster wrapper	DIVER runtime/config retained independently
+imindbench/scripts/run_single.sh	obsolete one-off wrapper	canonical runner is imindbench.run_eval
+imindbench/slurm_scripts/archive/README.md	archived cluster documentation	no runtime reachability
+imindbench/environment.yml	duplicate nested environment	root environment is canonical
+imindbench/utils/data_adapter.py::lip_to_mni152_ras	SEEG-only coordinate transform	no retained model/config consumes seegnificant_mni
+imindbench/utils/data_adapter.py::COORDINATE_PROFILES[seegnificant_mni]	SEEG-only profile	generic popt_lip and diver_mni routing retained
+imindbench/utils/pipeline_contracts.py::VALID_COORDINATE_PROFILES[seegnificant_mni]	SEEG-only profile	validation now rejects removed profile

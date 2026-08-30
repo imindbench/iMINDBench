@@ -6,7 +6,7 @@ LABEL_MODE="binary"
 PREPROCESSOR="laplacian_stft_1000Hz"
 DEVICE="cuda:1"
 OUTPUT_GROUP="kelesbyd2024_stft_sweep_with_nonword_tercile"
-PATHS_CFG="default"
+PATHS_CFG="${PATHS_CFG:-default}"
 DATASET_CFG="kelesbyd2024"
 # Optional train-set controls:
 # - true: for hold-in/hold-out-session, keep only sessions from test_subject in train split.

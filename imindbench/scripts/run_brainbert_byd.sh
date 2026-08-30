@@ -6,7 +6,7 @@ LABEL_MODE="binary"
 PREPROCESSOR="laplacian_stft_brainbert_1000Hz"
 DEVICE="cuda:0"
 OUTPUT_GROUP="kelesbyd2024"
-PATHS_CFG="server_ml7_popt_bb"
+PATHS_CFG="${PATHS_CFG:-default}"
 DATASET_CFG="kelesbyd2024"
 TRAIN_SAME_SUBJECT_ONLY="false"
 TRAIN_SAMPLE_FRACTION="1.0"
@@ -14,7 +14,6 @@ TRAIN_SAMPLE_FRACTION="1.0"
 DECODABLE_TRAIN_SUBJECT_SESSIONS_ONLY="false"
 MODELS=(
   "linear_baseline"
-  "deepnn_baseline"
 )
 
 REGIMES=(

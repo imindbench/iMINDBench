@@ -12,7 +12,7 @@
       "size_bytes": 6188,
       "selected": true,
       "destination": "tests/test_imindbench_pipelines/test_barista.py",
-      "deviation": "Imports changed from neuroprobe_eval to imindbench; CONF path changed from examples/neuroprobe_eval/conf to imindbench/conf for the repository-root package layout."
+      "deviation": "Imports changed from neuroprobe_eval to imindbench; CONF path changed from examples/neuroprobe_eval/conf to imindbench/conf for the repository-root package layout; the cleanup contract asserts that removed model families are absent from the registry."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_brainbert_encoder_preprocessor_variable.py",
@@ -102,7 +102,7 @@
       "size_bytes": 3383,
       "selected": true,
       "destination": "tests/test_imindbench_pipelines/test_imindbench_pipeline_contracts.py",
-      "deviation": "Imports changed mechanically from neuroprobe_eval to imindbench; destination filename changed to the canonical package name."
+      "deviation": "Imports changed mechanically from neuroprobe_eval to imindbench; destination filename changed to the canonical package name; the cleanup contract imports PREPROCESSOR_REGISTRY and asserts that the removed SEEG coordinate profile and preprocessors are rejected or absent."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_run_eval.py",

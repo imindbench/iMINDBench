@@ -63,6 +63,11 @@ def test_barista_unavailability_does_not_break_other_models():
         assert name in MODEL_REGISTRY
 
 
+def test_removed_models_are_not_registered():
+    for name in ("brant", "cnn_channel_concat", "deepnn_baseline"):
+        assert name not in MODEL_REGISTRY
+
+
 # ----------------------------------------------------------------------
 # Config contract
 # ----------------------------------------------------------------------

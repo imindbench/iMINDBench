@@ -6,7 +6,7 @@ LABEL_MODE="binary"
 PREPROCESSOR="laplacian_stft_2048Hz"
 DEVICE="cuda:2"
 OUTPUT_GROUP="berezutskayapippi2022_stft_sweep_with_nonword_tercile"
-PATHS_CFG="default"
+PATHS_CFG="${PATHS_CFG:-default}"
 DATASET_CFG="berezutskayapippi2022"
 SUBSET_TIER="high-cov"
 # Optional train-set controls:

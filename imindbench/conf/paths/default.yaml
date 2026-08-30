@@ -1,6 +1,5 @@
 brainbert_checkpoint: null
 popt_checkpoint: null
-brant_checkpoint_dir: null
 barista_checkpoint: null
 clean_laplacian_path: null
 electrode_dir_btb: null

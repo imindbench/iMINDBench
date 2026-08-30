@@ -88,29 +88,6 @@ def pippi_acpc_to_popt_lip(coords: Any) -> np.ndarray:
     return np.stack((left, inferior, posterior), axis=1).astype(np.float32, copy=False)
 
 
-def lip_to_mni152_ras(coords: Any) -> np.ndarray:
-    """Invert Brain TreeBank LIP voxel indices back to MNI152 RAS millimetres.
-
-    This is the inverse of ``byd_mni152_ras_to_popt_lip`` above, which is the
-    mapping this repo already uses in the forward direction for KelesBYD2024.
-    SEEGnificant's spatial positional encoding places Gaussian kernels at
-    mu in {-90, -70, ..., 70} with sigma^2 in {1, ..., 64}, i.e. on an
-    MNI millimetre grid, so LIP voxel indices (all positive, ~55-195) must be
-    converted or the radial-basis features collapse toward zero.
-
-    Verified against Brain TreeBank electrode names on the two bilateral
-    sessions: for sub_4_trial000 and sub_7_trial000, contacts named ``L*``
-    map to negative x (mean -29.7 / -32.2 mm) and contacts named ``R*`` map
-    to positive x (mean +12.9 / +23.4 mm), so the hemisphere sign is correct.
-    """
-    coords = np.asarray(coords, dtype=np.float32).reshape(-1, 3)
-    left, inferior, posterior = coords[:, 0], coords[:, 1], coords[:, 2]
-    x = -left + 128.0
-    y = -posterior + 128.0
-    z = -inferior + 110.0
-    return np.stack((x, y, z), axis=1).astype(np.float32, copy=False)
-
-
 def no_coordinates(coords: Any) -> None:
     _ = coords
     return None
@@ -128,16 +105,6 @@ COORDINATE_PROFILES: dict[str, dict[str, tuple[str, Any]]] = {
         "berezutskayapippi2022": ("acpc", no_coordinates),
         "neuroprobe2025": ("btb_xyz", identity),
         "neuroprobev2": ("btb_xyz", identity),
-    },
-    # SEEGnificant needs MNI-like millimetres (see lip_to_mni152_ras). For
-    # Brain TreeBank we invert the LIP voxel indices; KelesBYD2024 is already
-    # MNI152 RAS in mm, and BerezutskayaPippi2022's ACPC frame is mm-scaled
-    # with near-unit gain, so both pass through unchanged.
-    "seegnificant_mni": {
-        "kelesbyd2024": ("byd_mni152_ras", identity),
-        "berezutskayapippi2022": ("acpc", identity),
-        "neuroprobe2025": ("btb_lip", lip_to_mni152_ras),
-        "neuroprobev2": ("btb_lip", lip_to_mni152_ras),
     },
 }
 

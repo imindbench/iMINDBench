@@ -5,6 +5,7 @@ from omegaconf import OmegaConf
 
 os.environ.setdefault("ROOT_DIR_BRAINTREEBANK", "/tmp")
 
+from imindbench.preprocessors import PREPROCESSOR_REGISTRY
 from imindbench.utils.pipeline_contracts import (
     resolve_train_source_configs,
     validate_eval_config,
@@ -70,6 +71,20 @@ def test_validate_eval_config_rejects_unknown_coordinate_profile():
 
     with pytest.raises(ValueError, match="dataset.coordinate_profile"):
         validate_eval_config(cfg)
+
+
+def test_validate_eval_config_rejects_removed_seegnificant_profile():
+    cfg = _cfg({"name": "region_intersection_pool"})
+    cfg.dataset.coordinate_profile = "seegnificant_mni"
+
+    with pytest.raises(ValueError, match="dataset.coordinate_profile"):
+        validate_eval_config(cfg)
+
+
+def test_removed_preprocessors_are_not_registered():
+    assert "channel_subselect" not in PREPROCESSOR_REGISTRY
+    assert "downsample_pad" not in PREPROCESSOR_REGISTRY
+    assert "raw" in PREPROCESSOR_REGISTRY
 
 
 def test_resolve_train_source_configs_inherit_top_level_coordinate_profile():

@@ -15,7 +15,6 @@ dataset_dirname: neuroprobe_2025
 barista_checkpoint: /path/to/barista.ckpt
 brainbert_checkpoint: null
 popt_checkpoint: null
-brant_checkpoint_dir: null
 
 # Caches. train_source_cache_dir is written during multi-source training;
 # preprocessed_split_cache_dir is optional but the key is mandatory.

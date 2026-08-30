@@ -35,9 +35,9 @@ class TimeDomainFilterDIVERstylePreprocessor(BasePreprocessor):
             from mne.filter import filter_data, notch_filter
         except ModuleNotFoundError as exc:
             raise ModuleNotFoundError(
-                "time_domain_filter_diver_style requires mne. Install the "
-                "examples/imindbench/environment.yml environment before "
-                "using DIVER preprocessors."
+                "time_domain_filter_diver_style requires mne. Install dependencies "
+                "from the repository-root environment.yml before using DIVER "
+                "preprocessors."
             ) from exc
 
         filtered_data = filter_data(
