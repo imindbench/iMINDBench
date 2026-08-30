@@ -110,3 +110,18 @@ corresponding change.
 - Evidence/report ID: static namespace scan, retained pytest suite, built-wheel content inspection, and unrelated-working-directory import provenance check.
 - Reviewer/disposition: two independent reviews completed; canonical console name and test-manifest deviation findings fixed before commit.
 - Follow-up or user review needed: make bare Hydra `--help` compose without required experiment overrides in a separate usability change; Brainsets imports, README cleanup, and script reduction remain separate changes.
+
+### 2026-08-30 — Use the merged TorchBrain dataset API
+
+- Change ID/commit subject: `fix: load datasets from torch_brain public API`
+- Files changed: `imindbench/utils/pipeline_contracts.py`, `tests/test_imindbench_pipelines/test_torch_brain_dataset_imports.py`, `CHANGELOG_PARITY.md`
+- Classification: portability-only
+- Reason: standalone Brainsets is not installed; the merged public loaders are exported by `torch_brain.datasets`.
+- Behavioral effect: processed providers lazily resolve the same four dataset classes from the supported public namespace and fail with updated actionable errors.
+- Smoke cases affected: all Neuroprobe2025, NeuroprobeV2, BYD, and PIPPI processed-provider runs.
+- Before: a fresh environment failed on the removed `brainsets.datasets` namespace.
+- After: all provider loaders resolve from `torch_brain.datasets`; no standalone Brainsets import remains.
+- Metric/config deltas: none.
+- Evidence/report ID: focused provider import test plus retained pipeline suite.
+- Reviewer/disposition: two independent reviews completed; root verified against torch_brain-public commit `c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c` API.
+- Follow-up or user review needed: pin the public TorchBrain distribution/commit in release metadata and run real loader smoke tests after preparation.

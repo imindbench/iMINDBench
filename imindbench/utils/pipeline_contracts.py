@@ -18,51 +18,54 @@ AUTO_MAX_TRAIN_SAMPLES_PER_SUBJECT = "auto"
 # =========================
 
 
-def _require_brainsets_neuroprobe_v2():
+def _require_torch_brain_neuroprobe_v2():
     # Import lazily so local tooling/tests that do not instantiate datasets can
     # still import this module without optional data dependencies installed.
     try:
-        from brainsets.datasets import NeuroprobeV2
+        from torch_brain.datasets import NeuroprobeV2
     except ImportError as exc:
         raise ImportError(
-            "Variable-channel processed mode requires brainsets with NeuroprobeV2."
+            "Variable-channel processed mode requires torch_brain.datasets "
+            "with NeuroprobeV2."
         ) from exc
     return NeuroprobeV2
 
 
-def _require_brainsets_neuroprobe2025():
+def _require_torch_brain_neuroprobe2025():
     # Import lazily so local tooling/tests that do not instantiate datasets can
     # still import this module without optional data dependencies installed.
     try:
-        from brainsets.datasets import Neuroprobe2025
+        from torch_brain.datasets import Neuroprobe2025
     except ImportError as exc:
         raise ImportError(
-            "Processed provider 'neuroprobe2025' requires brainsets with Neuroprobe2025."
+            "Processed provider 'neuroprobe2025' requires torch_brain.datasets "
+            "with Neuroprobe2025."
         ) from exc
     return Neuroprobe2025
 
 
-def _require_brainsets_keles_byd_2024():
+def _require_torch_brain_keles_byd_2024():
     # Import lazily so local tooling/tests that do not instantiate datasets can
     # still import this module without optional data dependencies installed.
     try:
-        from brainsets.datasets import KelesBYD2024
+        from torch_brain.datasets import KelesBYD2024
     except ImportError as exc:
         raise ImportError(
-            "Processed provider 'kelesbyd2024' requires brainsets with KelesBYD2024."
+            "Processed provider 'kelesbyd2024' requires torch_brain.datasets "
+            "with KelesBYD2024."
         ) from exc
     return KelesBYD2024
 
 
-def _require_brainsets_berezutskaya_pippi_2022():
+def _require_torch_brain_berezutskaya_pippi_2022():
     # Import lazily so local tooling/tests that do not instantiate datasets can
     # still import this module without optional data dependencies installed.
     try:
-        from brainsets.datasets import BerezutskayaPippi2022
+        from torch_brain.datasets import BerezutskayaPippi2022
     except ImportError as exc:
         raise ImportError(
-            "Processed provider 'berezutskayapippi2022' requires brainsets with "
-            "BerezutskayaPippi2022."
+            "Processed provider 'berezutskayapippi2022' requires "
+            "torch_brain.datasets with BerezutskayaPippi2022."
         ) from exc
     return BerezutskayaPippi2022
 
@@ -75,7 +78,7 @@ def _require_brainsets_berezutskaya_pippi_2022():
 # a small localized patch instead of scattering provider checks across helpers.
 _PROVIDER_SPECS: dict[str, dict[str, Any]] = {
     "neuroprobev2": {
-        "dataset_class_loader": _require_brainsets_neuroprobe_v2,
+        "dataset_class_loader": _require_torch_brain_neuroprobe_v2,
         "regime_is_multi_subject": {
             "within-session": False,
             "hold-in-session": True,
@@ -84,7 +87,7 @@ _PROVIDER_SPECS: dict[str, dict[str, Any]] = {
         },
     },
     "neuroprobe2025": {
-        "dataset_class_loader": _require_brainsets_neuroprobe2025,
+        "dataset_class_loader": _require_torch_brain_neuroprobe2025,
         "regime_is_multi_subject": {
             "SS-SM": False,
             "SS-DM": False,
@@ -93,7 +96,7 @@ _PROVIDER_SPECS: dict[str, dict[str, Any]] = {
         "valid_subset_tiers": {"full", "lite", "nano"},
     },
     "kelesbyd2024": {
-        "dataset_class_loader": _require_brainsets_keles_byd_2024,
+        "dataset_class_loader": _require_torch_brain_keles_byd_2024,
         "regime_is_multi_subject": {
             "within-session": False,
             "hold-in-session": True,
@@ -103,7 +106,7 @@ _PROVIDER_SPECS: dict[str, dict[str, Any]] = {
         "valid_subset_tiers": {"full"},
     },
     "berezutskayapippi2022": {
-        "dataset_class_loader": _require_brainsets_berezutskaya_pippi_2022,
+        "dataset_class_loader": _require_torch_brain_berezutskaya_pippi_2022,
         "regime_is_multi_subject": {
             "within-session": False,
             "hold-in-session": True,
