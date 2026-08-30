@@ -50,3 +50,18 @@ corresponding change.
 - Evidence/report ID: `tests/source_manifest.json`; `conda run -n tb_buildathon python -m pytest -q -rs tests/test_neuroprobe_eval_pipelines`
 - Reviewer/disposition: root reviewed; accepted.
 - Follow-up or user review needed: rerun skipped BaRISTA tests in the final `imindbench` environment with `xformers` installed.
+
+### 2026-08-30 — Add baseline packaging and environment contract
+
+- Change ID/commit subject: `build: package baseline evaluation runtime`
+- Files changed: `pyproject.toml`, `environment.yml`, `.gitignore`
+- Classification: packaging
+- Reason: make the imported baseline installable and define the canonical Python 3.10 `imindbench` environment before the namespace migration.
+- Behavioral effect: adds distribution metadata, package-data inclusion, console entrypoint, dependency ownership, and generated-artifact exclusions; runtime algorithms are unchanged.
+- Smoke cases affected: package build/import and all later installed-package runs.
+- Before: the imported example was not a standalone root package.
+- After: a no-dependency local wheel build includes 95 Hydra YAMLs, six stable JSONs, and all three required license/notice files.
+- Metric/config deltas: none.
+- Evidence/report ID: local wheel SHA256 `6c8cd0108c72198c82540fa372986df6dbbc56df06afb62fc6055ce51d467d74`.
+- Reviewer/disposition: root reviewed; accepted for migration, with release dependency pins still subject to final fresh-environment validation.
+- Follow-up or user review needed: replace the development editable `torch_brain-public` install with an immutable public release/commit and rerun the built-wheel acceptance gate.
