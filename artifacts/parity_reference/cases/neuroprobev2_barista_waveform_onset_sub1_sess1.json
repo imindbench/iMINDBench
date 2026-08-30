@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "case_id": "neuroprobev2_barista_waveform_onset_sub1_sess1",
+  "source": {
+    "uri": "original-results://09_neurips/barista_jun9/neuroprobev2/barista_laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore/within-session/onset/sub1_sess1/population_btbank1_1_onset.json",
+    "sha256": "7df35439e1381aac24be8409d25ab71e6a3bc672bc24aaeccf89625b82b44ee0",
+    "config_sha256": "1a878ec4bfa1cdee56f2fad01be746529703422c54fdcd73d983d2615d03cf93",
+    "preprocess_sha256": "43891a2361819277b9c8002d9dbc3b900b0fc07326e9d7776c013a99ad8b10e4"
+  },
+  "identity": {
+    "model_name": "barista",
+    "preprocess_name": "laplacian_wav",
+    "task": "onset",
+    "seed": 42,
+    "subject": 1,
+    "session": 1,
+    "regime": "within-session",
+    "recording_key": "btbank1_1",
+    "scope": "population",
+    "time_bin_key": "one_second_after_onset",
+    "time_bin_start": 0.0,
+    "time_bin_end": 1.0
+  },
+  "folds": [
+    {"fold_idx": 0, "train_accuracy": 0.9680918953414167, "train_roc_auc": 0.995303581202596, "val_accuracy": 0.8978288633461047, "val_roc_auc": 0.9526071298084451, "test_accuracy": 0.9183673469387755, "test_roc_auc": 0.9789280508121616},
+    {"fold_idx": 1, "train_accuracy": 0.9751116783663051, "train_roc_auc": 0.999972306930435, "val_accuracy": 0.8352490421455939, "val_roc_auc": 0.9664093898428937, "test_accuracy": 0.7780612244897959, "test_roc_auc": 0.9378188775510204}
+  ],
+  "counts": {"sample_counts": null, "class_counts": null, "note": "The historical result did not record counts."}
+}

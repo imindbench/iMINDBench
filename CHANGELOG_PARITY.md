@@ -140,3 +140,18 @@ corresponding change.
 - Evidence/report ID: focused CLI wrapper tests and unrelated-working-directory wheel help check.
 - Reviewer/disposition: two independent reviews completed; public `sys.argv` restoration and non-help preservation were added before commit.
 - Follow-up or user review needed: none.
+
+### 2026-08-30 — Freeze paper parity references and offline tooling
+
+- Change ID/commit subject: `feat: add manifest-driven parity checks`
+- Files changed: `artifacts/parity_reference/**`, `scripts/parity_tools.py`, `tests/test_parity_tools.py`, `CHANGELOG_PARITY.md`
+- Classification: test/docs
+- Reason: turn the reviewed paper-figure provenance into redistributable reference contracts and explicit, caller-mapped parity workflows.
+- Behavioral effect: adds dry-run command construction and offline JSON comparison only; no experiment is launched and evaluation runtime is unchanged.
+- Smoke cases affected: NeuroprobeV2 Logistic, BYD MLP, PIPPI PopT, NeuroprobeV2 BaRISTA, and NeuroprobeV2 hold-in PopT.
+- Before: five candidates and source result hashes were documented, but there was no frozen metric record or executable comparison boundary.
+- After: all five reduced reference records are byte-hashed; Logistic/MLP can report metric/config-record PASS/FAIL, while otherwise matching PopT/BaRISTA records report NOT-COMPARABLE until exact historical checkpoint hashes are recovered. Checkable mismatches always FAIL.
+- Metric/config deltas: none; the records preserve historical identities, folds, and metrics verbatim.
+- Evidence/report ID: `artifacts/parity_reference/manifest.json`; `conda run -n tb_buildathon python -m pytest -q tests/test_parity_tools.py` (17 passed), including adversarial hash/path/numeric/status/atomicity cases.
+- Reviewer/disposition: independent review findings fixed; two follow-up local review passes completed for boundary validation, status semantics, atomic report finalization, provenance-claim limits, simplification, and private-path exclusion.
+- Follow-up or user review needed: recover immutable PopT and BaRISTA reference checkpoint hashes before enabling strict comparison for those three cases; experiments remain unexecuted.
