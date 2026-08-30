@@ -125,3 +125,18 @@ corresponding change.
 - Evidence/report ID: focused provider import test plus retained pipeline suite.
 - Reviewer/disposition: two independent reviews completed; root verified against torch_brain-public commit `c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c` API.
 - Follow-up or user review needed: pin the public TorchBrain distribution/commit in release metadata and run real loader smoke tests after preparation.
+
+### 2026-08-30 — Make bare CLI help composable
+
+- Change ID/commit subject: `fix: make installed CLI help self-contained`
+- Files changed: `imindbench/run_eval.py`, `pyproject.toml`, `tests/test_imindbench_pipelines/test_imindbench_run_eval.py`, `CHANGELOG_PARITY.md`
+- Classification: portability-only
+- Reason: Hydra previously failed before displaying help because required experiment groups had no defaults.
+- Behavioral effect: `-h`/`--help` injects composition-only example groups when absent; non-help runs retain the required explicit experiment selections.
+- Smoke cases affected: installed `imindbench --help` and `python -m imindbench.run_eval --help`.
+- Before: bare help exited with `ConfigCompositionException`.
+- After: bare help composes and displays available configuration groups without accessing data or launching a run.
+- Metric/config deltas: none for experiment execution.
+- Evidence/report ID: focused CLI wrapper tests and unrelated-working-directory wheel help check.
+- Reviewer/disposition: two independent reviews completed; public `sys.argv` restoration and non-help preservation were added before commit.
+- Follow-up or user review needed: none.

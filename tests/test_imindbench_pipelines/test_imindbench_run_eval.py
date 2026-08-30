@@ -1,4 +1,5 @@
 import os
+import sys
 from types import SimpleNamespace
 
 import pytest
@@ -7,6 +8,46 @@ from omegaconf import OmegaConf
 os.environ.setdefault("ROOT_DIR_BRAINTREEBANK", "/tmp")
 
 import imindbench.run_eval as run_eval_module
+
+
+def test_cli_composes_required_groups_for_bare_help(monkeypatch):
+    original_argv = ["imindbench", "--help"]
+    captured_argv = []
+    monkeypatch.setattr(sys, "argv", original_argv)
+    monkeypatch.setattr(run_eval_module, "main", lambda: captured_argv.extend(sys.argv))
+
+    run_eval_module.cli()
+
+    assert "paths=example" in captured_argv
+    assert "model=logistic" in captured_argv
+    assert "preprocessor=laplacian_stft_2048Hz" in captured_argv
+    assert sys.argv is original_argv
+
+
+def test_cli_preserves_explicit_help_group_overrides(monkeypatch):
+    original_argv = ["imindbench", "--help", "model=mlp", "paths=default"]
+    captured_argv = []
+    monkeypatch.setattr(sys, "argv", original_argv)
+    monkeypatch.setattr(run_eval_module, "main", lambda: captured_argv.extend(sys.argv))
+
+    run_eval_module.cli()
+
+    assert "model=logistic" not in captured_argv
+    assert "paths=example" not in captured_argv
+    assert "preprocessor=laplacian_stft_2048Hz" in captured_argv
+    assert sys.argv is original_argv
+
+
+def test_cli_does_not_change_non_help_arguments(monkeypatch):
+    original_argv = ["imindbench", "model=mlp"]
+    captured_argv = []
+    monkeypatch.setattr(sys, "argv", original_argv)
+    monkeypatch.setattr(run_eval_module, "main", lambda: captured_argv.extend(sys.argv))
+
+    run_eval_module.cli()
+
+    assert captured_argv == original_argv
+    assert sys.argv is original_argv
 
 
 class _FakeWandb:

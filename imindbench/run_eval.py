@@ -4,6 +4,7 @@ Main evaluation script for neuroprobe using Hydra configuration.
 
 from functools import partial
 import logging
+import sys
 
 from omegaconf import DictConfig, OmegaConf
 import hydra
@@ -34,6 +35,35 @@ from imindbench.utils.logging_utils import (
     normalize_wandb_tags,
     set_verbose,
 )
+
+
+_HELP_COMPOSITION_DEFAULTS = (
+    "paths=example",
+    "model=logistic",
+    "preprocessor=laplacian_stft_2048Hz",
+)
+
+
+def cli() -> None:
+    """Run the Hydra entrypoint, composing placeholder groups for help only."""
+    original_argv = sys.argv
+    try:
+        effective_argv = list(original_argv)
+        if any(argument in {"-h", "--help"} for argument in effective_argv[1:]):
+            selected_groups = {
+                argument.split("=", 1)[0]
+                for argument in effective_argv[1:]
+                if "=" in argument
+            }
+            effective_argv.extend(
+                override
+                for override in _HELP_COMPOSITION_DEFAULTS
+                if override.split("=", 1)[0] not in selected_groups
+            )
+        sys.argv = effective_argv
+        main()
+    finally:
+        sys.argv = original_argv
 
 
 @hydra.main(config_path="conf", config_name="config", version_base="1.1")
@@ -241,4 +271,4 @@ def run_processed_evaluation(
 
 
 if __name__ == "__main__":
-    main()
+    cli()
