@@ -8,7 +8,6 @@ version = "0.1.0.dev0"
 description = "Reproducible evaluation workflows for public intracranial neural decoding benchmarks"
 readme = "neuroprobe_eval/README.md"
 requires-python = ">=3.10,<3.11"
-license = "Apache-2.0"
 license-files = ["LICENSE.txt", "THIRD_PARTY.md", "LICENSES/BaRISTA-LICENSE.md"]
 dependencies = [
     "einops>=0.8,<0.9",
@@ -29,6 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 logging = ["wandb>=0.21,<0.25"]
+test = ["pytest>=7.2,<9"]
 
 [project.scripts]
 neuroprobe-eval = "neuroprobe_eval.run_eval:main"
@@ -41,4 +41,5 @@ neuroprobe_eval = [
     "conf/**/*.yaml",
     "decodable_subject_sessions/**/*.json",
     "decodable_subject_sessions/**/README.md",
+    "scripts/*.sh",
 ]

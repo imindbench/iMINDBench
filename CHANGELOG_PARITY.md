@@ -62,7 +62,7 @@ corresponding change.
 - Before: the imported example was not a standalone root package.
 - After: a no-dependency local wheel build includes 95 Hydra YAMLs, six stable JSONs, and all three required license/notice files.
 - Metric/config deltas: none.
-- Evidence/report ID: local wheel SHA256 `6c8cd0108c72198c82540fa372986df6dbbc56df06afb62fc6055ce51d467d74`.
+- Evidence/report ID: successful local wheel inspection (the recorded wheel hash is a one-build artifact ID because ZIP timestamps make ordinary wheel bytes non-reproducible).
 - Reviewer/disposition: root reviewed; accepted for migration, with release dependency pins still subject to final fresh-environment validation.
 - Follow-up or user review needed: replace the development editable `torch_brain-public` install with an immutable public release/commit and rerun the built-wheel acceptance gate.
 
@@ -80,3 +80,18 @@ corresponding change.
 - Evidence/report ID: `provenance/paper_figs_provenance.json`, `provenance/consulted_artifacts.tsv`, `provenance/AUDIT.md`.
 - Reviewer/disposition: two agent review passes and root schema/path review; accepted with documented provenance gaps.
 - Follow-up or user review needed: recover/freeze the exact BaRISTA checkpoint/launcher provenance before claiming strict BaRISTA reproduction.
+
+### 2026-08-30 — Correct baseline release metadata
+
+- Change ID/commit subject: `fix: correct baseline package contracts`
+- Files changed: `pyproject.toml`, `environment.yml`, `.gitignore`, `CHANGELOG_PARITY.md`
+- Classification: packaging
+- Reason: address verified package-review findings before namespace migration.
+- Behavioral effect: removes the inaccurate whole-distribution Apache-only license claim while retaining all component notices; packages shell launchers; adds the test dependency contract; and restricts generated artifacts to reviewed parity references.
+- Smoke cases affected: wheel metadata/content, fresh-environment tests, and artifact hygiene.
+- Before: mixed-license code was labeled solely Apache, launchers/tests were missing from the installed contract, and arbitrary artifact files were trackable.
+- After: component license files remain authoritative, launchers are wheel data, pytest is declared, and only `artifacts/parity_reference/**` is allowlisted.
+- Metric/config deltas: none.
+- Evidence/report ID: independent package review after commits `d108a28` and `3f1b368`.
+- Reviewer/disposition: root verified and fixed all packaging-only findings.
+- Follow-up or user review needed: migrate `brainsets.datasets` to `torch_brain.datasets` in its dedicated runtime/import commit; clean current README launcher/environment claims during namespace/script cleanup.

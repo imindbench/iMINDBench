@@ -11,8 +11,9 @@ dist/
 
 # Experiment and Hydra runtime state
 outputs/
-artifacts/parity_reports/
-artifacts/brainsets_smoke/
+artifacts/*
+!artifacts/parity_reference/
+!artifacts/parity_reference/**
 .hydra/
 wandb/
 .tmp/
@@ -28,6 +29,3 @@ processed/
 *.pth
 
 # Canonical, reviewed parity references are intentionally tracked.
-!artifacts/
-!artifacts/parity_reference/
-!artifacts/parity_reference/**
