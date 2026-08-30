@@ -65,3 +65,18 @@ corresponding change.
 - Evidence/report ID: local wheel SHA256 `6c8cd0108c72198c82540fa372986df6dbbc56df06afb62fc6055ce51d467d74`.
 - Reviewer/disposition: root reviewed; accepted for migration, with release dependency pins still subject to final fresh-environment validation.
 - Follow-up or user review needed: replace the development editable `torch_brain-public` install with an immutable public release/commit and rerun the built-wheel acceptance gate.
+
+### 2026-08-30 — Freeze paper-figure provenance inventory
+
+- Change ID/commit subject: `docs: inventory paper-figure run provenance`
+- Files changed: `provenance/**`
+- Classification: test/docs
+- Reason: map the scoped paper-figure notebooks to immutable source artifacts and candidate parity cases before runtime simplification.
+- Behavioral effect: none; analysis-only provenance, with no notebook execution or runtime changes.
+- Smoke cases affected: five proposed cases spanning NeuroprobeV2, BYD, PIPPI, Logistic, MLP, PopT, BaRISTA, within-session, and hold-in routing.
+- Before: notebook/YAML/output relationships existed only in the dirty TorchBrain checkout.
+- After: 14 notebooks, 23 active YAMLs, 102 output roots, and 77 consulted artifact hashes/statuses are recorded under source-relative identifiers.
+- Metric/config deltas: none.
+- Evidence/report ID: `provenance/paper_figs_provenance.json`, `provenance/consulted_artifacts.tsv`, `provenance/AUDIT.md`.
+- Reviewer/disposition: two agent review passes and root schema/path review; accepted with documented provenance gaps.
+- Follow-up or user review needed: recover/freeze the exact BaRISTA checkpoint/launcher provenance before claiming strict BaRISTA reproduction.

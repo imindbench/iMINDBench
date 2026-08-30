@@ -1,0 +1,413 @@
+{
+  "schema_version": 1,
+  "scope": "notebooks/paper_figs only",
+  "source": {
+    "repository_uri": "torch-brain-dirty://",
+    "git_head": "47a3c8900c1f6bf2aec79bb08d99c389e4036603",
+    "notebook_root": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/",
+    "yaml_root": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/visualize_model/",
+    "reference_root": "original-results://09_neurips/",
+    "note": "The source checkout is dirty. Artifact SHA256 and Git status, not HEAD alone, define consulted inputs.",
+    "observed_source_drift": [
+      {
+        "uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/README.md",
+        "initial_sha256": "6d6b7f0c8760be8adf6dd0cae60389a245c12c856f75a4f6cee1b0787a5d01c3",
+        "final_sha256": "39da7e6ef88be3d92f0ff95e9ebe8036efb5070f3af2376e926be311f4bc182f"
+      },
+      {
+        "uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_appendix05_task_scaling.ipynb",
+        "initial_sha256": "1497990cdfa0f666664aaf9349392e5f270ea059dca967b54b63cbf346cc044d",
+        "final_sha256": "22c259592000dabe423984ef6dbcf9c8b3ad813c19ee81530c1be9457f828861"
+      },
+      {
+        "uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_fig03_beyond_within_session_scaling.ipynb",
+        "initial_sha256": null,
+        "final_sha256": "4556ec08911bc492722ecc9c4e626d75c2baf49e513cf46cd72d2080b8acabab",
+        "note": "Appeared during the audit and was included in the final inventory."
+      }
+    ]
+  },
+  "artifact_inventory": "imindbench://provenance/consulted_artifacts.tsv",
+  "notebooks": [
+    {
+      "id": "appendix01_main_challenge_unit_performance",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_appendix01_main_challenge_unit_performance.ipynb",
+      "paper_targets": ["Appendix 1"],
+      "active_yaml_uris": [],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["stft_sweeps", "htnet_500hz_waveform"],
+      "direct_inputs": [
+        "original-results://09_neurips/neuroprobev2_stft_sweep_with_val/",
+        "original-results://09_neurips/kelesbyd2024_stft_sweep_with_nonword_tercile/",
+        "original-results://09_neurips/berezutskayapippi2022_stft_sweep_with_nonword_tercile/",
+        "original-results://09_neurips/new_baselines/{neuroprobev2_original,kelesbyd2024_tercile_original,berezutskayapippi2022_tercile_original}/**/htnet_500Hz_*/within-session/",
+        "torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"
+      ]
+    },
+    {
+      "id": "appendix02_main_task_breakout",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_appendix02_main_task_breakout.ipynb",
+      "paper_targets": ["Appendix 2"],
+      "active_yaml_uris": [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_flagship_stft_only.yaml",
+        "visualize-model://2026-08-23_recolor/byd_flagship_stft_only.yaml",
+        "visualize-model://2026-08-23_recolor/pippi_flagship_stft_only.yaml",
+        "visualize-model://2026-08-23_recolor/neuroprobev2_flagship_wav_only.yaml",
+        "visualize-model://2026-08-23_recolor/byd_flagship_wav_only.yaml",
+        "visualize-model://2026-08-23_recolor/pippi_flagship_wav_only.yaml"
+      ],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["flagship_multistft", "flagship_waveform"],
+      "direct_inputs": ["torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"]
+    },
+    {
+      "id": "appendix03_main_subject_session_coverage",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_appendix03_main_subject_session_coverage.ipynb",
+      "paper_targets": ["Appendix 3"],
+      "active_yaml_uris": [
+        "visualize-model://2026-04-27/neuroprobev2_multi_stft_multiregime_logistic_only.yaml",
+        "visualize-model://2026-04-27/byd_multi_stft_multiregime_logistic_only.yaml",
+        "visualize-model://2026-04-27/pippi_multi_stft_multiregime_logistic_only.yaml"
+      ],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["logistic_stft_variants"],
+      "direct_inputs": ["torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"]
+    },
+    {
+      "id": "appendix04_task_sample_efficiency",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_appendix04_task_sample_efficiency.ipynb",
+      "paper_targets": ["Appendix 4"],
+      "active_yaml_uris": ["visualize-model://2026-08-23_recolor/neuroprobev2_sample_efficiency.yaml"],
+      "inactive_yaml_mentions": [
+        "2026-04-08_sample_efficiency/neuroprobev2_scaling.yaml",
+        "2026-04-08_sample_efficiency/small_sample_comparison.yaml",
+        "2026-04-08_sample_efficiency/within_vs_multisource.yaml",
+        "2026-04-13/neuroprobev2_scaling.yaml",
+        "2026-04-16/small_sample_comparison.yaml",
+        "2026-04-27/neuroprobev2_sample_efficiency_sixteenth.yaml",
+        "2026-05-03/neuroprobev2_sample_efficiency.yaml"
+      ],
+      "output_family_ids": ["neuroprobev2_sample_efficiency"],
+      "direct_inputs": []
+    },
+    {
+      "id": "appendix05_task_scaling",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_appendix05_task_scaling.ipynb",
+      "paper_targets": ["Appendix 5"],
+      "active_yaml_uris": ["visualize-model://2026-07-31_rebuttal_holdin_multisource/hold-in_vs_multisource.yaml"],
+      "inactive_yaml_mentions": ["2026-04-27/hold-in_vs_multisource.yaml"],
+      "output_family_ids": ["holdin_multisource"],
+      "direct_inputs": ["torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"]
+    },
+    {
+      "id": "appendix06_multistft_input",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_appendix06_multistft_input.ipynb",
+      "paper_targets": ["Appendix 6"],
+      "active_yaml_uris": [
+        "config://paths/processed_1_1_0.yaml",
+        "config://dataset/neuroprobe2025.yaml",
+        "config://preprocessor/laplacian_multi_stft_2048Hz.yaml"
+      ],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["processed_data_figure"],
+      "direct_inputs": [],
+      "gap_ids": ["appendix06_historical_rendering"]
+    },
+    {
+      "id": "fig02_dataset_summary_counts",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_fig02_dataset_summary_counts.ipynb",
+      "paper_targets": ["Figure 2 dataset counts"],
+      "active_yaml_uris": [
+        "config://paths/processed_1_1_0.yaml",
+        "config://dataset/neuroprobev2.yaml",
+        "config://dataset/kelesbyd2024.yaml",
+        "config://dataset/berezutskayapippi2022.yaml"
+      ],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["processed_data_figure"],
+      "direct_inputs": ["torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"]
+    },
+    {
+      "id": "fig02_dataset_summary_electrodes",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_fig02_dataset_summary_electrodes.ipynb",
+      "paper_targets": ["Figure 2 electrode locations"],
+      "active_yaml_uris": [],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["processed_data_figure"],
+      "direct_inputs": ["processed-data://processed_1.1.0/{neuroprobe_2025,keles_byd_2024,berezutskaya_pippi_2022}/*.h5"]
+    },
+    {
+      "id": "fig03_beyond_within_session_scaling",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_fig03_beyond_within_session_scaling.ipynb",
+      "paper_targets": ["Figure 3 beyond-within-session"],
+      "active_yaml_uris": ["visualize-model://2026-07-31_rebuttal_holdin_multisource/hold-in_vs_multisource.yaml"],
+      "inactive_yaml_mentions": ["2026-04-27/hold-in_vs_multisource.yaml"],
+      "output_family_ids": ["holdin_multisource"],
+      "direct_inputs": ["torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"]
+    },
+    {
+      "id": "fig03_sample_efficiency",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_fig03_sample_efficiency.ipynb",
+      "paper_targets": ["Figure 3 within-session"],
+      "active_yaml_uris": ["visualize-model://2026-08-23_recolor/neuroprobev2_sample_efficiency.yaml"],
+      "inactive_yaml_mentions": [
+        "2026-04-08_sample_efficiency/neuroprobev2_scaling.yaml",
+        "2026-04-08_sample_efficiency/small_sample_comparison.yaml",
+        "2026-04-08_sample_efficiency/within_vs_multisource.yaml",
+        "2026-04-13/neuroprobev2_scaling.yaml",
+        "2026-04-16/small_sample_comparison.yaml",
+        "2026-04-27/neuroprobev2_sample_efficiency_sixteenth.yaml",
+        "2026-05-03/neuroprobev2_sample_efficiency.yaml"
+      ],
+      "output_family_ids": ["neuroprobev2_sample_efficiency"],
+      "direct_inputs": []
+    },
+    {
+      "id": "fig04_preprocessing_baselines",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_fig04_preprocessing_baselines.ipynb",
+      "paper_targets": ["Figure 4 preprocessing baselines"],
+      "active_yaml_uris": [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/neuroprobev2_preprocessor_baselines.yaml",
+        "visualize-model://2026-08-22_rebuttal_preprocessor/byd_preprocessor_baselines.yaml",
+        "visualize-model://2026-08-22_rebuttal_preprocessor/pippi_preprocessor_baselines.yaml"
+      ],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["preprocessor_baselines"],
+      "direct_inputs": ["torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"]
+    },
+    {
+      "id": "fig04_preprocessing_stft_selection",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_fig04_preprocessing_stft_selection.ipynb",
+      "paper_targets": ["Figure 4 STFT selection"],
+      "active_yaml_uris": [],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["stft_sweeps"],
+      "direct_inputs": [
+        "original-results://09_neurips/neuroprobev2_stft_sweep_with_val/",
+        "original-results://09_neurips/kelesbyd2024_stft_sweep_with_nonword_tercile/",
+        "original-results://09_neurips/berezutskayapippi2022_stft_sweep_with_nonword_tercile/",
+        "torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"
+      ],
+      "gap_ids": ["figure04b_manual_selection"]
+    },
+    {
+      "id": "fig04_preprocessing_stft_sweeps",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_fig04_preprocessing_stft_sweeps.ipynb",
+      "paper_targets": ["Figure 4 STFT sweep explorer"],
+      "active_yaml_uris": [],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["stft_sweeps"],
+      "direct_inputs": ["original-results://09_neurips/kelesbyd2024_stft_sweep_with_nonword_tercile/logistic_laplacian_stft_1000Hz/"],
+      "gap_ids": ["figure04b_manual_selection"]
+    },
+    {
+      "id": "table01_within_session_scorecards",
+      "source_uri": "torch-brain-dirty://examples/neuroprobe_eval/notebooks/paper_figs/plot_table01_within_session_scorecards.ipynb",
+      "paper_targets": ["Table 1 within-session scorecards"],
+      "active_yaml_uris": [
+        "visualize-model://2026-04-27/neuroprobev2_flagship_stft_only.yaml",
+        "visualize-model://2026-04-27/byd_flagship_stft_only.yaml",
+        "visualize-model://2026-04-27/pippi_flagship_stft_only.yaml",
+        "visualize-model://2026-07-27_brainbert_stft_baselines/neuroprobev2_brainbert_stft_baselines.yaml",
+        "visualize-model://2026-07-27_brainbert_stft_baselines/byd_brainbert_stft_baselines.yaml",
+        "visualize-model://2026-07-27_brainbert_stft_baselines/pippi_brainbert_stft_baselines.yaml",
+        "visualize-model://2026-07-16_new_wav_baselines/neuroprobev2_new_wav_baselines.yaml",
+        "visualize-model://2026-07-16_new_wav_baselines/byd_new_wav_baselines.yaml",
+        "visualize-model://2026-07-16_new_wav_baselines/pippi_new_wav_baselines.yaml"
+      ],
+      "inactive_yaml_mentions": [],
+      "output_family_ids": ["flagship_multistft", "brainbert_stft", "flagship_waveform"],
+      "direct_inputs": ["torch-brain-dirty://examples/neuroprobe_eval/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/"]
+    }
+  ],
+  "output_families": {
+    "stft_sweeps": {
+      "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": ["within-session"],
+      "models": ["Logistic"],
+      "preprocessors": ["laplacian_stft_2048Hz", "laplacian_stft_1000Hz"],
+      "launchers": [
+        "script://run_neuroprobev2_stft_sweep.sh",
+        "script://run_byd_stft_sweep.sh",
+        "script://run_pippi_stft_sweep.sh"
+      ],
+      "launch_status": "traced"
+    },
+    "htnet_500hz_waveform": {
+      "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": ["within-session"],
+      "models": ["HTNet"],
+      "preprocessors": ["laplacian_wav_HPF_global_robust_scalar_long_context_15s_*to500Hz"],
+      "launchers": [],
+      "launch_status": "missing_exact_launcher"
+    },
+    "flagship_multistft": {
+      "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": ["within-session"],
+      "models": ["Logistic", "MLP", "CNN", "PopT-v2"],
+      "preprocessors": ["laplacian_multi_stft_2048Hz", "laplacian_multi_stft_1000Hz"],
+      "launchers": ["script://run_neuroprobev2.sh", "script://run_byd.sh", "script://run_pippi.sh"],
+      "launch_status": "partial_current_script_state; model arrays do not activate every historical YAML entry"
+    },
+    "flagship_waveform": {
+      "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": ["within-session"],
+      "models": ["Linear", "Logistic", "MLP", "CNN", "HTNet", "BaRISTA", "DIVER-1"],
+      "preprocessors": ["model-specific waveform preprocessors"],
+      "launchers": ["script://run_neuroprobev2_brant.sh"],
+      "launch_status": "missing_exact_launcher; BRANT script is command-structure evidence only and does not reproduce barista_jun9 roots"
+    },
+    "logistic_stft_variants": {
+      "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": ["within-session"],
+      "models": ["Logistic"],
+      "preprocessors": ["single-STFT", "multi-STFT", "multi-STFT-high"],
+      "launchers": ["script://run_neuroprobev2.sh", "script://run_byd.sh", "script://run_pippi.sh"],
+      "launch_status": "partial_historical_mapping"
+    },
+    "neuroprobev2_sample_efficiency": {
+      "datasets": ["NeuroprobeV2"],
+      "regimes": ["within-session", "hold-in-session"],
+      "models": ["Logistic", "MLP", "CNN", "PopT-v2"],
+      "preprocessors": ["laplacian_multi_stft_2048Hz"],
+      "train_fractions": ["full", "half", "quarter", "eighth", "sixteenth"],
+      "launchers": [],
+      "launch_status": "missing_canonical_launcher"
+    },
+    "holdin_multisource": {
+      "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": ["within-session", "hold-in-session"],
+      "models": ["PopT-v2"],
+      "preprocessors": ["laplacian_multi_stft_2048Hz", "laplacian_multi_stft_1000Hz"],
+      "launchers": [
+        "script://run_{dataset}_decodable_subjects_hold_in_stft_or_htnet_500hz_val_mean0p60.sh",
+        "script://run_{dataset}_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh"
+      ],
+      "launch_status": "partial; wrapper and underlying dataset scripts trace behavior, but the rebuttal_holdin_multisource_exps output prefix is not encoded by default"
+    },
+    "preprocessor_baselines": {
+      "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": ["within-session"],
+      "models": ["Logistic", "MLP", "CNN", "HTNet"],
+      "preprocessors": ["single-STFT", "multi-STFT", "multi-STFT-zscore", "HTNet waveform variants"],
+      "launchers": [],
+      "launch_status": "missing_exact_launcher"
+    },
+    "brainbert_stft": {
+      "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": ["within-session"],
+      "models": ["Logistic", "MLP", "CNN", "BrainBERT linear baseline"],
+      "preprocessors": ["laplacian_stft_brainbert_2048Hz", "laplacian_stft_brainbert_1000Hz"],
+      "launchers": ["script://run_brainbert_neuroprobev2.sh", "script://run_brainbert_byd.sh", "script://run_brainbert_pippi.sh"],
+      "launch_status": "partial_historical_mapping; current output groups/model arrays do not cover every YAML root"
+    },
+    "processed_data_figure": {
+      "datasets": ["Neuroprobe2025/NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
+      "regimes": [],
+      "models": [],
+      "preprocessors": ["laplacian_multi_stft_2048Hz for Appendix 6 only"],
+      "launchers": [],
+      "launch_status": "not_an_evaluation_run"
+    }
+  },
+  "parity_candidates": [
+    {
+      "id": "neuroprobev2_logistic_multistft_onset_sub1_sess1",
+      "dataset": "NeuroprobeV2",
+      "regime": "within-session",
+      "model": "logistic",
+      "preprocessor": "laplacian_multi_stft_2048Hz",
+      "task": "onset",
+      "subject": 1,
+      "session": 1,
+      "seed": 42,
+      "fold_indices": [0, 1],
+      "test_roc_auc": [0.9588452728029988, 0.8847029883381925],
+      "reference_uri": "original-results://09_neurips/neuroprobev2/logistic_laplacian_multi_stft_2048Hz/within-session/onset/sub1_sess1/population_btbank1_1_onset.json",
+      "reference_sha256": "ed3731b29b25c82b65e1bc504b51979adbedd3527e042e06efd8563309e5556e",
+      "launcher_uri": "script://run_neuroprobev2.sh",
+      "launcher_status": "requires canonical single-case translation"
+    },
+    {
+      "id": "byd_mlp_multistft_global_flow_sub41_sess1",
+      "dataset": "KelesBYD2024",
+      "regime": "within-session",
+      "model": "mlp",
+      "preprocessor": "laplacian_multi_stft_1000Hz",
+      "task": "global_flow",
+      "subject": 41,
+      "session": 1,
+      "seed": 42,
+      "fold_indices": [0, 1],
+      "test_roc_auc": [0.4259555555555556, 0.5817169843143869],
+      "reference_uri": "original-results://09_neurips/kelesbyd2024_tercile/mlp_laplacian_multi_stft_1000Hz/within-session/global_flow/sub41_sess1/population_btbank41_1_global_flow.json",
+      "reference_sha256": "145852b8067d8478c295cab2a39d033f53473bc3bcbdcf33a500cacecf0689c7",
+      "launcher_uri": "script://run_byd.sh",
+      "launcher_status": "MLP is present but commented; requires canonical single-case translation"
+    },
+    {
+      "id": "pippi_popt_multistft_speech_sub1_sess1",
+      "dataset": "BerezutskayaPippi2022",
+      "regime": "within-session",
+      "model": "popt",
+      "preprocessor": "laplacian_multi_stft_2048Hz",
+      "task": "speech",
+      "subject": 1,
+      "session": 1,
+      "subset": "high-cov",
+      "seed": 42,
+      "fold_indices": [0, 1],
+      "test_roc_auc": [0.7112386621315193, 0.6482426303854875],
+      "reference_uri": "original-results://09_neurips/berezutskayapippi2022_tercile/high-cov/popt_laplacian_multi_stft_2048Hz/within-session/speech/sub1_sess1/population_btbank1_1_speech.json",
+      "reference_sha256": "8169025434451d27c738678d99709192e01ff5e4112df5a64fe761d2c8209d8e",
+      "launcher_uri": "script://run_pippi.sh",
+      "launcher_status": "requires canonical single-case translation"
+    },
+    {
+      "id": "neuroprobev2_barista_waveform_onset_sub1_sess1",
+      "dataset": "NeuroprobeV2",
+      "regime": "within-session",
+      "model": "barista",
+      "preprocessor": "laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore",
+      "task": "onset",
+      "subject": 1,
+      "session": 1,
+      "seed": 42,
+      "fold_indices": [0, 1],
+      "test_roc_auc": [0.9789280508121616, 0.9378188775510204],
+      "reference_uri": "original-results://09_neurips/barista_jun9/neuroprobev2/barista_laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore/within-session/onset/sub1_sess1/population_btbank1_1_onset.json",
+      "reference_sha256": "7df35439e1381aac24be8409d25ab71e6a3bc672bc24aaeccf89625b82b44ee0",
+      "launcher_uri": "script://run_neuroprobev2_brant.sh",
+      "launcher_status": "not reproducible as written; exact barista_jun9 command/checkpoint mapping is missing"
+    },
+    {
+      "id": "neuroprobev2_popt_multistft_holdin_onset_sub1_sess1",
+      "dataset": "NeuroprobeV2",
+      "regime": "hold-in-session",
+      "model": "popt",
+      "preprocessor": "laplacian_multi_stft_2048Hz",
+      "task": "onset",
+      "subject": 1,
+      "session": 1,
+      "subset": "lite",
+      "seed": 42,
+      "fold_indices": [0, 1],
+      "test_roc_auc": [0.9854748021657643, 0.924754659516868],
+      "reference_uri": "original-results://09_neurips/rebuttal_holdin_multisource_exps/neuroprobev2_stft_or_htnet_500hz_val_mean0p60/lite/popt_laplacian_multi_stft_2048Hz/hold-in-session/onset/sub1_sess1/population_btbank1_1_onset.json",
+      "reference_sha256": "e21e4b57d70068501f7a434444b331c6ba00df4eedaec228b42248756218cb8c",
+      "launcher_uri": "script://run_neuroprobev2_decodable_subjects_hold_in_stft_or_htnet_500hz_val_mean0p60.sh",
+      "launcher_status": "behavior traced; canonical translation must set the historical nested output root"
+    }
+  ],
+  "unsupported_model_references": {
+    "MVPFormer": [],
+    "SEEGnificant": [],
+    "note": "No active or commented reference to either unsupported model occurs in the scoped notebooks or their active YAMLs."
+  },
+  "gaps": {
+    "figure04b_manual_selection": "Figure 4b is a manual four-panel selection; the explorer default does not reproduce the assembly.",
+    "appendix06_historical_rendering": "The notebook uses the current Multi-STFT transform and does not reproduce the paper asset's historical 128-sample-hop, approximately 35-bin layout.",
+    "barista_launcher": "BaRISTA is an active paper input for all three datasets, but no consulted script reproduces the exact barista_jun9 roots and checkpoint configuration.",
+    "missing_launchers": "Exact launch provenance is also incomplete for HTNet 500 Hz, preprocessing-baseline, and sample-efficiency roots."
+  }
+}
