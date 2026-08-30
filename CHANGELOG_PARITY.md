@@ -95,3 +95,18 @@ corresponding change.
 - Evidence/report ID: independent package review after commits `d108a28` and `3f1b368`.
 - Reviewer/disposition: root verified and fixed all packaging-only findings.
 - Follow-up or user review needed: migrate `brainsets.datasets` to `torch_brain.datasets` in its dedicated runtime/import commit; clean current README launcher/environment claims during namespace/script cleanup.
+
+### 2026-08-30 — Rename the installed package namespace
+
+- Change ID/commit subject: `refactor: rename neuroprobe_eval package to imindbench`
+- Files changed: `neuroprobe_eval/**` → `imindbench/**`, `tests/test_neuroprobe_eval_pipelines/**` → `tests/test_imindbench_pipelines/**`, `tests/source_manifest.json`, `pyproject.toml`, `THIRD_PARTY.md`, `CHANGELOG_PARITY.md`
+- Classification: portability-only
+- Reason: give the standalone distribution one canonical installed namespace independent of its TorchBrain example origin.
+- Behavioral effect: imports, module launch commands, packaging discovery/data paths, current documentation, and test destinations use `imindbench`; evaluation algorithms and configuration values are unchanged.
+- Smoke cases affected: package import, Hydra config discovery, launcher entrypoints, and retained tests.
+- Before: the `imindbench` distribution installed and launched the `neuroprobe_eval` Python package.
+- After: the distribution installs and launches `imindbench`; the old package namespace is absent.
+- Metric/config deltas: none; W&B project identity, cache directory names, provider/model/task identifiers, stable JSONs, and source-provenance URIs remain unchanged.
+- Evidence/report ID: static namespace scan, retained pytest suite, built-wheel content inspection, and unrelated-working-directory import provenance check.
+- Reviewer/disposition: two independent reviews completed; canonical console name and test-manifest deviation findings fixed before commit.
+- Follow-up or user review needed: make bare Hydra `--help` compose without required experiment overrides in a separate usability change; Brainsets imports, README cleanup, and script reduction remain separate changes.

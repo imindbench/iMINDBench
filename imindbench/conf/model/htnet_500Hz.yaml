@@ -1,0 +1,37 @@
+# HTNet single-session decoder for 500 Hz time-domain inputs.
+# These defaults are adapted for 1 s imindbench windows. Peterson et al.
+# tuned HTNet on 2 s segments resampled to 250 Hz, so this config should not be
+# treated as an exact paper-parity setting.
+name: htnet
+requires_aligned_channels: true
+requires_coords: false
+
+# Architecture. These mirror the original HTNet/EEGNet parameters.
+f1: 8
+d: 2
+f2: 16
+kernel_length: 32
+separable_kernel_length: 8
+dropout_rate: 0.5
+dropout_type: Dropout  # Dropout | SpatialDropout2D
+norm_rate: 0.25
+depthwise_max_norm: 1.0
+
+# Hilbert spectral feature layer.
+compute_val: power  # power | relative_power | phase | freqslide
+do_log: false
+base_split: 4
+data_srate: 500
+
+# Training.
+batch_size: 128
+learning_rate: 0.001
+optimizer: Adam
+weight_decay: 0.0
+training_mode: epoch_based
+max_iter: 100
+patience: 10
+tol: 1e-4
+random_state: 42
+device: auto
+grad_clip: 1.0

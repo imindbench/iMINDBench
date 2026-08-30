@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "imindbench"
 version = "0.1.0.dev0"
 description = "Reproducible evaluation workflows for public intracranial neural decoding benchmarks"
-readme = "neuroprobe_eval/README.md"
+readme = "imindbench/README.md"
 requires-python = ">=3.10,<3.11"
 license-files = ["LICENSE.txt", "THIRD_PARTY.md", "LICENSES/BaRISTA-LICENSE.md"]
 dependencies = [
@@ -31,13 +31,13 @@ logging = ["wandb>=0.21,<0.25"]
 test = ["pytest>=7.2,<9"]
 
 [project.scripts]
-neuroprobe-eval = "neuroprobe_eval.run_eval:main"
+imindbench = "imindbench.run_eval:main"
 
 [tool.setuptools.packages.find]
-include = ["neuroprobe_eval*"]
+include = ["imindbench*"]
 
 [tool.setuptools.package-data]
-neuroprobe_eval = [
+imindbench = [
     "conf/**/*.yaml",
     "decodable_subject_sessions/**/*.json",
     "decodable_subject_sessions/**/README.md",

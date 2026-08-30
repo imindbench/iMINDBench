@@ -11,8 +11,8 @@
       "mode": "100644",
       "size_bytes": 6188,
       "selected": true,
-      "destination": "tests/test_neuroprobe_eval_pipelines/test_barista.py",
-      "deviation": "CONF path changed from examples/neuroprobe_eval/conf to neuroprobe_eval/conf for the repository-root package layout."
+      "destination": "tests/test_imindbench_pipelines/test_barista.py",
+      "deviation": "Imports changed from neuroprobe_eval to imindbench; CONF path changed from examples/neuroprobe_eval/conf to imindbench/conf for the repository-root package layout."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_brainbert_encoder_preprocessor_variable.py",
@@ -20,8 +20,8 @@
       "mode": "100644",
       "size_bytes": 3390,
       "selected": true,
-      "destination": "tests/test_neuroprobe_eval_pipelines/test_brainbert_encoder_preprocessor_variable.py",
-      "deviation": null
+      "destination": "tests/test_imindbench_pipelines/test_brainbert_encoder_preprocessor_variable.py",
+      "deviation": "Imports changed mechanically from neuroprobe_eval to imindbench."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_brant_model.py",
@@ -64,8 +64,8 @@
       "mode": "100644",
       "size_bytes": 1735,
       "selected": true,
-      "destination": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_base_runner.py",
-      "deviation": null
+      "destination": "tests/test_imindbench_pipelines/test_imindbench_base_runner.py",
+      "deviation": "Imports changed mechanically from neuroprobe_eval to imindbench; destination filename changed to the canonical package name."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_htnet_public_contract.py",
@@ -101,8 +101,8 @@
       "mode": "100644",
       "size_bytes": 3383,
       "selected": true,
-      "destination": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_pipeline_contracts.py",
-      "deviation": null
+      "destination": "tests/test_imindbench_pipelines/test_imindbench_pipeline_contracts.py",
+      "deviation": "Imports changed mechanically from neuroprobe_eval to imindbench; destination filename changed to the canonical package name."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_run_eval.py",
@@ -110,8 +110,8 @@
       "mode": "100644",
       "size_bytes": 4007,
       "selected": true,
-      "destination": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_run_eval.py",
-      "deviation": null
+      "destination": "tests/test_imindbench_pipelines/test_imindbench_run_eval.py",
+      "deviation": "Imports changed mechanically from neuroprobe_eval to imindbench; destination filename changed to the canonical package name."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_eval_run_eval_processed_mode.py",
@@ -147,8 +147,8 @@
       "mode": "100644",
       "size_bytes": 4068,
       "selected": true,
-      "destination": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_htnet_model.py",
-      "deviation": null
+      "destination": "tests/test_imindbench_pipelines/test_neuroprobe_htnet_model.py",
+      "deviation": "Imports changed mechanically from neuroprobe_eval to imindbench."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_neuroprobe_popt_head_input_mode.py",
@@ -170,8 +170,8 @@
       "mode": "100644",
       "size_bytes": 3577,
       "selected": true,
-      "destination": "tests/test_neuroprobe_eval_pipelines/test_region_intersection_pool_preprocessor.py",
-      "deviation": null
+      "destination": "tests/test_imindbench_pipelines/test_region_intersection_pool_preprocessor.py",
+      "deviation": "Imports changed mechanically from neuroprobe_eval to imindbench."
     },
     {
       "path": "tests/test_neuroprobe_eval_pipelines/test_shared_coordinate_routing.py",
