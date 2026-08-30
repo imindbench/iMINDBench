@@ -155,3 +155,18 @@ corresponding change.
 - Evidence/report ID: `artifacts/parity_reference/manifest.json`; `conda run -n tb_buildathon python -m pytest -q tests/test_parity_tools.py` (17 passed), including adversarial hash/path/numeric/status/atomicity cases.
 - Reviewer/disposition: independent review findings fixed; two follow-up local review passes completed for boundary validation, status semantics, atomic report finalization, provenance-claim limits, simplification, and private-path exclusion.
 - Follow-up or user review needed: recover immutable PopT and BaRISTA reference checkpoint hashes before enabling strict comparison for those three cases; experiments remain unexecuted.
+
+### 2026-08-30 — Add CPU Brainsets contract and artifact smoke checks
+
+- Change ID/commit subject: `test: add Brainsets public contract smoke checks`
+- Files changed: `config/brainsets_smoke_manifest.json`, `scripts/validate_brainsets_smoke.py`, `tests/test_brainsets_public_contract.py`, `tests/test_neuroprobe_shared_artifacts.py`, `CHANGELOG_PARITY.md`
+- Classification: test/docs
+- Reason: verify the public preparation interface and prepared-artifact loading boundary before running network or GPU experiments.
+- Behavioral effect: adds read-only validation tooling and tests only; it does not prepare, download, or modify datasets.
+- Smoke cases affected: Brainsets CLI IDs and isolated `uv` construction, packaged BYD/PIPPI labels, and Neuroprobe2025/NeuroprobeV2 shared-artifact loading.
+- Before: public loader and preparation assumptions were documented but not executable from iMINDBench.
+- After: the pinned TorchBrain source, manifest schema, packaged assets, selector contracts, deterministic recording access, and H5 immutability are checked explicitly; full-corpus hashing is opt-in.
+- Metric/config deltas: none.
+- Evidence/report ID: `conda run -n tb_buildathon env PYTHONPATH=/home/geeling/Projects/ieeg_project/torch_brain-public python -m pytest -q tests/test_brainsets_public_contract.py tests/test_neuroprobe_shared_artifacts.py` (21 passed).
+- Reviewer/disposition: two implementation review/fix passes plus an independent review; parser optionality and real `Pipeline.process()` routing were added before commit.
+- Follow-up or user review needed: push TorchBrain commit `c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c` so the immutable pin is publicly reachable, then run the network-backed preparation matrix.
