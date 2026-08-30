@@ -185,3 +185,18 @@ corresponding change.
 - Evidence/report ID: exhaustive `provenance/surface/{retained,removed}.tsv`; full CPU suite against pinned TorchBrain (72 passed, 7 expected BaRISTA/xformers skips).
 - Reviewer/disposition: two implementation review/fix passes plus independent paper-provenance reachability review; broken BRANT launcher, stale path configs, source-manifest deviations, and environment guidance fixed before commit.
 - Follow-up or user review needed: translate remaining launcher matrices into canonical declarative run manifests before any further script deletion.
+
+### 2026-08-30 — Replace example-era onboarding with standalone public guidance
+
+- Change ID/commit subject: `docs: add standalone iMINDBench workflow`
+- Files changed: `imindbench/README.md`, `CHANGELOG_PARITY.md`
+- Classification: test/docs
+- Reason: replace stale TorchBrain-example, private-path, removed-leaderboard, and nonexistent-script instructions with the actual standalone package workflow.
+- Behavioral effect: documentation only.
+- Smoke cases affected: environment creation, Brainsets preparation, CPU Logistic invocation, output isolation, parity tooling, and GPU model prerequisites.
+- Before: onboarding assumed the private monorepo layout and referenced removed or absent assets.
+- After: commands use the canonical `imindbench` environment/CLI, merged public Brainsets API, caller-owned paths, and explicit parity limitations.
+- Metric/config deltas: none.
+- Evidence/report ID: link/path checks, Hydra composition, CLI/parity help checks, and post-cleanup model/config inventory review.
+- Reviewer/disposition: two documentation review passes plus an independent operational review; all content passed except that the pinned TorchBrain commit is pending publication.
+- Follow-up or user review needed: push TorchBrain commit `c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c` before treating its VCS install command as publicly runnable.

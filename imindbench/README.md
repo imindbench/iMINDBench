@@ -1,291 +1,175 @@
-# Neuroprobe Eval
+# iMINDBench
 
-Public release surface for running Hydra-based evaluation on supported public providers.
+iMINDBench is a standalone, Hydra-configured evaluation package for public
+intracranial neural decoding datasets. It consumes processed datasets from the
+public `torch_brain` package and writes one portable result JSON per evaluation.
 
-## Scope
+This repository retains the legacy paper model families—Linear/BrainBERT
+baseline, Logistic, MLP, CNN, HTNet, PopT, and DIVER—plus BaRISTA. It does not
+include MVPFormer, SEEGnificant, or leaderboard/submission services. Use
+`imindbench --help` to see the exact installed Hydra groups; the presence of a
+group does not by itself establish paper parity for a particular run.
 
-Public code path supports:
-- dataset provider: `neuroprobe2025`
-- dataset provider: `kelesbyd2024`
-- dataset provider: `berezutskayapippi2022`
-- regimes: `SS-SM`, `SS-DM`, `DS-DM`
-- regimes: `within-session`, `hold-in-session`, `hold-out-session`, `hold-out-subject`
-- models: `logistic`, `mlp`, `cnn`, `popt`, `htnet`, `brant`, `barista`
+## Install
 
-HTNet requires the time-domain `laplacian_wav_*` preprocessors and is currently
-intended for aligned within-session runs. The shipped HTNet configs are adapted
-for the 1 s imindbench windows; the Peterson et al. paper tuned HTNet on
-2 s segments resampled to 250 Hz, so these defaults should be treated as
-task-specific adaptations rather than exact paper-parity hyperparameters.
-
-BRANT uses the BaRISTA-style compatibility path for short windows: each whole
-raw window is resampled to one `1500`-sample pseudo-patch before entering the
-BRANT time/channel encoders. This is not paper-parity BRANT, which expects
-`15 x 6s` patches over `90s` context. The default BRANT classification head is
-`mlp_token`, which applies the original-style MLP to each valid channel token
-and then averages logits to match Neuroprobe's sample-level labels. Set
-`model.head_type=linear_pooled` to reproduce the older pooled-linear local head.
-
-BaRISTA (`model=barista`) is a port of
-[ShanechiLab/BaRISTA](https://github.com/ShanechiLab/BaRISTA). It fine-tunes a
-pretrained region-tokenizer + transformer upstream, so it needs two things that
-have no usable default:
-
-- `paths.barista_checkpoint=<path/to/*.ckpt>` — the pretrained upstream weights.
-  Without it the model raises at construction (or set `model.random_init=true`
-  for an untrained control).
-- `dataset.brain_area_key=<key holding Destrieux labels>` — the spatial encoder
-  maps Destrieux region names to embedding ids, and the dataset defaults do not
-  point at a Destrieux key. Pass `localization_Destrieux` for neuroprobev2,
-  `label_destrieux` for pippi and BYD-destrieux, or `location` for BYD.
-  BaRISTA raises if fewer than 50% of a recording's channels resolve to a
-  Destrieux region rather than training on a collapsed spatial encoding — on
-  neuroprobev2 sub1_sess1, `localization_Destrieux` resolves 120/120 channels
-  while the `localization_DesikanKilliany` default resolves only 7/120. Tune
-  with `model.min_resolved_region_fraction`, or set
-  `model.tokenizer.add_spatial_encoding=false` to opt out deliberately.
-
-BaRISTA also requires `xformers` (see `environment.yml`).
-
-The dataset launchers default to smoke subsets; the complete cell lists are in
-`leaderboard/data/coverage_contract.json`. Keep their worker and schedule defaults
-when reproducing published results because those settings affect RNG order.
-
-Note on the LR schedule when comparing against BaRISTA numbers recorded before
-this port: `epoch_based` training overwrites `model.scheduler.total_steps` with
-`max_iter * steps_per_epoch`, so the 5% warm-up resolves to a few epochs. The
-older runs used `conf/model/barista.yaml`'s literal `total_steps: 10000`, which
-made warm-up longer than the whole run. To reproduce those runs exactly, pin the
-schedule in optimizer updates — these take precedence over the override:
-
-```
-++model.scheduler.warmup_steps=500 ++model.scheduler.step_size_updates=95
-```
-
-## Layout
-
-- `run_eval.py`: main entrypoint
-- `scripts/`: simple public regime runners
-- `models/`: public model implementations
-- `preprocessors/`: public preprocessors
-- `conf/`: public Hydra configs
-
-## Environment Setup
-
-Use the conda environment file as the canonical setup:
-
-Before creating or updating the environment, edit
-`environment.yml` and replace:
-- `/path/to/brainsets`
-- `/path/to/torch_brain`
-with your local checkout paths.
+The canonical environment is Python 3.10 in the root
+[`environment.yml`](../environment.yml). From the repository root:
 
 ```bash
-cd torch_brain
 conda env create -f environment.yml
-```
-
-If the environment already exists, update it in place:
-
-```bash
-cd torch_brain
-conda env update -n imindbench -f environment.yml --prune
-```
-
-Activate it before running:
-
-```bash
 conda activate imindbench
+python -m pip install "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c"
+python -m pip install -e .
+python -m pip check
+imindbench --help
 ```
 
-Optional extras (not required for default runs):
-- `wandb`
-- `warmup_scheduler`
+`torch_brain` is installed separately at an immutable commit because it owns the
+dataset loaders and the merged `brainsets` CLI. Do not install the former
+standalone `brainsets` package. Do not use the `torch_brain` development extra;
+the iMINDBench environment owns the pinned PyTorch stack.
 
-## Quick Start
+For a release deployment, replace the development pin above only with a reviewed
+immutable release or commit. An editable local `torch_brain-public` checkout is
+appropriate for development, but is not a reproducible public installation.
 
-From the examples parent directory:
+## Prepare public data
+
+Keep raw data, processed H5 files, caches, and run outputs outside this Git
+checkout. The high-level preparation flow is:
 
 ```bash
-cd torch_brain/examples
+brainsets list
+brainsets prepare neuroprobe_2025 --raw-dir /path/to/raw --processed-dir /path/to/processed
+brainsets prepare keles_byd_2024 --raw-dir /path/to/raw --processed-dir /path/to/processed
+brainsets prepare berezutskaya_pippi_2022 --raw-dir /path/to/raw --processed-dir /path/to/processed
+```
+
+Preparation may download large datasets and uses each pipeline's isolated
+environment. Review `brainsets prepare --help`, storage requirements, dataset
+terms, and any required credentials before starting. NeuroprobeV2 is an
+alternate split/recording view over the artifacts produced by
+`brainsets prepare neuroprobe_2025`; there is no separate NeuroprobeV2 prepare
+command.
+
+Copy [`conf/paths/example.yaml`](conf/paths/example.yaml) to a machine-local
+`conf/paths/server_<name>.yaml`, set `dataset_root` to the processed root, and
+select it with `paths=server_<name>`. These `server_*.yaml` files are ignored by
+Git. Add only the checkpoint and cache paths required by the selected model and
+runtime.
+
+## Run an evaluation
+
+The installed command is the canonical entrypoint. A CPU Logistic run has this
+shape:
+
+```bash
+imindbench \
+  paths=server_local \
+  dataset=neuroprobe2025 \
+  dataset.regime=SS-SM \
+  dataset.task=onset \
+  dataset.test_subject=1 \
+  dataset.test_session=1 \
+  model=logistic \
+  preprocessor=laplacian_stft_2048Hz \
+  wandb.enabled=false \
+  runtime.overwrite=false \
+  hydra.run.dir=/path/to/runs/logistic-onset-sub1-session1
+```
+
+The equivalent low-level entrypoint is:
+
+```bash
 python -m imindbench.run_eval --help
 ```
 
-### Run by regime (recommended)
+Replace `imindbench` with `python -m imindbench.run_eval` to use the same Hydra
+arguments through the low-level entrypoint.
+
+Hydra writes `.hydra/`, logs, and `population_*.json` into `hydra.run.dir`.
+Give every run a distinct output directory outside the source tree and keep
+`runtime.overwrite=false` unless replacement is deliberate. Do not point
+multiple simultaneous runs at the same directory.
+
+Neuroprobe2025 uses `SS-SM`, `SS-DM`, and `DS-DM`. NeuroprobeV2, BYD, and PIPPI
+use the configured within/hold-in/hold-out regimes exposed by their dataset
+groups. Model/preprocessor compatibility, coordinates, sampling rate, and
+checkpoint requirements are validated at runtime; start from a shipped matching
+config rather than mixing groups blindly.
+
+### CPU and GPU gates
+
+- Installation, both help entrypoints, config composition, and a small Logistic
+  run are the CPU acceptance gate.
+- Before a CUDA model run, require `torch.cuda.is_available()` in the active
+  environment and use a device override supported by the selected model.
+- Checkpoint-backed PopT and BaRISTA runs require caller-supplied checkpoints.
+  BaRISTA also requires `xformers`, compatible CUDA/PyTorch builds for GPU use,
+  channel coordinates, and appropriate Destrieux region metadata. There is no
+  bundled BaRISTA checkpoint.
+- A CPU smoke result does not substitute for the final GPU acceptance run for a
+  GPU-targeted model.
+
+## Paper-reference parity tools
+
+[`scripts/parity_tools.py`](../scripts/parity_tools.py) is an offline tool. It
+constructs commands but never launches them, and it compares existing result
+JSONs against the five records in
+[`artifacts/parity_reference/`](../artifacts/parity_reference/). Inspect its
+validated interfaces with:
 
 ```bash
-./imindbench/scripts/run_eval.sh
+python scripts/parity_tools.py build-commands --help
+python scripts/parity_tools.py compare --help
 ```
 
-Edit constants at the top of `scripts/run_eval.sh`:
+Both modes require caller-owned JSON mappings. `checkpoint-map.json` maps the
+logical keys `popt_checkpoint` and/or `barista_checkpoint` to files when a
+selected case needs them. `resource-map.json` maps auxiliary resource keys; an
+empty object is valid when the selected case needs none. Comparison additionally
+uses `candidate-map.json`, mapping case IDs to existing `population_*.json`
+files. Run and report output roots must not already exist.
+For the checkpoint-free Logistic example below, both `checkpoint-map.json` and
+`resource-map.json` may contain the single JSON object `{}`.
+
+Example dry-run construction for the checkpoint-free Logistic case:
 
 ```bash
-REGIME
-PATHS_CFG
-TEST_SUBJECT
-TEST_SESSION
-TASK
-LABEL_MODE
-MODEL
-PREPROCESSOR
-OUTPUT_GROUP
+python scripts/parity_tools.py \
+  --manifest artifacts/parity_reference/manifest.json \
+  build-commands \
+  --case neuroprobev2_logistic_multistft_onset_sub1_sess1 \
+  --data-root /path/to/processed \
+  --output-root /path/to/fresh-run-root \
+  --checkpoint-map checkpoint-map.json \
+  --resource-map resource-map.json
 ```
 
-Minimal PIPPI PopT runner:
+Example comparison:
 
 ```bash
-./imindbench/scripts/run_pippi_within_session_popt.sh
+python scripts/parity_tools.py \
+  --manifest artifacts/parity_reference/manifest.json \
+  compare \
+  --case neuroprobev2_logistic_multistft_onset_sub1_sess1 \
+  --candidate-map candidate-map.json \
+  --checkpoint-map checkpoint-map.json \
+  --resource-map resource-map.json \
+  --report-dir /path/to/fresh-report-root
 ```
 
-PIPPI all-regime runners:
+`PASS` means metric/config-record parity only; it does not prove execution
+provenance. `FAIL` and `MISSING` are nonzero exits. PopT and BaRISTA references
+remain `NOT-COMPARABLE`—also a nonzero exit—when every checkable field matches
+but the exact historical checkpoint hash is unknown. See the
+[`parity reference README`](../artifacts/parity_reference/README.md) for the
+precise status contract.
 
-```bash
-./imindbench/scripts/run_pippi.sh
-```
+## Licensing
 
-`run_pippi.sh` now sweeps `logistic`, `mlp`, `cnn`, and `popt`, and includes a
-commented `htnet_2048Hz` option. If you enable HTNet there, switch
-`PREPROCESSOR` from `laplacian_stft_2048Hz` to `laplacian_wav_2048Hz`.
-
-PIPPI sampling-rate policy (phase 1):
-- `high-cov` runs use native `2048 Hz` preprocessors.
-- `low-cov` runs use native `512 Hz` preprocessors.
-- `full` mixed-rate runs are not launched directly; aggregate `high-cov` and
-  `low-cov` outputs post hoc.
-- Folds with fewer than 2 classes in required split(s) are skipped and logged
-  with class-count diagnostics (instead of failing mid-run).
-
-### Task-Decodable Subject Filtering
-
-BYD, PIPPI, and NeuroProbeV2 launchers can restrict target runs and eligible
-train regimes to subject/session pairs listed as decodable for each task. Set
-`DECODABLE_TRAIN_SUBJECT_SESSIONS_ONLY="true"` in the launcher to enable the
-filter; dedicated `run_*_decodable_subjects*.sh` scripts set it to `"true"` by
-default.
-
-The launchers skip target subject/session runs that are not listed for the task.
-Set `decodable_subject_sessions_dir` in the selected `PATHS_CFG`; the launchers
-also pass:
-
-```bash
-dataset.train_decodable_subject_sessions_only=true
-```
-
-Manifest lookup is provider-specific and expects `<provider>.json`. Current
-checked-in manifests cover `kelesbyd2024`, `berezutskayapippi2022`, and
-`neuroprobev2`.
-
-Scripts with `_multisource` in the filename use `dataset.train_sources`; hold-in
-and same-subject variants use the single target dataset config. Launchers that
-cap per-subject train samples expose that value as `MAX_TRAIN_SAMPLES_PER_SUBJECT`
-and pass it to `dataset.max_train_samples_per_subject`.
-
-When `dataset.train_sources` is set, decodable train filtering supports only
-`train_sources[].regime: hold-in-session`. This defines each source's training
-set as all eligible task-decodable subject/sessions for that provider, independent
-of the eval target subject/session.
-
-## Environment Overrides for Scripts
-
-Scripts are constant-driven; adjust values directly in the files.
-
-## Standardization Modes
-
-The `standardize` preprocessor supports multiple train-fit normalization modes:
-
-- `global_feature`: one mean/std per feature or time index, pooled over training
-  samples and channels. For STFT-shaped `(channels, timebins, freqs)` inputs,
-  each `(timebin, freq)` position keeps separate statistics.
-- `global_scalar`: one mean/std scalar pooled over every training value,
-  flattening channels, time/timebins, and feature axes. Intended mainly for
-  waveform inputs; for STFT this mixes frequency bins with different natural
-  scales.
-- `global_robust_scalar`: one approximate robust scalar estimated from a
-  bounded reservoir of training values, using median and `1.4826 * MAD`.
-  Intended mainly for waveform inputs; for STFT/multi-STFT use as an ablation
-  rather than a default.
-
-Recommended use:
-- For waveform inputs shaped `(channels, time)`, `global_scalar` and
-  `global_robust_scalar` can normalize recording scale while preserving
-  cross-channel amplitude relationships.
-- For STFT/multi-STFT inputs shaped `(channels, timebins, freqs)`, prefer
-  frequency-aware modes such as `global_feature` or
-  `per_channel_samples_time_pooled`. A single global scalar is usually only
-  appropriate as an ablation because frequency bins can have very different
-  natural scales.
-
-`global_robust_scalar` estimates median/MAD from a bounded deterministic
-reservoir of training values to avoid materializing every value in memory. The
-default `robust_reservoir_size` is `1000000`; smaller values reduce memory use
-but make the robust scalar an approximation.
-
-## Direct Hydra Example
-
-```bash
-python -m imindbench.run_eval \
-  paths=<paths_cfg> \
-  dataset.provider=neuroprobe2025 \
-  dataset.regime=SS-SM \
-  dataset.task=onset \
-  dataset.test_subject=2 \
-  dataset.test_session=0 \
-  model=logistic \
-  preprocessor=laplacian_stft \
-  wandb.enabled=false
-```
-
-BYD example:
-
-```bash
-python -m imindbench.run_eval \
-  paths=server_ml7_popt_stft \
-  dataset=kelesbyd2024 \
-  dataset.test_subject=41 \
-  dataset.test_session=1 \
-  dataset.task=speech \
-  model=popt \
-  preprocessor=laplacian_stft_1000Hz \
-  wandb.enabled=false
-```
-
-BYD HTNet example:
-
-```bash
-python -m imindbench.run_eval \
-  paths=server_ml7_popt_stft \
-  dataset=kelesbyd2024 \
-  dataset.regime=within-session \
-  dataset.test_subject=42 \
-  dataset.test_session=1 \
-  dataset.task=speech \
-  model=htnet_1000Hz \
-  preprocessor=laplacian_wav_1000Hz \
-  wandb.enabled=false
-```
-
-PIPPI example:
-
-```bash
-python -m imindbench.run_eval \
-  paths=processed_1_0_0_pippi \
-  dataset=berezutskayapippi2022 \
-  dataset.subset_tier=high-cov \
-  dataset.regime=within-session \
-  dataset.task=speech \
-  dataset.test_subject=1 \
-  dataset.test_session=1 \
-  model=popt \
-  preprocessor=popt_stft_filter_neuroprobe_pippi_highcov \
-  wandb.enabled=false
-```
-
-PIPPI channel coordinates are read in ACPC and transformed to PopT checkpoint
-slot order `[L, I, P]` inside the variable-channel adapter. Samples and batches
-expose the neutral key `channel_coords`, and the active frame selection is
-controlled by `dataset.coordinate_profile` (`popt_lip` by default,
-`diver_mni` for the alternate source-frame view).
-
-For aligned multi-subject PIPPI runs (`logistic/mlp/cnn` with non-`within-session`
-regimes), use `dataset.brain_area_key=group` and a preprocessor chain that
-includes `region_intersection_pool`.
+The repository is Apache-2.0 except for identified third-party components. In
+particular, BaRISTA is under the USC educational, research, and non-profit
+license; commercial use requires separate USC permission. Review
+[`THIRD_PARTY.md`](../THIRD_PARTY.md) and the
+[`BaRISTA license`](../LICENSES/BaRISTA-LICENSE.md) before redistribution or use.
