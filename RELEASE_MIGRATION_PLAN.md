@@ -19,11 +19,14 @@ manifest-driven parity tooling, public Brainsets contract tests, retained-surfac
 reduction, and standalone onboarding are committed.
 
 Subsequent CPU validation created a fresh `imindbench` environment, passed the
-full suite, prepared and reloaded one recording for each provider, and completed
-full PIPPI preparation plus an idempotent full rerun. No new evaluation or GPU
-experiment has run. The next gates are full Neuroprobe2025 preparation,
-cross-recording NeuroprobeV2 regime checks, and metric/config-record comparison
-for the runnable Logistic and MLP cases; then the GPU handoff gate below. PopT and BaRISTA remain
+full suite, prepared and reloaded one recording for each provider, completed full
+PIPPI and Neuroprobe2025 preparation plus idempotent full reruns, and opened every
+resolved recording for both folds of all four NeuroprobeV2 regimes from the shared
+Neuroprobe artifacts. One fixed one-second window was byte-identical through the
+Neuroprobe2025 and NeuroprobeV2 explicit-recording views. The two checkpoint-free
+CPU parity cases have run: Logistic passed strict record parity, while BYD MLP
+completed but failed metric parity and is recorded as a provenance/drift finding.
+No GPU experiment has run. The next gate is the GPU handoff below. PopT and BaRISTA remain
 `NOT-COMPARABLE` until the exact historical checkpoint hashes are established.
 
 ## 1. Validate the public Brainsets workflow
@@ -506,10 +509,12 @@ historical-rendering gap in the provenance manifest and change log.
 5. **Complete:** Trace source paper notebooks to YAMLs/original outputs and add
    canonical launch mappings without requiring notebook execution; retain the
    documented Figure 4b and Appendix 6 gaps.
-6. **Partial:** All `--list` and single-recording prepare/load/idempotency gates
-   pass, and full PIPPI preparation plus its full idempotent rerun pass. Full
-   Neuroprobe2025 preparation and all four NeuroprobeV2 regime checks remain;
-   full BYD preparation remains optional when resources permit. Treat fresh-data
+6. **Complete for preparation and shared-artifact routing, except optional full BYD:** All `--list` and single-recording
+   prepare/load/idempotency gates pass. Full PIPPI and Neuroprobe2025 preparation,
+   their full idempotent reruns, and all four NeuroprobeV2 regimes across folds 0
+   and 1 pass. Every resolved recording's interval/channel selector was materialized,
+   and one fixed window matched byte-for-byte between both Neuroprobe views.
+   Full BYD preparation remains optional when resources permit. Treat fresh-data
    reproduction separately from evaluation-code parity.
 7. **Pending:** From a fresh clone and built iMINDBench/TorchBrain artifacts—not editable
    installs—validate in `imindbench` with public dependencies and no private

@@ -12,6 +12,8 @@ import re
 import subprocess
 from typing import Any
 
+import numpy as np
+
 DEFAULT_MANIFEST = (
     Path(__file__).resolve().parents[1] / "config" / "brainsets_smoke_manifest.json"
 )
@@ -168,12 +170,134 @@ def validate_loader(
         keep_files_open=False,
     )
     recording = dataset.get_recording(recording_id)
+    try:
+        return {
+            "class": spec["class"],
+            "recording_id": recording_id,
+            "domain_start": float(recording.domain.start[0]),
+            "domain_end": float(recording.domain.end[0]),
+        }
+    finally:
+        file_handle = getattr(recording, "file", None)
+        if file_handle is not None:
+            file_handle.close()
+
+
+def validate_neuroprobe_fixed_window_equivalence(
+    root: Path, spec: dict[str, Any], recording_id: str
+) -> dict[str, Any]:
+    """Compare one fixed neural window through both public Neuroprobe views."""
+    from torch_brain.datasets import Neuroprobe2025, NeuroprobeV2
+
+    arrays = []
+    windows = []
+    for dataset_class in (Neuroprobe2025, NeuroprobeV2):
+        dataset = dataset_class(
+            root=root,
+            dirname=spec["dirname"],
+            recording_ids=[recording_id],
+            keep_files_open=False,
+        )
+        recording = dataset.get_recording(recording_id)
+        try:
+            start = float(recording.domain.start[0])
+            end = min(start + 1.0, float(recording.domain.end[-1]))
+            if end <= start:
+                raise ValueError(f"recording '{recording_id}' has an empty domain")
+            window = recording.slice(start, end, reset_origin=False)
+            arrays.append(np.asarray(window.seeg_data.data))
+            windows.append((start, end))
+        finally:
+            file_handle = getattr(recording, "file", None)
+            if file_handle is not None:
+                file_handle.close()
+
+    if windows[0] != windows[1]:
+        raise ValueError(
+            "Neuroprobe2025 and NeuroprobeV2 returned different recording domains"
+        )
+    if not all(np.isfinite(array).all() for array in arrays):
+        raise ValueError("fixed Neuroprobe window contains non-finite neural values")
+    if arrays[0].dtype != arrays[1].dtype or not np.array_equal(arrays[0], arrays[1]):
+        raise ValueError(
+            "Neuroprobe2025 and NeuroprobeV2 returned different fixed-window bytes"
+        )
+    digest = hashlib.sha256()
+    digest.update(arrays[0].dtype.str.encode("ascii"))
+    digest.update(str(arrays[0].shape).encode("ascii"))
+    digest.update(arrays[0].tobytes(order="C"))
     return {
-        "class": spec["class"],
         "recording_id": recording_id,
-        "domain_start": float(recording.domain.start[0]),
-        "domain_end": float(recording.domain.end[0]),
+        "window_start": windows[0][0],
+        "window_end": windows[0][1],
+        "shape": list(arrays[0].shape),
+        "sha256": digest.hexdigest(),
     }
+
+
+def validate_neuroprobe_v2_regimes(
+    root: Path, spec: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Resolve and open every public NeuroprobeV2 regime/split combination."""
+    from torch_brain.datasets import NeuroprobeV2
+
+    results = []
+    for regime in (
+        "within-session",
+        "hold-in-session",
+        "hold-out-session",
+        "hold-out-subject",
+    ):
+        for split in ("train", "val", "test"):
+            for fold in (0, 1):
+                dataset = NeuroprobeV2(
+                    root=root,
+                    dirname=spec["dirname"],
+                    subset_tier="full",
+                    test_subject=1,
+                    test_session=1,
+                    split=split,
+                    label_mode="binary",
+                    task="onset",
+                    regime=regime,
+                    fold=fold,
+                    keep_files_open=False,
+                )
+                selector_counts = {}
+                for recording_id in dataset.recording_ids:
+                    recording = dataset.get_recording(recording_id)
+                    try:
+                        starts = np.asarray(recording.splits.start)
+                        ends = np.asarray(recording.splits.end)
+                        labels = np.asarray(recording.splits.label)
+                        included = np.asarray(recording.channels.included)
+                        if starts.shape != ends.shape or starts.shape != labels.shape:
+                            raise ValueError(
+                                f"split selector shape mismatch for '{recording_id}'"
+                            )
+                        if starts.size == 0 or not included.any():
+                            raise ValueError(
+                                f"empty interval/channel selector for '{recording_id}'"
+                            )
+                        selector_counts[recording_id] = {
+                            "interval_count": int(starts.shape[0]),
+                            "included_channel_count": int(included.sum()),
+                        }
+                    finally:
+                        file_handle = getattr(recording, "file", None)
+                        if file_handle is not None:
+                            file_handle.close()
+                results.append(
+                    {
+                        "regime": regime,
+                        "split": split,
+                        "fold": fold,
+                        "recording_count": len(dataset.recording_ids),
+                        "opened_recording_count": len(selector_counts),
+                        "selector_counts": selector_counts,
+                    }
+                )
+    return results
 
 
 def main() -> int:
@@ -183,6 +307,11 @@ def main() -> int:
     parser.add_argument("--root", type=Path)
     parser.add_argument("--dataset")
     parser.add_argument("--recording-id")
+    parser.add_argument(
+        "--neuroprobe-v2-regimes",
+        action="store_true",
+        help="Open every fold/recording for all NeuroprobeV2 regime/split selections.",
+    )
     parser.add_argument(
         "--full-hash",
         action="store_true",
@@ -209,6 +338,13 @@ def main() -> int:
     )
     result: dict[str, Any] = {"source": source, "inventory": before}
     result["loader"] = validate_loader(args.root, spec, recording_id)
+    if args.neuroprobe_v2_regimes:
+        if args.dataset != "neuroprobev2":
+            parser.error("--neuroprobe-v2-regimes requires --dataset neuroprobev2")
+        result["regime_splits"] = validate_neuroprobe_v2_regimes(args.root, spec)
+        result["fixed_window_equivalence"] = (
+            validate_neuroprobe_fixed_window_equivalence(args.root, spec, recording_id)
+        )
     after = inventory(
         args.root,
         spec["dirname"],
@@ -217,7 +353,7 @@ def main() -> int:
     )
     if before != after:
         raise RuntimeError("loader smoke changed prepared artifacts")
-    result["idempotent"] = True
+    result["loader_inventory_unchanged"] = True
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 

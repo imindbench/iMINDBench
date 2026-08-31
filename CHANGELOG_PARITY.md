@@ -230,3 +230,30 @@ corresponding change.
 - Evidence/report ID: processed Neuroprobe SHA256 `a58777ed3b7191c239c764657177dd58eec794a87d9b00f2d8ca032a7519c19b`; BYD `9bd6c48eb7375dd799c8173c0f8499c54cafb640a62ee0f85eebb105fa37bae9`; selected PIPPI `f76e220facc682a0dcb45806cf6656d3d40b24075718e9f37b764d291ad2c6a1`; fresh suite 80 passed.
 - Reviewer/disposition: PIPPI fix had two implementation passes and an independent wheel/API/isolation review; real preparation retry passed.
 - Follow-up or user review needed: full Neuroprobe2025 preparation and cross-recording NeuroprobeV2 regime gates remain; TorchBrain commit `492f94a594e81d30ef38db32d8be145627421b0d` must be pushed before its public VCS pin resolves.
+
+### 2026-08-31 — Complete full Neuroprobe and NeuroprobeV2 CPU gates
+
+- Change ID/commit subject: `test: validate full Neuroprobe shared artifacts`
+- Files changed: `scripts/validate_brainsets_smoke.py`, `tests/test_neuroprobe_shared_artifacts.py`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`
+- Classification: test/docs
+- Reason: verify that one Neuroprobe2025 preparation corpus supports every public NeuroprobeV2 routing regime without a second pipeline or artifact mutation.
+- Behavioral effect: adds an opt-in read-only `--neuroprobe-v2-regimes` validation mode; evaluation and preparation algorithms are unchanged.
+- Smoke cases affected: folds 0 and 1, binary onset train/val/test for within-session, hold-in-session, hold-out-session, and hold-out-subject.
+- Before: only one real explicit-recording Neuroprobe load and synthetic regime contracts were verified.
+- After: all 26 Neuroprobe2025 recordings prepare and survive a full idempotent rerun; all 24 NeuroprobeV2 fold/regime/split selections materialize the interval and channel selectors for every resolved shared H5 recording. The validator closes each lazy H5 handle, confirms its read-only inventory is unchanged, and compares one fixed one-second neural window byte-for-byte through both public Neuroprobe views.
+- Metric/config deltas: none.
+- Evidence/report ID: 26/26 prepared; 24 selections and 166 recording-selection opens; per-fold V2 train recording counts 1/26/25/23 for within/hold-in/hold-out-session/hold-out-subject; selected H5 SHA256 remains `a58777ed3b7191c239c764657177dd58eec794a87d9b00f2d8ca032a7519c19b`; fixed-window SHA256 `6ced00f906e65914cace8cdbafab5928692528699a3ab672df6cd1d690d355b8` with shape `[2048, 155]`; final full suite 82 passed.
+- Reviewer/disposition: exhaustive real-corpus validator pass plus strengthened multi-recording/fold/closure tests and two implementation review passes.
+- Follow-up or user review needed: investigate the checkpoint-free BYD MLP metric discrepancy recorded below without changing the migrated runtime speculatively; broader per-provider deterministic-window/evaluation-output checks and optional full BYD preparation remain.
+
+### 2026-08-31 — Run checkpoint-free CPU parity cases
+
+- Change ID/commit subject: `test: record CPU parity evidence`
+- Classification: test/docs
+- Reason: smoke-test the migrated evaluation path against frozen paper-output records using freshly prepared public artifacts.
+- Behavioral effect: none; no runtime code was changed in response to results.
+- Smoke cases affected: NeuroprobeV2 Logistic/onset and BYD MLP/global-flow, folds 0 and 1.
+- Results: Logistic passed the strict metric/config-record comparator. BYD MLP completed successfully but failed metric parity with matching identity/config hashes: test ROC-AUC was `0.3944888889` versus `0.4259555556` for fold 0 and `0.4892899308` versus `0.5817169843` for fold 1.
+- Evidence/report ID: local fresh-output comparator reports under the validation run root; generated run data and reports remain untracked.
+- Reviewer/disposition: flag as an unresolved provenance/runtime-data drift candidate. Do not tune or alter the copied implementation until the historical environment and prepared-H5 provenance can be established.
+- Follow-up or user review needed: compare historical dependency/data fingerprints where available; otherwise retain the failure transparently as a known provenance gap.

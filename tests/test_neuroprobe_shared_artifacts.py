@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import h5py
 import numpy as np
@@ -72,7 +73,7 @@ def test_inventory_fails_clearly_without_prepared_data(tmp_path):
 
 
 def _write_selector_h5(path: Path, *, include_mask: bool = True) -> None:
-    from torch_brain.data import ArrayDict, Data, Interval
+    from torch_brain.data import ArrayDict, Data, Interval, RegularTimeSeries
 
     path.parent.mkdir(parents=True)
     key = "full$binary$within_session$speech$fold0$train"
@@ -90,7 +91,10 @@ def _write_selector_h5(path: Path, *, include_mask: bool = True) -> None:
         subject=Data(id="1"),
         session=Data(id="sub_1_trial001"),
         channels=ArrayDict(id=np.array(["ch0"]), included=np.array([False])),
-        seeg_data=Data(unit="uV", scale_to_uV=1.0),
+        seeg_data=RegularTimeSeries(
+            data=np.array([[1.0], [2.0]], dtype=np.float32),
+            sampling_rate=2.0,
+        ),
         splits=splits,
         channel_splits=channel_splits,
         domain=domain,
@@ -159,14 +163,79 @@ def test_manifest_and_imported_source_match_pinned_commit():
     source = smoke.validate_torch_brain_source(manifest["torch_brain_commit"])
 
     assert source["commit"] == manifest["torch_brain_commit"]
-    assert manifest["datasets"]["neuroprobe2025"]["recording_id"] == (
-        "sub_1_trial001"
-    )
+    assert manifest["datasets"]["neuroprobe2025"]["recording_id"] == ("sub_1_trial001")
 
 
 def test_imported_source_rejects_wrong_commit():
     with pytest.raises(RuntimeError, match="commit mismatch"):
         smoke.validate_torch_brain_source("0" * 40)
+
+
+def test_neuroprobe_v2_regime_validator_opens_all_public_selections(monkeypatch):
+    calls = []
+    opened = []
+
+    class FakeFile:
+        closed = False
+
+        def close(self):
+            self.closed = True
+
+    class FakeRecording:
+        def __init__(self, recording_id):
+            self.splits = SimpleNamespace(
+                start=np.array([0.0]), end=np.array([1.0]), label=np.array([1])
+            )
+            self.channels = SimpleNamespace(included=np.array([True, False]))
+            self.file = FakeFile()
+            self.recording_id = recording_id
+
+    class FakeNeuroprobeV2:
+        def __init__(self, **kwargs):
+            calls.append(kwargs)
+            self.recording_ids = ["recording-a", "recording-b"]
+
+        def get_recording(self, recording_id):
+            recording = FakeRecording(recording_id)
+            opened.append(recording)
+            return recording
+
+    monkeypatch.setattr("torch_brain.datasets.NeuroprobeV2", FakeNeuroprobeV2)
+
+    results = smoke.validate_neuroprobe_v2_regimes(
+        Path("/processed"), {"dirname": "neuroprobe_2025"}
+    )
+
+    assert len(results) == 24
+    assert {(call["regime"], call["split"]) for call in calls} == {
+        (regime, split)
+        for regime in (
+            "within-session",
+            "hold-in-session",
+            "hold-out-session",
+            "hold-out-subject",
+        )
+        for split in ("train", "val", "test")
+    }
+    assert {call["fold"] for call in calls} == {0, 1}
+    assert all(call["task"] == "onset" for call in calls)
+    assert all(result["opened_recording_count"] == 2 for result in results)
+    assert len(opened) == 48
+    assert all(recording.file.closed for recording in opened)
+
+
+def test_fixed_window_equivalence_uses_both_public_neuroprobe_views(tmp_path):
+    artifact = tmp_path / "neuroprobe_2025" / "sub_1_trial001.h5"
+    _write_selector_h5(artifact)
+
+    result = smoke.validate_neuroprobe_fixed_window_equivalence(
+        tmp_path,
+        {"dirname": "neuroprobe_2025"},
+        "sub_1_trial001",
+    )
+
+    assert result["shape"] == [2, 1]
+    assert len(result["sha256"]) == 64
 
 
 @pytest.mark.parametrize(
