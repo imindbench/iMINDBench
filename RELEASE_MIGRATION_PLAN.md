@@ -8,6 +8,24 @@ and (3) trace paper notebooks to the YAML configurations and result trees they
 consume. The released workflow must depend only on public `torch_brain`, including
 its `brainsets` CLI and `torch_brain.datasets` loaders.
 
+## Current implementation status
+
+This plan is audited against iMINDBench commit
+`056ca22c14e2726858b94c71d14f2290c1d8966d` and the public TorchBrain dependency
+commit `492f94a594e81d30ef38db32d8be145627421b0d`. Repository bootstrap, the filtered
+baseline import, source-test inventory, installable packaging, the `imindbench`
+namespace migration, paper-figure provenance, frozen reduced reference records,
+manifest-driven parity tooling, public Brainsets contract tests, retained-surface
+reduction, and standalone onboarding are committed.
+
+Subsequent CPU validation created a fresh `imindbench` environment, passed the
+full suite, prepared and reloaded one recording for each provider, and completed
+full PIPPI preparation plus an idempotent full rerun. No new evaluation or GPU
+experiment has run. The next gates are full Neuroprobe2025 preparation,
+cross-recording NeuroprobeV2 regime checks, and metric/config-record comparison
+for the runnable Logistic and MLP cases; then the GPU handoff gate below. PopT and BaRISTA remain
+`NOT-COMPARABLE` until the exact historical checkpoint hashes are established.
+
 ## 1. Validate the public Brainsets workflow
 
 Use a fresh Conda environment rather than either existing `tb_buildathon`
@@ -27,8 +45,11 @@ Build `iMINDBench/environment.yml` by minimizing the existing
 `torch_brain/examples/neuroprobe_eval/environment.yml`, preserving only packages
 reached by the retained runtime, parity scripts and provenance tooling. During
 migration, install `torch_brain-public` editable as shown above. For the public
-release, replace the local path with a pinned released version or immutable Git
-commit and artifact hash.
+release, the current reviewed source pin is
+`492f94a594e81d30ef38db32d8be145627421b0d`; install that immutable Git commit (or
+a release artifact proven to contain it) and record the artifact hash. Until the
+user-authorized push gate is cleared, use the reviewed local checkout for
+development and treat the public immutable installation as blocked.
 Do not install standalone `brainsets`: its CLI, pipelines, data structures and
 dataset loaders now come from `torch_brain-public`.
 
@@ -60,14 +81,14 @@ env -u PYTHONPATH conda run -n imindbench python -c "import torch, torch_brain; 
 
 Require PyTorch to match the environment pin and `torch_brain.__file__` to point
 to `torch_brain-public` during development (or the pinned public installation at
-release). The retained iMINDBench runtime should import no standalone `brainsets`;
-replace its current `brainsets.datasets` imports with `torch_brain.datasets`.
+release). The retained iMINDBench runtime imports no standalone `brainsets`; its
+dataset imports now use `torch_brain.datasets`.
 Record the original runs' Python/PyTorch/CUDA/scikit-learn versions separately:
 historical-stack parity and current-release-stack compatibility are different
 results, and version drift must not be misreported as a code-migration regression.
 
-Make iMINDBench itself an installable package and install it editable during
-development:
+iMINDBench is installable from its root `pyproject.toml`; install it editable
+during development:
 
 ```bash
 conda run -n imindbench python -m pip install -e /home/geeling/Projects/ieeg_project/iMINDBench
@@ -82,10 +103,12 @@ env -u PYTHONPATH conda run -n imindbench python -c "import imindbench; print(im
 env -u PYTHONPATH conda run -n imindbench python -m imindbench.run_eval --help
 ```
 
-Use the equivalent `neuroprobe_eval` commands only for the untouched pre-rename
-baseline gate. The resolved module path must be inside the iMINDBench checkout.
-Test failure is required if it resolves to a TorchBrain checkout, another
-worktree, or a stale site-packages copy.
+The equivalent `neuroprobe_eval` commands were reserved for the untouched
+pre-rename baseline gate; that experiment was not run and must not now be
+recreated from a TorchBrain checkout. Current validation uses `imindbench`. The
+resolved module path must be inside the iMINDBench checkout, and validation must
+fail if it resolves to a TorchBrain checkout, another worktree, or a stale
+site-packages copy.
 
 Conda owns only the iMINDBench application environment. `brainsets prepare`,
 although launched from `imindbench`, intentionally invokes its bundled `uv` to
@@ -107,8 +130,8 @@ Run these commands first with `--list`, then with one stable manifest ID via
 
 ```bash
 conda run -n imindbench brainsets prepare neuroprobe_2025 --list --raw-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/raw --processed-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/processed
-conda run -n imindbench brainsets prepare keles_byd_2024 --list --raw-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/raw --processed-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/processed --labels-dir /home/geeling/Projects/ieeg_project/torch_brain-public/torch_brain/pipeline/brainsets-pipelines/keles_byd_2024/labels
-conda run -n imindbench brainsets prepare berezutskaya_pippi_2022 --list --raw-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/raw --processed-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/processed --labels-dir /home/geeling/Projects/ieeg_project/torch_brain-public/torch_brain/pipeline/brainsets-pipelines/berezutskaya_pippi_2022/labels
+conda run -n imindbench brainsets prepare keles_byd_2024 --list --raw-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/raw --processed-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/processed
+conda run -n imindbench brainsets prepare berezutskaya_pippi_2022 --list --raw-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/raw --processed-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/processed
 ```
 
 For each dataset, copy one ID printed by `--list` into the corresponding command
@@ -118,11 +141,20 @@ the checked-in plan. Once selected, check the stable manifest IDs and expected
 recording IDs into the smoke manifest rather than selecting them interactively on
 future runs.
 
+The current `config/brainsets_smoke_manifest.json` schema pins TorchBrain commit
+`492f94a`, the three preparation pipeline IDs, and four public dataset
+class/directory/recording mappings (including NeuroprobeV2's shared directory).
+`scripts/validate_brainsets_smoke.py` is a CPU-only, read-only post-prepare
+checker: `--list-datasets` validates the source pin and lists mappings; `--root`
+and `--dataset` inventory prepared H5 files and verify the pinned public loader;
+optional `--recording-id` overrides the selected recording and `--full-hash`
+hashes the complete corpus. It does not download or prepare data.
+
 After the single-recording gates pass, full preparation is mandatory for PIPPI
 and Neuroprobe2025:
 
 ```bash
-conda run -n imindbench brainsets prepare berezutskaya_pippi_2022 --raw-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/raw --processed-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/processed --labels-dir /home/geeling/Projects/ieeg_project/torch_brain-public/torch_brain/pipeline/brainsets-pipelines/berezutskaya_pippi_2022/labels
+conda run -n imindbench brainsets prepare berezutskaya_pippi_2022 --raw-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/raw --processed-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/processed
 conda run -n imindbench brainsets prepare neuroprobe_2025 --raw-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/raw --processed-dir /home/geeling/Projects/ieeg_project/data/imindbench_validation/processed
 ```
 
@@ -135,11 +167,11 @@ inventory, sizes, H5 SHA256s and mtimes plus stdout/stderr and the detected
 TorchBrain spec used by uv. After the second run require no duplicate/unexpected
 files, byte-identical H5s, no unexpected rewrites, and successful loader reopening.
 
-The checkout-specific `--labels-dir` paths above are development-only. Before
-public release, make BYD/PIPPI default to their packaged label resources (or add a
-public resolver based on `importlib.resources`) so installed-wheel users do not
-need the source tree. Verify labels and brain-area tables are present in wheel and
-sdist builds and record their hashes in preparation provenance.
+At public TorchBrain commit `492f94a`, BYD and PIPPI resolve their packaged label
+resources when `--labels-dir` is omitted. The option remains an explicit override,
+not a normal preparation requirement. The remaining release gate is to verify the
+packaged labels and brain-area tables from built wheel and sdist artifacts and
+record their hashes in preparation provenance.
 
 Expected intermediates are downloaded source assets under
 `raw/<brainset_id>/`, followed by processed recording H5 files under
@@ -174,13 +206,11 @@ different processed files.
 
 ### Repository and source bootstrap
 
-The local `iMINDBench/` directory is not yet a Git repository. First identify and
-clone the intended public iMINDBench remote (or explicitly initialize it if this
-is a new repository), establish `main`, record its base SHA, and verify a clean
-index. Then create `gc/neuroprobe-eval-public-migration`; the baseline import must
-be the first commit after that base. Keep the currently drafted plan/changelog
-untracked and stage only the explicit import allowlist for commit 1—never use
-`git add -A` for the baseline.
+This bootstrap is complete. The repository uses the
+`gc/neuroprobe-eval-public-migration` branch from initial `main` commit `6d9ccd0`,
+and the audited import is recorded as the first migration commit. The historical
+rule remains: the baseline commit contains only the explicit import allowlist,
+never an indiscriminate `git add -A` snapshot.
 
 The runtime/config/script baseline source is fixed to
 `/home/geeling/Projects/ieeg_project/torch_brain-main` at tracked `main` commit
@@ -288,13 +318,15 @@ Preserve the package-relative layout while retaining only:
 - packaging: `pyproject.toml`, pinned `environment.yml`, README,
   license, data-download instructions and tests.
 
-The newly released model scope is **BaRISTA only**. Preserve BaRISTA's released
-preprocessing for reference parity: split-local, same-recording window
+The retained model surface is the legacy paper families—Linear/BrainBERT,
+Logistic, MLP, CNN, HTNet, PopT, and DIVER—plus BaRISTA. Preserve BaRISTA's
+released preprocessing for reference parity: split-local, same-recording window
 concatenation for filtering; direct 1000-to-2048 Hz upsampling for BYD; native
 2048 Hz for PIPPI/NeuroprobeV2; Laplacian rereferencing; global robust scaling;
 and per-window/per-channel z-scoring. At a high level this remains comparable to
 the model-specific HTNet and DIVER preprocessing used by the benchmark, but it
-must be reported as its own model/preprocessor configuration.
+must be reported as its own model/preprocessor configuration. Retention is not a
+claim that every model has a frozen or currently comparable parity case.
 
 Do not import MVPFormer or SEEGnificant from their later release commits. During
 surface reduction, explicitly inventory and remove any residual scripts,
@@ -329,25 +361,38 @@ generated `artifacts/parity_reports/**` and `outputs/**`.
 
 ## 3. Publication parity gates
 
-Create `scripts/run_parity_subset.sh` and a checked-in parity manifest selecting a
-small but representative matrix:
+The implemented interface is the checked-in
+`artifacts/parity_reference/manifest.json` plus `scripts/parity_tools.py`; there
+is no experiment-running `run_parity_subset.sh`. The tool validates inputs,
+constructs commands with `build-commands`, or compares caller-supplied candidate
+JSON with `compare`. Both modes require caller-owned JSON checkpoint/resource
+mappings; command construction additionally requires a data root and fresh output
+root, while comparison requires a candidate map and fresh report directory.
 
-- datasets: NeuroprobeV2, BYD and PIPPI;
-- model/preprocessor: Logistic + flagship multi-STFT for all three; add one MLP
-  case and one PopT case to cover the torch/checkpoint path;
-- data points: checked-in dataset-specific task IDs, subjects/sessions and folds
-  selected only after inventorying available reference rows; prefer one
-  speech/language and one continuous/movie-derived task where each dataset
-  actually supports them;
-- regime: within-session first; add one fixed hold-in case to cover cross-session
-  routing.
+The five selected records are NeuroprobeV2 Logistic/multi-STFT onset, BYD
+MLP/multi-STFT global flow, PIPPI PopT/multi-STFT speech, NeuroprobeV2
+BaRISTA/waveform onset, and NeuroprobeV2 PopT/multi-STFT hold-in onset. Logistic
+and MLP are runnable metric/config-record cases. The two PopT cases and BaRISTA
+are `NOT-COMPARABLE` because the historical results do not establish exact
+checkpoint hashes; a checkable identity, config, fold, metric, or supplied known
+checkpoint mismatch is still `FAIL`.
 
-Freeze a redistributable reference manifest before simplification: source SHA,
-historical environment, dataset/H5 fingerprints, label/config/seed/checkpoint
-hashes, and the exact original `population_*.json` files or metric records with
-source URI and SHA256. Review privacy/licensing before checking references in.
-The comparator must consume only these immutable references, not a mutable private
-TorchBrain checkout; prove this with a clean-checkout/offline comparator test.
+```bash
+python scripts/parity_tools.py --manifest artifacts/parity_reference/manifest.json build-commands --case neuroprobev2_logistic_multistft_onset_sub1_sess1 --data-root /path/to/processed --output-root /path/to/fresh-run-root --checkpoint-map checkpoint-map.json --resource-map resource-map.json
+python scripts/parity_tools.py --manifest artifacts/parity_reference/manifest.json compare --case neuroprobev2_logistic_multistft_onset_sub1_sess1 --candidate-map candidate-map.json --checkpoint-map checkpoint-map.json --resource-map resource-map.json --report-dir /path/to/fresh-report-root
+```
+
+The CLI exits zero only when every selected comparison is `PASS`; `FAIL`,
+`MISSING`, and `NOT-COMPARABLE` are nonzero.
+
+The redistributable reduced records freeze source/result URIs and hashes,
+config/preprocess hashes, identity, seed, folds, and reported metrics. Historical
+result counts are recorded as unavailable, and historical environment,
+dataset/H5, label, and checkpoint fingerprints remain evidence gaps rather than
+inferred values. The comparator consumes only checked-in immutable reference
+records and verifies their hashes; it does not read a mutable private TorchBrain
+checkout. Tests cover offline resolution, path containment, tampered hashes,
+non-finite metrics, status precedence, CLI exits, and atomic report finalization.
 
 Keep two separate gates:
 
@@ -361,11 +406,13 @@ Keep two separate gates:
    fingerprints differ and equivalence is not established, report
    `NOT-COMPARABLE`.
 
-Define absolute/relative metric tolerances, fold aggregation, repeat count and
-hardware nondeterminism policy before observing candidate scores. A parity checker
-should compare identity fields, sample counts, folds and metrics and emit
-machine-readable JSON plus Markdown under
-`iMINDBench/artifacts/parity_reports/<run_id>/`.
+The frozen manifest sets absolute and relative metric tolerances to `1e-9` and
+compares exact fold indices plus per-fold metrics; it does not aggregate folds or
+claim hardware-repeat equivalence. Any future repeat-count or nondeterminism
+policy must be set before observing new candidate scores. Reports are
+machine-readable JSON plus Markdown under a caller-selected fresh directory
+(conventionally `artifacts/parity_reports/<run_id>/`). Historical sample/class
+counts are null, so they cannot be compared for the five frozen records.
 
 ### Notebook-to-run provenance and smoke parity
 
@@ -384,34 +431,41 @@ directly names a stable artifact produced by one:
    output family. Flag notebook inputs that cannot be traced to a reproducible
    command; do not infer or silently repair them.
 
-The validation harness is script/result based, not notebook based. Provide one
-command that runs the complete checked-in smoke manifest into a caller-selected
-new root such as `iMINDBench/outputs/smoke/<run_id>/`. During reference capture,
-the canonical original results under
+The validation harness is script/result based, not notebook based. The committed
+parity tool deliberately does not execute experiments: `build-commands` emits the
+validated commands for selected or all manifest cases, and the caller runs any
+runnable command into the required fresh output root before invoking `compare`.
+During reference capture, the canonical original results under
 `torch_brain/examples/neuroprobe_eval/outputs/09_neurips` are read-only; routine
 comparison uses only the frozen redistributable reference artifacts.
 
 All new baseline runs must execute the installed copied `neuroprobe_eval` package;
 all post-rename candidate, parity and end-to-end runs must execute the installed
-`imindbench` package. Add import-provenance logging to every run and fail if the
-resolved package path is inside `torch_brain-main` or `torch_brain`.
+`imindbench` package. The current comparator explicitly reports
+`execution_provenance_verified: false`: a `PASS` proves only metric/config-record
+parity. Before reporting execution reproduction, the run workflow must separately
+capture and verify imported package paths, source/environment identity, resolved
+configuration, command, and data fingerprints, and fail if iMINDBench resolves
+inside either TorchBrain source checkout.
 
-Fail if a run root already exists unless explicit resume is requested. Resolve
-candidate outputs, Hydra directories, logs, caches and checkpoints beneath that
-run root; write resolved config plus source/environment/data fingerprints and use
-atomic completion markers. Verify reference hashes before and after, and test from
-an unrelated working directory with read-only references and distinct concurrent
-run IDs.
+Command construction fails if its output root already exists; comparison fails if
+its report directory exists and finalizes JSON/Markdown atomically through a
+same-parent temporary directory. There is no resume mode. Actual run orchestration
+must keep candidate outputs, Hydra directories, logs and caches in the caller's
+isolated root and add resolved config plus source/environment/data fingerprints
+and atomic completion markers before it can claim execution provenance.
 
-For every smoke case, map the candidate `population_*.json` to the exact frozen
-reference artifact. Compare dataset/regime/model/preprocessor/task, subject/session,
-fold, sample/class counts, seeds/config identity, and reported metrics. Use exact
-comparison for deterministic metadata/counts and documented tolerances for model
-metrics. Emit:
+For every selected case, the candidate map links its case ID to one existing
+`population_*.json`. Compare model/preprocessor/task, subject/session, regime,
+seed, time-bin identity, config/preprocess hashes, folds and reported metrics.
+Sample/class counts are unavailable in the historical records. Use exact
+comparison for deterministic identity/hash/fold fields and the manifest tolerance
+for metrics. Emit:
 
 - `artifacts/parity_reports/<run_id>/report.json` for machine-readable status;
 - `artifacts/parity_reports/<run_id>/report.md` for review;
-- a per-case pointer to candidate and frozen reference JSON/metric records;
+- per-case candidate, reference, source-result, checkpoint, and resource hashes
+  without embedding caller-private absolute paths;
 - PASS/FAIL/MISSING/NOT-COMPARABLE status with metric deltas and reasons.
 
 Keep `CHANGELOG_PARITY.md` as the review log for every copied-code adjustment
@@ -431,25 +485,52 @@ historical-rendering gap in the provenance manifest and change log.
 
 ## 4. Release sequence
 
-1. Bootstrap the iMINDBench repository/feature branch; scan and verify the fixed
+1. **Complete:** Bootstrap the iMINDBench repository/feature branch; scan and verify the fixed
    `torch_brain-main` source SHA above; make its filtered untouched baseline the
    branch's first commit, then commit the plan/changelog/provenance.
-2. Freeze licensed reference inputs/results and port the relevant source tests.
-   Establish one untouched imported-baseline smoke case from iMINDBench before
-   simplifying the import; do not launch new runs from a TorchBrain checkout.
-3. Create the `imindbench` environment, package the copied runtime, then make the
+2. **Partial:** Freeze licensed reference inputs/results and port the relevant
+   source tests. The intended untouched imported-baseline smoke case was not run
+   before simplification and is now an explicit historical evidence gap; do not
+   recreate it by launching from a TorchBrain checkout. The reduced reference
+   records and tests are complete, while historical data/environment/checkpoint
+   fingerprints remain gaps.
+3. **Partial:** Create the `imindbench` environment, package the copied runtime, then make the
    dedicated `neuroprobe_eval` → `imindbench` namespace commit and migrate public
    imports/paths. Make one Logistic evaluation-code parity case pass against
-   identical immutable inputs.
-4. Reduce the committed baseline using retained/removed manifests and tests, then
-   add the remaining parity matrix, isolated runner, comparator and reports.
-5. Trace source paper notebooks to YAMLs/original outputs and add canonical launch
-   mappings without requiring notebook execution.
-6. Pass all single-recording Brainsets gates, then full PIPPI and Neuroprobe2025
-   preparation plus measurable idempotent reruns. Validate all four NeuroprobeV2
-   regimes; run full BYD preparation when resources permit. Treat fresh-data
+   identical immutable inputs. Packaging and namespace migration are complete;
+   clean-environment installation and the Logistic run/compare gate remain.
+4. **Tooling complete; execution pending:** Reduce the committed baseline using
+   retained/removed manifests and tests, then add the remaining parity matrix,
+   command builder, comparator and reports. The tool is intentionally not an
+   experiment runner, and no candidate report is a committed acceptance result.
+5. **Complete:** Trace source paper notebooks to YAMLs/original outputs and add
+   canonical launch mappings without requiring notebook execution; retain the
+   documented Figure 4b and Appendix 6 gaps.
+6. **Partial:** All `--list` and single-recording prepare/load/idempotency gates
+   pass, and full PIPPI preparation plus its full idempotent rerun pass. Full
+   Neuroprobe2025 preparation and all four NeuroprobeV2 regime checks remain;
+   full BYD preparation remains optional when resources permit. Treat fresh-data
    reproduction separately from evaluation-code parity.
-7. From a fresh clone and built iMINDBench/TorchBrain artifacts—not editable
+7. **Pending:** From a fresh clone and built iMINDBench/TorchBrain artifacts—not editable
    installs—validate in `imindbench` with public dependencies and no private
    absolute paths, including one GPU case, lint/tests, two simplification/bug-risk
    reviews, and the documented smoke workflow.
+
+### GPU handoff and push pause
+
+After the clean CPU gates and at least one runnable parity comparison are
+reviewed, prepare a concise GPU handoff containing the exact iMINDBench and
+TorchBrain SHAs, environment/export and CUDA diagnostics, the runnable
+checkpoint-free BYD MLP manifest case (unless the user selects another bounded
+case), caller-owned data and checkpoint/resource mapping hashes, generated command, fresh
+output/report roots, and expected result/report files. Do not launch an unreviewed
+broad experiment matrix as the acceptance gate.
+
+Before pausing, commit every coherent CPU phase and, under the user's standing
+authorization for this GPU handoff, push both feature branches so another agent
+or machine can resume from the recorded SHAs. Do not merge branches or publish
+release artifacts. If credentials prevent the push, record the exact
+local SHAs, remotes, branch names, failed authentication method, and push commands
+in the handoff rather than losing or rewriting local history. Then pause after
+handing off the single GPU case. A metric/config `PASS` alone is not release
+acceptance because the current comparator does not verify execution provenance.

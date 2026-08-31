@@ -18,7 +18,7 @@ The canonical environment is Python 3.10 in the root
 ```bash
 conda env create -f environment.yml
 conda activate imindbench
-python -m pip install "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c"
+python -m pip install "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@492f94a594e81d30ef38db32d8be145627421b0d"
 python -m pip install -e .
 python -m pip check
 imindbench --help

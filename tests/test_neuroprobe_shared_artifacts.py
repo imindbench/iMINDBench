@@ -159,6 +159,9 @@ def test_manifest_and_imported_source_match_pinned_commit():
     source = smoke.validate_torch_brain_source(manifest["torch_brain_commit"])
 
     assert source["commit"] == manifest["torch_brain_commit"]
+    assert manifest["datasets"]["neuroprobe2025"]["recording_id"] == (
+        "sub_1_trial001"
+    )
 
 
 def test_imported_source_rejects_wrong_commit():
@@ -171,7 +174,15 @@ def test_imported_source_rejects_wrong_commit():
     [
         {"torch_brain_commit": "not-a-commit"},
         {"pipelines": []},
-        {"datasets": {"unsafe": {"class": "Dataset", "dirname": "../escape"}}},
+        {
+            "datasets": {
+                "unsafe": {
+                    "class": "Dataset",
+                    "dirname": "../escape",
+                    "recording_id": "recording",
+                }
+            }
+        },
     ],
 )
 def test_manifest_validation_rejects_invalid_contract(tmp_path, mutation):

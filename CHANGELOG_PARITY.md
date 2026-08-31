@@ -200,3 +200,33 @@ corresponding change.
 - Evidence/report ID: link/path checks, Hydra composition, CLI/parity help checks, and post-cleanup model/config inventory review.
 - Reviewer/disposition: two documentation review passes plus an independent operational review; all content passed except that the pinned TorchBrain commit is pending publication.
 - Follow-up or user review needed: push TorchBrain commit `c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c` before treating its VCS install command as publicly runnable.
+
+### 2026-08-30 — Validate the fresh application environment
+
+- Change ID/commit subject: `fix: make fresh environment installation runnable`
+- Files changed: `environment.yml`, `pyproject.toml`, `imindbench/conf/__init__.py`, `tests/test_imindbench_pipelines/test_imindbench_run_eval.py`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`
+- Classification: packaging/test/docs
+- Reason: fresh installation exposed mixed-channel solver delay, an incorrect direct-dependency project name, and a non-importable Hydra config module.
+- Behavioral effect: Conda resolution is restricted to conda-forge, the pinned warmup repository uses its published `warmup-scheduler` name, and installed CLI help can import packaged configs from an unrelated working directory.
+- Smoke cases affected: fresh environment creation, editable installation, `pip check`, installed help, and the full CPU test suite.
+- Before: full environment solving stalled; pip rejected the warmup dependency metadata; installed help failed with `MissingConfigException`.
+- After: a fresh Python 3.10 environment installs TorchBrain and iMINDBench, `pip check` passes, imports resolve to the intended checkouts, and installed help succeeds from `/tmp`.
+- Metric/config deltas: none.
+- Evidence/report ID: PyTorch `2.9.1+cu128`; `torch.cuda.is_available() == False`; full fresh-environment suite with writable XDG cache (80 passed).
+- Reviewer/disposition: boundary failures reproduced and fixed directly; packaging/config import and unrelated-CWD behavior rechecked.
+- Follow-up or user review needed: verify the full one-command `conda env create -f environment.yml` on a clean machine; this machine used a minimal Conda bootstrap followed by the same pinned pip dependency installation after the original full solve stalled.
+
+### 2026-08-31 — Run public Brainsets preparation smoke gates
+
+- Change ID/commit subject: `test: record prepared-data smoke identities`
+- Files changed: `config/brainsets_smoke_manifest.json`, `scripts/validate_brainsets_smoke.py`, `tests/test_neuroprobe_shared_artifacts.py`, `imindbench/README.md`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`
+- Classification: test/docs
+- Reason: freeze the manifest IDs selected by real public preparation and update the dependency pin after fixing PIPPI's isolated import boundary.
+- Behavioral effect: the smoke validator defaults to the checked-in recording for each dataset while retaining `--recording-id` overrides; evaluation algorithms are unchanged.
+- Smoke cases affected: Neuroprobe2025/V2 `sub_1_trial001`, BYD `sub-CS48_ses-P48CSR1`, and PIPPI `sub-01_ses-iemu_task-film_acq-clinical_run-1`.
+- Before: selected IDs were interactive and the PIPPI isolated pipeline failed before manifest discovery because a pure helper import triggered the Torch-dependent dataset package.
+- After: all three `--list` gates pass; Neuroprobe and BYD single-recording preparation/load/idempotent reruns pass; all 16 PIPPI recordings prepare, load, and survive a full idempotent rerun.
+- Metric/config deltas: none.
+- Evidence/report ID: processed Neuroprobe SHA256 `a58777ed3b7191c239c764657177dd58eec794a87d9b00f2d8ca032a7519c19b`; BYD `9bd6c48eb7375dd799c8173c0f8499c54cafb640a62ee0f85eebb105fa37bae9`; selected PIPPI `f76e220facc682a0dcb45806cf6656d3d40b24075718e9f37b764d291ad2c6a1`; fresh suite 80 passed.
+- Reviewer/disposition: PIPPI fix had two implementation passes and an independent wheel/API/isolation review; real preparation retry passed.
+- Follow-up or user review needed: full Neuroprobe2025 preparation and cross-recording NeuroprobeV2 regime gates remain; TorchBrain commit `492f94a594e81d30ef38db32d8be145627421b0d` must be pushed before its public VCS pin resolves.

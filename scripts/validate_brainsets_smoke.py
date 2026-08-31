@@ -47,8 +47,14 @@ def _load_manifest(path: Path) -> dict[str, Any]:
     for dataset_id, spec in datasets.items():
         if not isinstance(dataset_id, str) or not dataset_id:
             raise ValueError("dataset ids must be non-empty strings")
-        if not isinstance(spec, dict) or set(spec) != {"class", "dirname"}:
-            raise ValueError(f"dataset '{dataset_id}' must declare class and dirname")
+        if not isinstance(spec, dict) or set(spec) != {
+            "class",
+            "dirname",
+            "recording_id",
+        }:
+            raise ValueError(
+                f"dataset '{dataset_id}' must declare class, dirname, and recording_id"
+            )
         if any(not isinstance(spec[key], str) or not spec[key] for key in spec):
             raise ValueError(f"dataset '{dataset_id}' values must be non-empty strings")
         dirname = Path(spec["dirname"])
@@ -194,24 +200,24 @@ def main() -> int:
         spec = manifest["datasets"][args.dataset]
     except KeyError as exc:
         raise SystemExit(f"unknown dataset id: {args.dataset}") from exc
+    recording_id = args.recording_id or spec["recording_id"]
     before = inventory(
         args.root,
         spec["dirname"],
-        hash_recording_id=args.recording_id,
+        hash_recording_id=recording_id,
         full_hash=args.full_hash,
     )
     result: dict[str, Any] = {"source": source, "inventory": before}
-    if args.recording_id:
-        result["loader"] = validate_loader(args.root, spec, args.recording_id)
-        after = inventory(
-            args.root,
-            spec["dirname"],
-            hash_recording_id=args.recording_id,
-            full_hash=args.full_hash,
-        )
-        if before != after:
-            raise RuntimeError("loader smoke changed prepared artifacts")
-        result["idempotent"] = True
+    result["loader"] = validate_loader(args.root, spec, recording_id)
+    after = inventory(
+        args.root,
+        spec["dirname"],
+        hash_recording_id=recording_id,
+        full_hash=args.full_hash,
+    )
+    if before != after:
+        raise RuntimeError("loader smoke changed prepared artifacts")
+    result["idempotent"] = True
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 

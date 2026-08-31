@@ -1,3 +1,4 @@
+import importlib
 import os
 import sys
 from types import SimpleNamespace
@@ -8,6 +9,12 @@ from omegaconf import OmegaConf
 os.environ.setdefault("ROOT_DIR_BRAINTREEBANK", "/tmp")
 
 import imindbench.run_eval as run_eval_module
+
+
+def test_hydra_config_tree_is_an_importable_package():
+    config_package = importlib.import_module("imindbench.conf")
+
+    assert config_package.__file__ is not None
 
 
 def test_cli_composes_required_groups_for_bare_help(monkeypatch):

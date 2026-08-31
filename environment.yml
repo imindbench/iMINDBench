@@ -1,7 +1,7 @@
 name: imindbench
 channels:
   - conda-forge
-  - defaults
+  - nodefaults
 
 # Install torch_brain-public separately, without its dev extra:
 #   python -m pip install -e /path/to/torch_brain-public
@@ -26,6 +26,6 @@ dependencies:
       - torch==2.9.1
       - xformers==0.0.33.post2
       - mup==1.0.0
-      - pytorch-gradual-warmup-lr@git+https://github.com/ildoonet/pytorch-gradual-warmup-lr.git@7021d63a49106e22c79b40564a7d39930e7b0f53
+      - warmup-scheduler@git+https://github.com/ildoonet/pytorch-gradual-warmup-lr.git@7021d63a49106e22c79b40564a7d39930e7b0f53
 
 # Optional: install wandb only when remote experiment logging is enabled.
