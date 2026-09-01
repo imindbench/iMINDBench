@@ -380,6 +380,52 @@ are `NOT-COMPARABLE` because the historical results do not establish exact
 checkpoint hashes; a checkable identity, config, fold, metric, or supplied known
 checkpoint mismatch is still `FAIL`.
 
+### Deterministic HTNet GPU parity case
+
+Use one HTNet run from the Figure 4 preprocessing-baseline family as the bounded
+GPU acceptance case instead of using BYD MLP again. The source figure notebook is
+`plot_fig04_preprocessing_baselines.ipynb`; it reads this exact output family from
+`09_neurips/rebuttal_preprocessor_baselines`. The selected unit is deliberately
+small and reuses the fully validated Neuroprobe artifacts:
+
+- case ID to add: `neuroprobev2_htnet500_hpf_global_onset_sub1_sess1`;
+- dataset/regime/task: `neuroprobev2`, `within-session`, binary `onset`;
+- target: subject 1, session 1, folds 0 and 1, seed 42;
+- model: `htnet_500Hz`;
+- preprocessor:
+  `laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz`;
+- immutable source result, relative to the caller's read-only `09_neurips` root:
+  `rebuttal_preprocessor_baselines/neuroprobev2_original/htnet_500Hz_laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz/within-session/onset/sub1_sess1/population_btbank1_1_onset.json`;
+- source-result SHA256:
+  `7166736abeeb89bd23b3eef552d53abcc3d93f4c891fdc1f4e7bbeb167e1b2b3`;
+- preprocessor YAML SHA256:
+  `de34d0d5b14b47ce29367bc626d01a7c5feefcaae72035f19d80a330c326a844`;
+- historical launcher SHA256:
+  `2cbe3a2b1c19434539797e21136ac4faa6d9e1503b17ae29565ba3aac2c188e0`;
+- expected fold test ROC-AUC: fold 0 `0.9607129841732611`, fold 1
+  `0.8639434089962517`.
+
+The historical launcher `run_htnet_500hz_preprocessor_reruns.sh` explicitly set
+`+model.deterministic=true`, `runtime.seed=42`, `runner.num_workers=0`, and four
+preprocessing/BLAS threads. `TorchRunner` then enabled deterministic cuDNN and
+`torch.use_deterministic_algorithms(True)`. Reproduce those settings, including
+`model.device=cuda:<index>`, but write to a new output/cache root. Do not run the
+launcher matrix. The result JSON does not serialize the deterministic override,
+so freeze the launcher hash and resolved Hydra config with the new case evidence.
+
+Before launching, extend `artifacts/parity_reference/manifest.json` with this one
+case, create its reduced immutable reference record, and extend parity-tool tests.
+Confirm the copied iMINDBench model YAML differs from the historical YAML only in
+its comment (`neuroprobe_eval` renamed to `imindbench`); compare semantic config
+content rather than treating that comment-only file hash change as behavior.
+Build the command through `scripts/parity_tools.py`, capture Git/import, H5,
+environment, CUDA/GPU, command and resolved-config fingerprints, then run and
+compare both folds. Apply the existing `1e-9` metric tolerance first because the
+run was deterministic; do not widen tolerance after seeing results. If exact
+metric parity fails but an April-checkout HTNet run and current iMINDBench run
+match on the same machine, classify migration parity as `PASS` and the historical
+record as provenance-incomplete rather than changing the model or preprocessor.
+
 ```bash
 python scripts/parity_tools.py --manifest artifacts/parity_reference/manifest.json build-commands --case neuroprobev2_logistic_multistft_onset_sub1_sess1 --data-root /path/to/processed --output-root /path/to/fresh-run-root --checkpoint-map checkpoint-map.json --resource-map resource-map.json
 python scripts/parity_tools.py --manifest artifacts/parity_reference/manifest.json compare --case neuroprobev2_logistic_multistft_onset_sub1_sess1 --candidate-map candidate-map.json --checkpoint-map checkpoint-map.json --resource-map resource-map.json --report-dir /path/to/fresh-report-root
@@ -526,8 +572,8 @@ historical-rendering gap in the provenance manifest and change log.
 After the clean CPU gates and at least one runnable parity comparison are
 reviewed, prepare a concise GPU handoff containing the exact iMINDBench and
 TorchBrain SHAs, environment/export and CUDA diagnostics, the runnable
-checkpoint-free BYD MLP manifest case (unless the user selects another bounded
-case), caller-owned data and checkpoint/resource mapping hashes, generated command, fresh
+deterministic HTNet case above (replacing the earlier BYD MLP default),
+caller-owned data and checkpoint/resource mapping hashes, generated command, fresh
 output/report roots, and expected result/report files. Do not launch an unreviewed
 broad experiment matrix as the acceptance gate.
 
