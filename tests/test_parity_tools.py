@@ -63,6 +63,32 @@ def _multi_stft_preprocess(sampling_rate: int) -> dict[str, object]:
     }
 
 
+def _htnet_preprocess() -> dict[str, object]:
+    return {
+        "name": "laplacian_wav_long_context_15s",
+        "chain": [
+            {
+                "name": "context_window",
+                "context_window_sec": 15.0,
+                "sampling_rate": 2048,
+            },
+            {
+                "name": "time_domain_filter",
+                "sampling_rate": 2048,
+                "high_gamma": False,
+                "notch_q": 30,
+                "high_pass_hz": 0.5,
+                "high_pass_order": 4,
+                "high_pass_zero_phase": True,
+            },
+            {"name": "crop_to_target_window"},
+            {"name": "laplacian_rereference", "remove_non_laplacian": True},
+            {"name": "downsample", "source_rate": 2048, "target_rate": 500},
+            {"name": "standardize", "mode": "global_robust_scalar"},
+        ],
+    }
+
+
 def _candidate(manifest: dict[str, object], case_id: str) -> dict[str, object]:
     record = parity_tools.load_reference_record(manifest, case_id)
     identity = record["identity"]
@@ -89,6 +115,12 @@ def _candidate(manifest: dict[str, object], case_id: str) -> dict[str, object]:
             "model_name": identity["model_name"],
         },
     }
+
+
+def _htnet_candidate(manifest: dict[str, object], case_id: str) -> dict[str, object]:
+    candidate = _candidate(manifest, case_id)
+    candidate["config"]["preprocess"] = _htnet_preprocess()
+    return candidate
 
 
 @pytest.fixture
@@ -143,6 +175,35 @@ def test_checkpoint_case_requires_caller_mapping(tmp_path, manifest):
             checkpoint_map={},
             resource_map={},
         )
+
+
+def test_htnet_case_builds_deterministic_gpu_command_and_compares(tmp_path, manifest):
+    case_id = "neuroprobev2_htnet500_hpf_global_onset_sub1_sess1"
+    data_root = tmp_path / "data"
+    data_root.mkdir()
+    command = parity_tools.build_case_command(
+        manifest,
+        case_id,
+        data_root=data_root,
+        output_root=tmp_path / "output",
+        checkpoint_map={},
+        resource_map={},
+        device="cuda:0",
+    )
+    assert "model=htnet_500Hz" in command
+    assert (
+        "preprocessor=laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz"
+        in command
+    )
+    assert "++model.deterministic=true" in command
+    assert "model.device=cuda:0" in command
+
+    candidate_path = tmp_path / "candidate.json"
+    _write_json(candidate_path, _htnet_candidate(manifest, case_id))
+    report = parity_tools.compare_case(
+        manifest, case_id, candidate_path, checkpoint_map={}
+    )
+    assert report["status"] == "PASS"
 
 
 def test_compare_reports_pass_fail_and_missing(tmp_path, manifest):
@@ -268,9 +329,9 @@ def test_reference_rejects_tampered_hash_and_path_escape(manifest):
         parity_tools.load_reference_record(tampered, case_id)
 
     escaped = copy.deepcopy(manifest)
-    escaped["cases"][case_id][
-        "reference_record_uri"
-    ] = "imindbench://artifacts/parity_reference/README.md"
+    escaped["cases"][case_id]["reference_record_uri"] = (
+        "imindbench://artifacts/parity_reference/README.md"
+    )
     with pytest.raises(ValueError, match="escapes"):
         parity_tools.load_reference_record(escaped, case_id)
 

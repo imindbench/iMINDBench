@@ -257,3 +257,15 @@ corresponding change.
 - Evidence/report ID: local fresh-output comparator reports under the validation run root; generated run data and reports remain untracked.
 - Reviewer/disposition: flag as an unresolved provenance/runtime-data drift candidate. Do not tune or alter the copied implementation until the historical environment and prepared-H5 provenance can be established.
 - Follow-up or user review needed: compare historical dependency/data fingerprints where available; otherwise retain the failure transparently as a known provenance gap.
+
+### 2026-09-01 — Freeze deterministic HTNet GPU parity case
+
+- Change ID/commit subject: `test: add deterministic HTNet parity case`
+- Files changed: `artifacts/parity_reference/manifest.json`, `artifacts/parity_reference/cases/neuroprobev2_htnet500_hpf_global_onset_sub1_sess1.json`, `artifacts/parity_reference/README.md`, `tests/test_parity_tools.py`.
+- Classification: test/docs
+- Reason: provide the GPU machine with one checkpoint-free neural-network case used by the Figure 4 preprocessing comparison.
+- Behavioral effect: adds command construction and metric/config-record comparison only; no evaluation implementation changes.
+- Smoke case affected: NeuroprobeV2 within-session binary onset, subject 1/session 1, folds 0 and 1, deterministic HTNet 500 Hz with the 15-second-context HPF/global-robust preprocessor.
+- Evidence/report ID: source result SHA256 `7166736abeeb89bd23b3eef552d53abcc3d93f4c891fdc1f4e7bbeb167e1b2b3`; reduced reference SHA256 `9fd1f0ae8d2f1940b0a7b2ff6ba11d22fb72978623a6fb18321e9dc88acc319a`; historical launcher SHA256 `2cbe3a2b1c19434539797e21136ac4faa6d9e1503b17ae29565ba3aac2c188e0`.
+- Reviewer/disposition: source identity, canonical config/preprocessor hashes, fold metrics, deterministic overrides, generated command, and Hydra composition verified; parity-tool focused tests pass.
+- Follow-up or user review needed: run the generated command on the GPU machine with full execution fingerprints and compare into a fresh report directory.
