@@ -236,6 +236,9 @@ def test_artifact_source_rejects_mismatched_commit_and_editable_install():
         "direct_url": direct_url,
     }
 
+    source = smoke._validate_artifact_source(version="0.2.1.dev11+ge39f48ce0", **kwargs)
+    assert source["artifact_sha256"] == "a" * 64
+
     with pytest.raises(RuntimeError, match="commit mismatch"):
         smoke._validate_artifact_source(version="0.2.1.dev11+g0000000", **kwargs)
     with pytest.raises(RuntimeError, match="must not be editable"):
@@ -243,7 +246,6 @@ def test_artifact_source_rejects_mismatched_commit_and_editable_install():
             version="0.2.1.dev11+ge39f48ce0",
             **{**kwargs, "direct_url": {"dir_info": {"editable": True}}},
         )
-
     with pytest.raises(RuntimeError, match="does not match installed distribution"):
         smoke._validate_artifact_source(
             version="0.2.1.dev11+ge39f48ce0",
@@ -252,6 +254,38 @@ def test_artifact_source_rejects_mismatched_commit_and_editable_install():
                 "distribution_module_path": Path("/shadow/torch_brain/__init__.py"),
             },
         )
+
+
+def test_distribution_record_validation_detects_file_drift(tmp_path):
+    package_file = tmp_path / "torch_brain" / "module.py"
+    package_file.parent.mkdir()
+    package_file.write_text("value = 1\n", encoding="utf-8")
+    digest = (
+        smoke.base64.urlsafe_b64encode(
+            smoke.hashlib.sha256(package_file.read_bytes()).digest()
+        )
+        .rstrip(b"=")
+        .decode("ascii")
+    )
+    item = SimpleNamespace(
+        parts=("torch_brain", "module.py"),
+        hash=SimpleNamespace(mode="sha256", value=digest),
+    )
+    distribution = SimpleNamespace(
+        files=[item], locate_file=lambda selected: package_file
+    )
+
+    smoke._validate_distribution_files(distribution)
+    package_file.write_text("value = 2\n", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="file hash mismatch"):
+        smoke._validate_distribution_files(distribution)
+    package_file.unlink()
+    with pytest.raises(RuntimeError, match="file is missing"):
+        smoke._validate_distribution_files(distribution)
+    package_file.write_text("value = 1\n", encoding="utf-8")
+    item.hash.mode = "sha512"
+    with pytest.raises(RuntimeError, match="unsupported RECORD hash"):
+        smoke._validate_distribution_files(distribution)
 
 
 def test_neuroprobe_v2_regime_validator_opens_all_public_selections(monkeypatch):

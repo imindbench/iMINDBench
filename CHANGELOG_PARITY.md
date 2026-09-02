@@ -198,8 +198,8 @@ corresponding change.
 - After: commands use the canonical `imindbench` environment/CLI, merged public Brainsets API, caller-owned paths, and explicit parity limitations.
 - Metric/config deltas: none.
 - Evidence/report ID: link/path checks, Hydra composition, CLI/parity help checks, and post-cleanup model/config inventory review.
-- Reviewer/disposition: two documentation review passes plus an independent operational review; all content passed except that the pinned TorchBrain commit is pending publication.
-- Follow-up or user review needed: push TorchBrain commit `c9fe75a3a0fa1eaec29314248cf3e0ae0e18e05c` before treating its VCS install command as publicly runnable.
+- Reviewer/disposition: two documentation review passes plus an independent operational review; the dependency publication was pending at this phase and was subsequently completed.
+- Follow-up or user review needed: none; the final reviewed TorchBrain commit is public and artifact-validated below.
 
 ### 2026-08-30 — Validate the fresh application environment
 
@@ -280,8 +280,8 @@ corresponding change.
 - Smoke case affected: NeuroprobeV2 within-session binary onset, subject 1/session 1, folds 0 and 1, MLP with `laplacian_multi_stft_2048Hz`.
 - Results: every train/validation/test accuracy and ROC-AUC metric matched exactly at `1e-9` after restoring the historical profile of four persistent pinned workers, prefetch factor two, and six preprocessing threads.
 - Evidence/report ID: historical result SHA256 `2abf4d1873bf4b703ce02fbf3e1ba565afbdb23b96ba87cb657f02e7e609fbb7`; candidate SHA256 `003182f61a09aee2bbc0ab7820c6c1cf02e75e6902085a81184c1c9cd3d31bd4`; resolved-config SHA256 `82055c8c6dd2c453f9054c6a67bfa5f0ab1ffe0175efd607069cde741283827d`; run-log SHA256 `65ef53eddc64e014d29a2ac82b2674689d25f4de8e678f57c91682b85e4ede43`; fresh comparator status `PASS`.
-- Reviewer/disposition: promote this MLP case to completed development GPU parity evidence; retain deterministic HTNet as an optional runnable reference and keep built-artifact release acceptance pending.
-- Follow-up or user review needed: rerun the bounded acceptance command from non-editable, freshly built iMINDBench and TorchBrain artifacts before release.
+- Reviewer/disposition: promote this MLP case to completed development GPU parity evidence; retain deterministic HTNet as an optional runnable reference. Built-artifact release acceptance was pending at this phase and is completed in the entry below.
+- Follow-up or user review needed: completed by the later non-editable built-artifact reproduction.
 
 ### 2026-09-02 — Remove the final private TorchBrain preparation fallback
 
@@ -300,7 +300,20 @@ corresponding change.
 - Files changed: `config/brainsets_smoke_manifest.json`, `scripts/validate_brainsets_smoke.py`, `tests/test_neuroprobe_shared_artifacts.py`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`.
 - Classification: runtime/test/docs
 - Reason: fresh artifact testing exposed that the smoke validator recognized clean Git checkouts and VCS installs but not a reviewed wheel installation.
-- Behavioral effect: smoke-manifest schema 2 pins the TorchBrain wheel SHA256. Validation accepts either the exact clean source checkout or the pinned non-editable wheel, binds distribution metadata to the imported module, rejects dirty SCM versions/shadow imports, and verifies installed package files against wheel `RECORD` hashes.
-- Evidence/report ID: TorchBrain wheel SHA256 `b2c318141f23bce4ff2749fd5e9000fd679760d735c02af9e8cc5557a140172d`; 20 focused source/artifact tests and 90 full iMINDBench tests pass before artifact rebuild.
+- Behavioral effect: smoke-manifest schema 2 pins the TorchBrain wheel SHA256. Validation accepts either the exact clean source checkout or the pinned non-editable wheel, binds distribution metadata to the imported module, rejects dirty SCM versions/shadow imports, and verifies installed package files against installed `RECORD` hashes.
+- Evidence/report ID: TorchBrain wheel SHA256 `b2c318141f23bce4ff2749fd5e9000fd679760d735c02af9e8cc5557a140172d`; 21 focused source/artifact tests plus the full iMINDBench suite pass.
 - Reviewer/disposition: two review/fix passes closed unchecked-hash, nested-environment, untracked-file, shadow-import, and installed-file-integrity gaps.
-- Follow-up or user review needed: rebuild iMINDBench from this commit and repeat the unrelated-directory installed-wheel suite.
+- Follow-up or user review needed: none; the unrelated-directory installed-wheel suite and loader workflow passed.
+
+### 2026-09-02 — Reproduce MLP parity from release artifacts
+
+- Change ID/commit subject: `test: validate built release artifacts`
+- Files changed: `tests/test_neuroprobe_shared_artifacts.py`, `artifacts/parity_reference/README.md`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`.
+- Classification: test/docs
+- Reason: close the release migration plan's non-editable built-artifact acceptance gate using clean clones of the requested iMINDBench and TorchBrain-public repositories.
+- Behavioral effect: no evaluation or preparation behavior changed; additional tests cover legacy archive metadata and installed-file drift detection.
+- Smoke cases affected: all four migrated public loaders and the NeuroprobeV2 MLP/multi-STFT onset GPU case.
+- Results: a disposable environment installed fresh sdist-derived wheels with no editable packages, passed `pip check`, import/CLI/resource validation, unchanged-inventory loader smokes, and the full iMINDBench suite. The CUDA MLP run again matched every historical metric for both folds at `1e-9`.
+- Evidence/report ID: source commits iMINDBench `302b66073a201823639700b284579db9ba7390ff` and TorchBrain `e39f48ce0ec8c8f59be2507dca8ae172cce79d28`; iMINDBench sdist/wheel SHA256 `72226acaf88371d31092b44e825008d9e00e1a75a620df4eefc49bec735978dd` / `9fae43948f412cb19dc9124b86d9b6612f4a9c825b1789cb86d5e271cb99d5bb`; TorchBrain sdist/wheel SHA256 `b24920bc6a2bedb8b206270bd7fd7da70e6e3eb92440d63c894e2b9aa10d7fbf` / `b2c318141f23bce4ff2749fd5e9000fd679760d735c02af9e8cc5557a140172d`; candidate SHA256 `40e0f03ecc67e9ef411cb8a46969b750781fa1325bd056ba61bfdf2cdf4f69f6`; comparator report SHA256 `51b38dad9eb67568ebbdb4c84b5c2e03b443a0ef9eed2ec2612fc165d00bd935`, status `PASS`.
+- Reviewer/disposition: two independent simplification/bug-risk review cycles completed; no blocking artifact, source-identity, packaging, or parity finding remains.
+- Follow-up or user review needed: verify the full one-command Conda solve on a clean machine; this validation used a disposable clone of the established `imindbench` environment. Push the iMINDBench branch when repository SSH credentials are available.

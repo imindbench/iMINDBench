@@ -11,7 +11,7 @@ its `brainsets` CLI and `torch_brain.datasets` loaders.
 ## Current implementation status
 
 This plan is audited through iMINDBench commit
-`ea77564fc7ee284d96da94ceb01c5792b37d3bce` and the public TorchBrain dependency
+`302b66073a201823639700b284579db9ba7390ff` and the public TorchBrain dependency
 commit `e39f48ce0ec8c8f59be2507dca8ae172cce79d28`. Repository bootstrap, the filtered
 baseline import, source-test inventory, installable packaging, the `imindbench`
 namespace migration, paper-figure provenance, frozen reduced reference records,
@@ -28,7 +28,8 @@ CPU parity cases have run: Logistic passed strict record parity, while BYD MLP
 completed but failed metric parity and is recorded as a provenance/drift finding.
 The checkpoint-free NeuroprobeV2 MLP GPU case then matched every historical fold
 metric exactly on newly prepared public data after restoring the historical
-worker/thread profile. PopT and BaRISTA remain
+worker/thread profile. A second run from the final non-editable artifact stack
+reproduced the same exact result. PopT and BaRISTA remain
 `NOT-COMPARABLE` until the exact historical checkpoint hashes are established.
 
 ## 1. Validate the public Brainsets workflow
@@ -53,8 +54,8 @@ migration, install `torch_brain-public` editable as shown above. For the public
 release, the current reviewed source pin is
 `e39f48ce0ec8c8f59be2507dca8ae172cce79d28`; install that immutable Git commit (or
 a release artifact proven to contain it) and record the artifact hash. The
-reviewed commit is synchronized with its public feature branch; built-artifact
-validation remains pending.
+reviewed commit is synchronized with its public feature branch. Fresh
+sdist-derived wheel validation is complete, including the bounded GPU case.
 Do not install standalone `brainsets`: its CLI, pipelines, data structures and
 dataset loaders now come from `torch_brain-public`.
 
@@ -175,9 +176,10 @@ files, byte-identical H5s, no unexpected rewrites, and successful loader reopeni
 
 At public TorchBrain commit `e39f48c`, BYD and PIPPI resolve their packaged label
 resources when `--labels-dir` is omitted. The option remains an explicit override,
-not a normal preparation requirement. The remaining release gate is to verify the
-packaged labels and brain-area tables from built wheel and sdist artifacts and
-record their hashes in preparation provenance.
+not a normal preparation requirement. Both the fresh sdist and the sdist-derived
+wheel contain all 30 labels plus the brain-area table for each dataset; the
+installed-wheel loader smoke passed for all four migrated dataset classes without
+changing the prepared inventories.
 
 Expected intermediates are downloaded source assets under
 `raw/<brainset_id>/`, followed by processed recording H5 files under
@@ -419,7 +421,9 @@ claim. The preserved resolved config and run log verify the historical runtime
 profile, `cuda:0`, CUDA availability, and four visible GPUs. Raw-window identity
 was established by an earlier read-only migration-data audit, but Git/import,
 environment, H5, GPU model, driver, and standalone CUDA diagnostics were not
-captured in this run tree and remain part of the built-artifact gate.
+captured in this development run tree. The separate built-artifact reproduction
+below closes the release installation/source gate without retroactively expanding
+the comparator's claim.
 
 The checked-in `neuroprobev2_htnet500_hpf_global_onset_sub1_sess1` case remains
 a runnable deterministic reference from the Figure 4 preprocessing-baseline
@@ -551,7 +555,7 @@ historical-rendering gap in the provenance manifest and change log.
    imports/paths. Make one Logistic evaluation-code parity case pass against
    the frozen metrics/config record. Packaging, namespace migration, environment
    bootstrap, and the Logistic run/compare gate are complete. Built-artifact
-   installation remains part of step 7.
+   installation was subsequently completed in step 7.
 4. **Complete for tooling and selected executions:** Reduce the committed baseline using
    retained/removed manifests and tests, then add the remaining parity matrix,
    command builder, comparator and reports. Logistic and the NeuroprobeV2 MLP
@@ -567,10 +571,17 @@ historical-rendering gap in the provenance manifest and change log.
    and one fixed window matched byte-for-byte between both Neuroprobe views.
    Full BYD preparation remains optional when resources permit. Treat fresh-data
    reproduction separately from evaluation-code parity.
-7. **Pending:** From a fresh clone and built iMINDBench/TorchBrain artifacts—not editable
-   installs—validate in `imindbench` with public dependencies and no private
-   absolute paths, including one GPU case, lint/tests, two simplification/bug-risk
-   reviews, and the documented smoke workflow.
+7. **Complete for artifact acceptance:** Clean detached clones of iMINDBench and
+   TorchBrain-public produced fresh sdists and sdist-derived wheels. A disposable
+   non-editable environment had no editable packages, passed `pip check`, imported
+   both packages from site-packages, passed CLI help, the full iMINDBench suite,
+   packaged-resource inspection, all four read-only loader smokes, and the bounded
+   CUDA MLP run/comparison. TorchBrain passed its configured Ruff check/format and
+   226 focused migrated pipeline tests; changed iMINDBench files passed Ruff and
+   the full suite. Two simplification/bug-risk review cycles were completed. A
+   clean-machine one-command Conda solve remains an onboarding portability check
+   because this machine used a disposable clone of the validated `imindbench`
+   environment.
 
 ### GPU evidence and remaining delivery gate
 
@@ -579,9 +590,22 @@ exact metric/config-record parity under the historical paper profile. Preserve
 the caller-owned result, resolved config, log, mapping, and report artifacts; do not
 replace this bounded evidence with a broad experiment matrix.
 
-The remaining release gate is step 7: commit and push coherent phases, build
-fresh iMINDBench and TorchBrain artifacts, install them non-editably in a clean
-environment, verify packaged resources/import provenance, and rerun the bounded
-GPU acceptance from those artifacts. Do not merge branches or publish release
-artifacts as part of this validation. A metric/config `PASS` alone is not release
-acceptance because the comparator does not verify execution provenance.
+Step 7 reproduced the case from clean clones of
+`/home/geeling/Projects/ieeg_project/iMINDBench` at
+`302b66073a201823639700b284579db9ba7390ff` and
+`/home/geeling/Projects/ieeg_project/torch_brain-public` at
+`e39f48ce0ec8c8f59be2507dca8ae172cce79d28`. The
+non-editable iMINDBench and TorchBrain wheel SHA256 values were
+`9fae43948f412cb19dc9124b86d9b6612f4a9c825b1789cb86d5e271cb99d5bb` and
+`b2c318141f23bce4ff2749fd5e9000fd679760d735c02af9e8cc5557a140172d`.
+The artifact-installed CUDA run again matched both historical folds exactly;
+candidate result, resolved config, run log, and report SHA256 values were
+`40e0f03ecc67e9ef411cb8a46969b750781fa1325bd056ba61bfdf2cdf4f69f6`,
+`4f1819e7cc920ba6893bf40338d29289a9a6379d83052064df414ab920ddc280`,
+`18945b73872db4a6e0687546f607c03ea7adcad449896bee1ccd268b187258ef`,
+and `51b38dad9eb67568ebbdb4c84b5c2e03b443a0ef9eed2ec2612fc165d00bd935`.
+The comparator remains scoped to metric/config-record parity; the clean-clone,
+artifact, import, resource, loader, and test checks are the separate release
+execution evidence. Remaining delivery work is administrative: commit the final
+evidence updates and push iMINDBench. Do not merge branches or publish release
+artifacts as part of this validation.

@@ -7,7 +7,9 @@ identifiers, not local filesystem paths.
 Logistic, BYD MLP, NeuroprobeV2 MLP, and deterministic HTNet can pass
 metric/config-record comparison. The NeuroprobeV2 MLP case is the completed
 development GPU parity evidence and records the historical paper-run
-worker/thread profile; release acceptance from built artifacts remains pending.
+worker/thread profile. Release acceptance also passed from the pinned,
+non-editable built artifacts; the comparator's `PASS` remains limited to the
+metric/config record.
 HTNet remains a runnable, unexecuted reference from the Figure 4 preprocessing
 baseline family. PopT and BaRISTA are
 `NOT-COMPARABLE` only when every checkable identity, config hash, fold, and metric
