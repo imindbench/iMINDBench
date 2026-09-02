@@ -214,7 +214,7 @@ corresponding change.
 - Metric/config deltas: none.
 - Evidence/report ID: PyTorch `2.9.1+cu128`; `torch.cuda.is_available() == False`; full fresh-environment suite with writable XDG cache (80 passed).
 - Reviewer/disposition: boundary failures reproduced and fixed directly; packaging/config import and unrelated-CWD behavior rechecked.
-- Follow-up or user review needed: verify the full one-command `conda env create -f environment.yml` on a clean machine; this machine used a minimal Conda bootstrap followed by the same pinned pip dependency installation after the original full solve stalled.
+- Follow-up or user review needed: completed by the later minimal-Conda/full-pip one-command validation below.
 
 ### 2026-08-31 — Run public Brainsets preparation smoke gates
 
@@ -316,4 +316,15 @@ corresponding change.
 - Results: a disposable environment installed fresh sdist-derived wheels with no editable packages, passed `pip check`, import/CLI/resource validation, unchanged-inventory loader smokes, and the full iMINDBench suite. The CUDA MLP run again matched every historical metric for both folds at `1e-9`.
 - Evidence/report ID: source commits iMINDBench `302b66073a201823639700b284579db9ba7390ff` and TorchBrain `e39f48ce0ec8c8f59be2507dca8ae172cce79d28`; iMINDBench sdist/wheel SHA256 `72226acaf88371d31092b44e825008d9e00e1a75a620df4eefc49bec735978dd` / `9fae43948f412cb19dc9124b86d9b6612f4a9c825b1789cb86d5e271cb99d5bb`; TorchBrain sdist/wheel SHA256 `b24920bc6a2bedb8b206270bd7fd7da70e6e3eb92440d63c894e2b9aa10d7fbf` / `b2c318141f23bce4ff2749fd5e9000fd679760d735c02af9e8cc5557a140172d`; candidate SHA256 `40e0f03ecc67e9ef411cb8a46969b750781fa1325bd056ba61bfdf2cdf4f69f6`; comparator report SHA256 `51b38dad9eb67568ebbdb4c84b5c2e03b443a0ef9eed2ec2612fc165d00bd935`, status `PASS`.
 - Reviewer/disposition: two independent simplification/bug-risk review cycles completed; no blocking artifact, source-identity, packaging, or parity finding remains.
-- Follow-up or user review needed: verify the full one-command Conda solve on a clean machine; this validation used a disposable clone of the established `imindbench` environment. Push the iMINDBench branch when repository SSH credentials are available.
+- Follow-up or user review needed: the one-command environment gate is completed below. Push is intentionally deferred for this local-only continuation.
+
+### 2026-09-02 — Make clean environment creation practical
+
+- Change ID/commit subject: `fix: simplify release environment solve`
+- Files changed: `environment.yml`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`.
+- Classification: packaging/docs
+- Reason: both the default and explicit libmamba paths spent more than ten CPU-active minutes solving the broad Conda scientific matrix, although the validated environment already obtained those packages from PyPI.
+- Behavioral effect: Conda now owns only Python 3.10, pip, and setuptools; the existing bounded NumPy/SciPy/pandas/sklearn/h5py/MNE/Hydra constraints move unchanged into the pip subsection beside the exact PyTorch/xformers pins.
+- Results: `conda env create --prefix <fresh-prefix> --file environment.yml` completed; Conda resolution finished in under 30 seconds and the full cached installation completed in roughly two minutes. Installing the reviewed iMINDBench and TorchBrain wheels produced no editable packages, passed `pip check`, resolved both imports from site-packages, reported PyTorch `2.9.1+cu128`/CUDA `12.8`/xformers `0.0.33.post2`, passed CLI help, and passed all 91 tests.
+- Reviewer/disposition: two independent reviews agreed this is the smallest maintainable change and matches the established parity environment; exact Conda build pins were rejected as brittle and unnecessary.
+- Follow-up or user review needed: none for the local release-migration gate. A generated pip constraints/lock artifact may be added later if byte-level cross-date dependency resolution is required.

@@ -10,7 +10,7 @@ its `brainsets` CLI and `torch_brain.datasets` loaders.
 
 ## Current implementation status
 
-This plan is audited through iMINDBench commit
+The built-artifact execution was audited at iMINDBench commit
 `302b66073a201823639700b284579db9ba7390ff` and the public TorchBrain dependency
 commit `e39f48ce0ec8c8f59be2507dca8ae172cce79d28`. Repository bootstrap, the filtered
 baseline import, source-test inventory, installable packaging, the `imindbench`
@@ -36,9 +36,9 @@ reproduced the same exact result. PopT and BaRISTA remain
 
 Use a fresh Conda environment rather than either existing `tb_buildathon`
 environment. iMINDBench is a minimal release of `neuroprobe_eval`, whose current
-canonical setup is Conda because it owns a compiled scientific/PyTorch stack and
-GPU evaluation runtime. Retain its Python 3.10 contract and name the new canonical
-environment `imindbench`:
+canonical setup uses Conda for an isolated Python 3.10 prefix and pip for the
+compiled scientific/PyTorch GPU runtime. Retain the Python 3.10 contract and name
+the canonical environment `imindbench`:
 
 ```bash
 cd /home/geeling/Projects/ieeg_project/iMINDBench
@@ -67,11 +67,13 @@ classes/mixins, H5 serialization, intervals/time series, channel metadata, and
 pipeline utilities, so install the complete public package rather than copying
 selected TorchBrain modules.
 
-The `imindbench` Conda environment owns the evaluation runtime: Python 3.10,
-PyTorch 2.9.1 for the target release stack, NumPy/SciPy/pandas/h5py, scikit-learn,
-Hydra/OmegaConf, MNE, retained model dependencies, and provenance tooling. Do not
-retain Jupyter/plotting dependencies unless retained non-notebook code imports
-them.
+The `imindbench` environment owns the evaluation runtime: Python 3.10, PyTorch
+2.9.1 for the target release stack, NumPy/SciPy/pandas/h5py, scikit-learn,
+Hydra/OmegaConf, MNE, retained model dependencies, and provenance tooling. Conda
+bootstraps only Python, pip, and setuptools; pip installs the bounded scientific
+and CUDA wheel stack. This matches the validated parity environment and avoids an
+unbounded Conda solve over the compiled scientific matrix. Do not retain
+Jupyter/plotting dependencies unless retained non-notebook code imports them.
 Install `torch_brain-public` without `[dev]`; its development extra requests
 `torch~=2.0`, which must not replace the evaluation stack's parity-pinned PyTorch.
 The package installation supplies its declared runtime dependencies, including
@@ -191,9 +193,11 @@ versions, file inventories and validation results in the small report directory.
 After preparation, instantiate every public loader from `torch_brain.datasets`,
 exercise every supported regime and `train`/`val`/`test` split, and fetch real
 windows. Check shapes, timestamps, finite signal values, labels, split isolation,
-channel IDs/coordinates/areas and deterministic repeated loading. Then run one
-small Logistic evaluation per provider and require a valid `population_*.json`
-under `iMINDBench/artifacts/brainsets_smoke/eval/<provider>/`.
+channel IDs/coordinates/areas and deterministic repeated loading. Evaluation
+evidence is representative rather than one redundant Logistic run per provider:
+NeuroprobeV2 Logistic and MLP plus BYD MLP exercise the migrated evaluation path,
+while the loader/materialization gates cover every provider. Preserve the BYD
+metric drift transparently; do not tune it to manufacture a pass.
 
 NeuroprobeV2 intentionally has no separate preparation pipeline: it is a
 different recording/regime-selection view over the H5 files produced by
@@ -544,7 +548,7 @@ historical-rendering gap in the provenance manifest and change log.
 1. **Complete:** Bootstrap the iMINDBench repository/feature branch; scan and verify the fixed
    `torch_brain-main` source SHA above; make its filtered untouched baseline the
    branch's first commit, then commit the plan/changelog/provenance.
-2. **Partial:** Freeze licensed reference inputs/results and port the relevant
+2. **Complete with documented historical limitations:** Freeze licensed reference inputs/results and port the relevant
    source tests. The intended untouched imported-baseline smoke case was not run
    before simplification and is now an explicit historical evidence gap; do not
    recreate it by launching from a TorchBrain checkout. The reduced reference
@@ -578,12 +582,13 @@ historical-rendering gap in the provenance manifest and change log.
    packaged-resource inspection, all four read-only loader smokes, and the bounded
    CUDA MLP run/comparison. TorchBrain passed its configured Ruff check/format and
    226 focused migrated pipeline tests; changed iMINDBench files passed Ruff and
-   the full suite. Two simplification/bug-risk review cycles were completed. A
-   clean-machine one-command Conda solve remains an onboarding portability check
-   because this machine used a disposable clone of the validated `imindbench`
-   environment.
+   the full suite. Two simplification/bug-risk review cycles were completed. The
+   canonical one-command `conda env create` also completed in a new temporary
+   prefix after assigning the Python scientific/CUDA stack to pip; installing the
+   release wheels there passed `pip check`, non-editable import provenance, CLI
+   help, and all 91 iMINDBench tests.
 
-### GPU evidence and remaining delivery gate
+### GPU evidence and local delivery status
 
 The single-case GPU handoff has been executed with NeuroprobeV2 MLP and produced
 exact metric/config-record parity under the historical paper profile. Preserve
@@ -606,6 +611,6 @@ candidate result, resolved config, run log, and report SHA256 values were
 and `51b38dad9eb67568ebbdb4c84b5c2e03b443a0ef9eed2ec2612fc165d00bd935`.
 The comparator remains scoped to metric/config-record parity; the clean-clone,
 artifact, import, resource, loader, and test checks are the separate release
-execution evidence. Remaining delivery work is administrative: commit the final
-evidence updates and push iMINDBench. Do not merge branches or publish release
-artifacts as part of this validation.
+execution evidence. Local release-migration validation is complete. The feature
+branch remains local by request; no merge, push, or release publication is part
+of this validation.
