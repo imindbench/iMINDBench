@@ -206,6 +206,42 @@ def test_htnet_case_builds_deterministic_gpu_command_and_compares(tmp_path, mani
     assert report["status"] == "PASS"
 
 
+def test_mlp_gpu_case_builds_historical_profile_command_and_compares(
+    tmp_path, manifest
+):
+    case_id = "neuroprobev2_mlp_multistft_onset_sub1_sess1"
+    data_root = tmp_path / "data"
+    data_root.mkdir()
+    command = parity_tools.build_case_command(
+        manifest,
+        case_id,
+        data_root=data_root,
+        output_root=tmp_path / "output",
+        checkpoint_map={},
+        resource_map={},
+        device="cuda:0",
+    )
+    assert "model=mlp" in command
+    assert "preprocessor=laplacian_multi_stft_2048Hz" in command
+    assert "runner.num_workers=4" in command
+    assert "runner.pin_memory=true" in command
+    assert "runner.persistent_workers=true" in command
+    assert "runner.prefetch_factor=2" in command
+    assert "runtime.preprocess_torch_num_threads=6" in command
+    assert "model.device=cuda:0" in command
+
+    reference = parity_tools.load_reference_record(manifest, case_id)
+    assert reference["folds"][0]["test_roc_auc"] == 0.9687630154102458
+    assert reference["folds"][1]["test_roc_auc"] == 0.9028594856309872
+
+    candidate_path = tmp_path / "candidate.json"
+    _write_json(candidate_path, _candidate(manifest, case_id))
+    report = parity_tools.compare_case(
+        manifest, case_id, candidate_path, checkpoint_map={}
+    )
+    assert report["status"] == "PASS"
+
+
 def test_compare_reports_pass_fail_and_missing(tmp_path, manifest):
     case_id = "neuroprobev2_logistic_multistft_onset_sub1_sess1"
     candidate = _candidate(manifest, case_id)

@@ -1,11 +1,14 @@
 # Frozen parity references
 
-`manifest.json` defines six paper-figure parity cases and hashes every reduced
+`manifest.json` defines seven paper-figure parity cases and hashes every reduced
 reference record in `cases/`. The `original-results://` URIs are stable source
 identifiers, not local filesystem paths.
 
-Logistic, MLP, and deterministic HTNet can pass metric/config-record comparison.
-HTNet is the bounded GPU-training case selected from the Figure 4 preprocessing
+Logistic, BYD MLP, NeuroprobeV2 MLP, and deterministic HTNet can pass
+metric/config-record comparison. The NeuroprobeV2 MLP case is the completed
+development GPU parity evidence and records the historical paper-run
+worker/thread profile; release acceptance from built artifacts remains pending.
+HTNet remains a runnable, unexecuted reference from the Figure 4 preprocessing
 baseline family. PopT and BaRISTA are
 `NOT-COMPARABLE` only when every checkable identity, config hash, fold, and metric
 matches but the historical checkpoint hash remains unknown. Any checkable

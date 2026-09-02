@@ -8,7 +8,9 @@ THIRD_PARTY.md	license metadata	distributed with the release
 artifacts/parity_reference/README.md	release documentation	public repository documentation
 artifacts/parity_reference/cases/byd_mlp_multistft_global_flow_sub41_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/neuroprobev2_barista_waveform_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
+artifacts/parity_reference/cases/neuroprobev2_htnet500_hpf_global_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/neuroprobev2_logistic_multistft_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
+artifacts/parity_reference/cases/neuroprobev2_mlp_multistft_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/neuroprobev2_popt_multistft_holdin_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/pippi_popt_multistft_speech_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/manifest.json	canonical parity reference	consumed by scripts/parity_tools.py
@@ -18,6 +20,7 @@ imindbench/.gitignore	repository metadata	controls public source selection
 imindbench/README.md	release documentation	public repository documentation
 imindbench/__init__.py	evaluation runtime	imported by the imindbench package
 imindbench/base_runner.py	evaluation runtime	imported by the imindbench package
+imindbench/conf/__init__.py	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/config.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/dataset/berezutskayapippi2022.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/dataset/berezutskayapippi2022_multisource_train.yaml	runtime configuration	composed by imindbench.run_eval

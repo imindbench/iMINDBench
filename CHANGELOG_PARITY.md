@@ -269,3 +269,27 @@ corresponding change.
 - Evidence/report ID: source result SHA256 `7166736abeeb89bd23b3eef552d53abcc3d93f4c891fdc1f4e7bbeb167e1b2b3`; reduced reference SHA256 `9fd1f0ae8d2f1940b0a7b2ff6ba11d22fb72978623a6fb18321e9dc88acc319a`; historical launcher SHA256 `2cbe3a2b1c19434539797e21136ac4faa6d9e1503b17ae29565ba3aac2c188e0`.
 - Reviewer/disposition: source identity, canonical config/preprocessor hashes, fold metrics, deterministic overrides, generated command, and Hydra composition verified; parity-tool focused tests pass.
 - Follow-up or user review needed: run the generated command on the GPU machine with full execution fingerprints and compare into a fresh report directory.
+
+### 2026-09-02 — Establish exact NeuroprobeV2 MLP GPU parity
+
+- Change ID/commit subject: `test: record NeuroprobeV2 MLP GPU parity`
+- Files changed: `artifacts/parity_reference/manifest.json`, `artifacts/parity_reference/cases/neuroprobev2_mlp_multistft_onset_sub1_sess1.json`, `artifacts/parity_reference/README.md`, `tests/test_parity_tools.py`, `provenance/AUDIT.md`, `provenance/consulted_artifacts.tsv`, `provenance/surface/retained.tsv`, `imindbench/README.md`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`.
+- Classification: test/docs
+- Reason: formalize the checkpoint-free MLP run that exactly reproduced the paper record on newly prepared public Neuroprobe data.
+- Behavioral effect: adds one manifest-built command and immutable comparison record; no evaluation implementation changed.
+- Smoke case affected: NeuroprobeV2 within-session binary onset, subject 1/session 1, folds 0 and 1, MLP with `laplacian_multi_stft_2048Hz`.
+- Results: every train/validation/test accuracy and ROC-AUC metric matched exactly at `1e-9` after restoring the historical profile of four persistent pinned workers, prefetch factor two, and six preprocessing threads.
+- Evidence/report ID: historical result SHA256 `2abf4d1873bf4b703ce02fbf3e1ba565afbdb23b96ba87cb657f02e7e609fbb7`; candidate SHA256 `003182f61a09aee2bbc0ab7820c6c1cf02e75e6902085a81184c1c9cd3d31bd4`; resolved-config SHA256 `82055c8c6dd2c453f9054c6a67bfa5f0ab1ffe0175efd607069cde741283827d`; run-log SHA256 `65ef53eddc64e014d29a2ac82b2674689d25f4de8e678f57c91682b85e4ede43`; fresh comparator status `PASS`.
+- Reviewer/disposition: promote this MLP case to completed development GPU parity evidence; retain deterministic HTNet as an optional runnable reference and keep built-artifact release acceptance pending.
+- Follow-up or user review needed: rerun the bounded acceptance command from non-editable, freshly built iMINDBench and TorchBrain artifacts before release.
+
+### 2026-09-02 — Remove the final private TorchBrain preparation fallback
+
+- Change ID/commit subject: `fix: remove private BYD label fallback` (`torch_brain` `e39f48ce0ec8c8f59be2507dca8ae172cce79d28`)
+- Files changed: TorchBrain BYD pipeline and portability tests; iMINDBench dependency pin, smoke manifest, onboarding, and release plan.
+- Classification: runtime/test/docs
+- Reason: the direct BYD processor retained a developer-specific label fallback even though the normal public pipeline already used packaged labels.
+- Behavioral effect: `process_file(..., labels_dir=None)` now resolves packaged labels through the canonical validator; explicit paths retain their prior behavior. Opt-in real-data tests use `BYD_CS41_RAW_DIR` rather than a private fixture path.
+- Evidence/report ID: 226 migrated dataset/pipeline tests passed with two expected real-data skips; full TorchBrain Ruff check and format check passed; tracked private-path scan is empty.
+- Reviewer/disposition: two review/fix passes found no behavioral or packaging regression; the public feature branch contains the immutable dependency commit.
+- Follow-up or user review needed: verify packaged resources and imports from fresh sdist-derived wheels.

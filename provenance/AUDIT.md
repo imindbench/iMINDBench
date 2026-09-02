@@ -23,6 +23,40 @@ BaRISTA-style script does not reproduce the exact `barista_jun9` output roots,
 preprocessor, or checkpoint mapping. This is a provenance gap, not evidence that
 BaRISTA should be dropped.
 
+## Runtime profiles represented in paper figures
+
+The paper notebooks combine results produced under two runtime profiles. These
+profiles belong to result families, not entire figures: a single notebook may
+read both historical and newer families. The resolved `.hydra/config.yaml` beside
+each result remains authoritative.
+
+- **Historical profile:** `runner.num_workers=4`, `runner.pin_memory=true`,
+  `runner.persistent_workers=true`, `runner.prefetch_factor=2`, and
+  `runtime.preprocess_torch_num_threads=6`. This profile covers the original
+  NeuroprobeV2, BYD, and Pippi flagship multi-STFT Logistic/MLP/CNN/PopT results;
+  NeuroprobeV2 half/quarter/eighth/sixteenth sample-efficiency results; the
+  original STFT sweep families used by Figure 4 and Appendix 1; `barista_jun9`;
+  and the older NeuroprobeV2 multisource family. These results feed the flagship
+  panels in Appendix 2 and Table 1, the sample-efficiency panels in Figure 3 and
+  Appendix 4, and parts of the task/coverage and preprocessing figures.
+- **Newer profile:** `runner.num_workers=0`, `runner.pin_memory=false`,
+  `runner.persistent_workers=false`, `runner.prefetch_factor=2`, and
+  `runtime.preprocess_torch_num_threads=4`. This profile covers `new_baselines`,
+  `rebuttal_preprocessor_baselines`, `rebuttal_holdin_multisource_exps`,
+  `diver_outputs_longcontext`, and the dataset-specific
+  `{dataset}_stft_{sampling_rate}` baseline roots. These results feed the newer
+  waveform/baseline panels in Appendix 1, Appendix 2, Figure 4, and Table 1, plus
+  the rebuttal hold-in/multisource panels used by Figure 3 and Appendix 5.
+
+The `kelesbyd2024_tercile` root is mostly historical. Its
+`logistic_laplacian_stft_1000Hz` and
+`logistic_laplacian_multi_stft_1000Hz_zscore` families use the newer profile;
+the other active YAML paths sampled from that root use the historical profile.
+Across the 102 unique result paths resolved from the 23 active visualization
+YAMLs, representative resolved configs were available for 101 paths: 57 used the
+historical profile and 44 used the newer profile. This is a path-level provenance
+inventory, not a weighting by the number of subject/task result files.
+
 ## Recommended parity subset
 
 The five selected cases are immutable candidates, not copied reference fixtures:
@@ -39,6 +73,13 @@ they cover all three datasets, retained classical/torch/checkpoint paths,
 language and movie-derived tasks, within/hold-in routing, and BaRISTA's released preprocessing. Before
 running them, translate the dirty scripts into one public, manifest-driven
 launcher and recover/freeze BaRISTA's exact checkpoint provenance.
+
+The later `neuroprobev2_mlp_multistft_onset_sub1_sess1` record supplements this
+original five-case provenance subset as the development GPU parity case. Its
+migrated run used the historical paper profile (four persistent workers, pinned
+memory, prefetch factor two, and six preprocessing threads) and matched every
+frozen fold metric exactly on newly prepared public data. The deterministic
+HTNet record remains a runnable but unexecuted optional reference.
 
 ## Gaps to carry forward
 

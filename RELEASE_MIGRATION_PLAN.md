@@ -10,9 +10,9 @@ its `brainsets` CLI and `torch_brain.datasets` loaders.
 
 ## Current implementation status
 
-This plan is audited against iMINDBench commit
-`056ca22c14e2726858b94c71d14f2290c1d8966d` and the public TorchBrain dependency
-commit `492f94a594e81d30ef38db32d8be145627421b0d`. Repository bootstrap, the filtered
+This plan is audited through iMINDBench commit
+`ea77564fc7ee284d96da94ceb01c5792b37d3bce` and the public TorchBrain dependency
+commit `e39f48ce0ec8c8f59be2507dca8ae172cce79d28`. Repository bootstrap, the filtered
 baseline import, source-test inventory, installable packaging, the `imindbench`
 namespace migration, paper-figure provenance, frozen reduced reference records,
 manifest-driven parity tooling, public Brainsets contract tests, retained-surface
@@ -26,7 +26,9 @@ Neuroprobe artifacts. One fixed one-second window was byte-identical through the
 Neuroprobe2025 and NeuroprobeV2 explicit-recording views. The two checkpoint-free
 CPU parity cases have run: Logistic passed strict record parity, while BYD MLP
 completed but failed metric parity and is recorded as a provenance/drift finding.
-No GPU experiment has run. The next gate is the GPU handoff below. PopT and BaRISTA remain
+The checkpoint-free NeuroprobeV2 MLP GPU case then matched every historical fold
+metric exactly on newly prepared public data after restoring the historical
+worker/thread profile. PopT and BaRISTA remain
 `NOT-COMPARABLE` until the exact historical checkpoint hashes are established.
 
 ## 1. Validate the public Brainsets workflow
@@ -49,10 +51,10 @@ Build `iMINDBench/environment.yml` by minimizing the existing
 reached by the retained runtime, parity scripts and provenance tooling. During
 migration, install `torch_brain-public` editable as shown above. For the public
 release, the current reviewed source pin is
-`492f94a594e81d30ef38db32d8be145627421b0d`; install that immutable Git commit (or
-a release artifact proven to contain it) and record the artifact hash. Until the
-user-authorized push gate is cleared, use the reviewed local checkout for
-development and treat the public immutable installation as blocked.
+`e39f48ce0ec8c8f59be2507dca8ae172cce79d28`; install that immutable Git commit (or
+a release artifact proven to contain it) and record the artifact hash. The
+reviewed commit is synchronized with its public feature branch; built-artifact
+validation remains pending.
 Do not install standalone `brainsets`: its CLI, pipelines, data structures and
 dataset loaders now come from `torch_brain-public`.
 
@@ -145,7 +147,7 @@ recording IDs into the smoke manifest rather than selecting them interactively o
 future runs.
 
 The current `config/brainsets_smoke_manifest.json` schema pins TorchBrain commit
-`492f94a`, the three preparation pipeline IDs, and four public dataset
+`e39f48c`, the three preparation pipeline IDs, and four public dataset
 class/directory/recording mappings (including NeuroprobeV2's shared directory).
 `scripts/validate_brainsets_smoke.py` is a CPU-only, read-only post-prepare
 checker: `--list-datasets` validates the source pin and lists mappings; `--root`
@@ -170,7 +172,7 @@ inventory, sizes, H5 SHA256s and mtimes plus stdout/stderr and the detected
 TorchBrain spec used by uv. After the second run require no duplicate/unexpected
 files, byte-identical H5s, no unexpected rewrites, and successful loader reopening.
 
-At public TorchBrain commit `492f94a`, BYD and PIPPI resolve their packaged label
+At public TorchBrain commit `e39f48c`, BYD and PIPPI resolve their packaged label
 resources when `--labels-dir` is omitted. The option remains an explicit override,
 not a normal preparation requirement. The remaining release gate is to verify the
 packaged labels and brain-area tables from built wheel and sdist artifacts and
@@ -372,63 +374,60 @@ JSON with `compare`. Both modes require caller-owned JSON checkpoint/resource
 mappings; command construction additionally requires a data root and fresh output
 root, while comparison requires a candidate map and fresh report directory.
 
-The five selected records are NeuroprobeV2 Logistic/multi-STFT onset, BYD
-MLP/multi-STFT global flow, PIPPI PopT/multi-STFT speech, NeuroprobeV2
-BaRISTA/waveform onset, and NeuroprobeV2 PopT/multi-STFT hold-in onset. Logistic
-and MLP are runnable metric/config-record cases. The two PopT cases and BaRISTA
+The manifest now contains the original five selected records—NeuroprobeV2
+Logistic/multi-STFT onset, BYD MLP/multi-STFT global flow, PIPPI
+PopT/multi-STFT speech, NeuroprobeV2 BaRISTA/waveform onset, and NeuroprobeV2
+PopT/multi-STFT hold-in onset—plus NeuroprobeV2 MLP/multi-STFT onset and HTNet
+500 Hz references. Logistic, both MLP cases, and HTNet are runnable
+metric/config-record cases. The two PopT cases and BaRISTA
 are `NOT-COMPARABLE` because the historical results do not establish exact
 checkpoint hashes; a checkable identity, config, fold, metric, or supplied known
 checkpoint mismatch is still `FAIL`.
 
-### Deterministic HTNet GPU parity case
+### GPU acceptance evidence
 
-Use one HTNet run from the Figure 4 preprocessing-baseline family as the bounded
-GPU acceptance case instead of using BYD MLP again. The source figure notebook is
-`plot_fig04_preprocessing_baselines.ipynb`; it reads this exact output family from
-`09_neurips/rebuttal_preprocessor_baselines`. The selected unit is deliberately
-small and reuses the fully validated Neuroprobe artifacts:
+The completed bounded GPU case is
+`neuroprobev2_mlp_multistft_onset_sub1_sess1`, used directly by the Figure 3 and
+Figure 4 YAMLs. It covers subject 1/session 1, folds 0 and 1, binary onset,
+`mlp`, and `laplacian_multi_stft_2048Hz`, with seed 42 on CUDA. The migrated run
+used newly prepared public Neuroprobe data and the historical paper profile:
 
-- case ID to add: `neuroprobev2_htnet500_hpf_global_onset_sub1_sess1`;
-- dataset/regime/task: `neuroprobev2`, `within-session`, binary `onset`;
-- target: subject 1, session 1, folds 0 and 1, seed 42;
-- model: `htnet_500Hz`;
-- preprocessor:
-  `laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz`;
-- immutable source result, relative to the caller's read-only `09_neurips` root:
-  `rebuttal_preprocessor_baselines/neuroprobev2_original/htnet_500Hz_laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz/within-session/onset/sub1_sess1/population_btbank1_1_onset.json`;
-- source-result SHA256:
-  `7166736abeeb89bd23b3eef552d53abcc3d93f4c891fdc1f4e7bbeb167e1b2b3`;
-- preprocessor YAML SHA256:
-  `de34d0d5b14b47ce29367bc626d01a7c5feefcaae72035f19d80a330c326a844`;
-- historical launcher SHA256:
-  `2cbe3a2b1c19434539797e21136ac4faa6d9e1503b17ae29565ba3aac2c188e0`;
-- expected fold test ROC-AUC: fold 0 `0.9607129841732611`, fold 1
-  `0.8639434089962517`.
+- `runner.num_workers=4`;
+- `runner.pin_memory=true`;
+- `runner.persistent_workers=true`;
+- `runner.prefetch_factor=2`;
+- `runtime.preprocess_torch_num_threads=6`.
 
-The historical launcher `run_htnet_500hz_preprocessor_reruns.sh` explicitly set
-`+model.deterministic=true`, `runtime.seed=42`, `runner.num_workers=0`, and four
-preprocessing/BLAS threads. `TorchRunner` then enabled deterministic cuDNN and
-`torch.use_deterministic_algorithms(True)`. Reproduce those settings, including
-`model.device=cuda:<index>`, but write to a new output/cache root. Do not run the
-launcher matrix. The result JSON does not serialize the deterministic override,
-so freeze the launcher hash and resolved Hydra config with the new case evidence.
+Every train, validation, and test accuracy/ROC-AUC metric matched the frozen
+historical record exactly for both folds at the declared `1e-9` tolerance. The
+immutable source result SHA256 is
+`2abf4d1873bf4b703ce02fbf3e1ba565afbdb23b96ba87cb657f02e7e609fbb7`;
+the adjacent historical resolved-config SHA256 is
+`1f66ca0ad257afc86778185dd7c7c8ab40369baf399214044171929356600133`;
+the historical run-log SHA256 is
+`f064f224265ed119da0926ed162c774c774cad265bf30807bbfd859f20215f54`;
+the candidate result SHA256 is
+`003182f61a09aee2bbc0ab7820c6c1cf02e75e6902085a81184c1c9cd3d31bd4`;
+the candidate resolved-config SHA256 is
+`82055c8c6dd2c453f9054c6a67bfa5f0ab1ffe0175efd607069cde741283827d`;
+and the run-log SHA256 is
+`65ef53eddc64e014d29a2ac82b2674689d25f4de8e678f57c91682b85e4ede43`.
+The fresh comparator report is `PASS`; its
+`execution_provenance_verified: false` field correctly limits the comparator's
+claim. The preserved resolved config and run log verify the historical runtime
+profile, `cuda:0`, CUDA availability, and four visible GPUs. Raw-window identity
+was established by an earlier read-only migration-data audit, but Git/import,
+environment, H5, GPU model, driver, and standalone CUDA diagnostics were not
+captured in this run tree and remain part of the built-artifact gate.
 
-Before launching, extend `artifacts/parity_reference/manifest.json` with this one
-case, create its reduced immutable reference record, and extend parity-tool tests.
-Confirm the copied iMINDBench model YAML differs from the historical YAML only in
-its comment (`neuroprobe_eval` renamed to `imindbench`); compare semantic config
-content rather than treating that comment-only file hash change as behavior.
-Build the command through `scripts/parity_tools.py`, capture Git/import, H5,
-environment, CUDA/GPU, command and resolved-config fingerprints, then run and
-compare both folds. Apply the existing `1e-9` metric tolerance first because the
-run was deterministic; do not widen tolerance after seeing results. If exact
-metric parity fails but an April-checkout HTNet run and current iMINDBench run
-match on the same machine, classify migration parity as `PASS` and the historical
-record as provenance-incomplete rather than changing the model or preprocessor.
+The checked-in `neuroprobev2_htnet500_hpf_global_onset_sub1_sess1` case remains
+a runnable deterministic reference from the Figure 4 preprocessing-baseline
+family. It is optional and was not needed after the MLP case established exact
+GPU parity.
 
 ```bash
-python scripts/parity_tools.py --manifest artifacts/parity_reference/manifest.json build-commands --case neuroprobev2_logistic_multistft_onset_sub1_sess1 --data-root /path/to/processed --output-root /path/to/fresh-run-root --checkpoint-map checkpoint-map.json --resource-map resource-map.json
-python scripts/parity_tools.py --manifest artifacts/parity_reference/manifest.json compare --case neuroprobev2_logistic_multistft_onset_sub1_sess1 --candidate-map candidate-map.json --checkpoint-map checkpoint-map.json --resource-map resource-map.json --report-dir /path/to/fresh-report-root
+python scripts/parity_tools.py --manifest artifacts/parity_reference/manifest.json build-commands --case neuroprobev2_mlp_multistft_onset_sub1_sess1 --data-root /path/to/processed --output-root /path/to/fresh-run-root --checkpoint-map checkpoint-map.json --resource-map resource-map.json --device cuda:0
+python scripts/parity_tools.py --manifest artifacts/parity_reference/manifest.json compare --case neuroprobev2_mlp_multistft_onset_sub1_sess1 --candidate-map candidate-map.json --checkpoint-map checkpoint-map.json --resource-map resource-map.json --report-dir /path/to/fresh-report-root
 ```
 
 The CLI exits zero only when every selected comparison is `PASS`; `FAIL`,
@@ -436,7 +435,8 @@ The CLI exits zero only when every selected comparison is `PASS`; `FAIL`,
 
 The redistributable reduced records freeze source/result URIs and hashes,
 config/preprocess hashes, identity, seed, folds, and reported metrics. Historical
-result counts are recorded as unavailable, and historical environment,
+result counts are generally unavailable. The MLP GPU record includes log-derived
+sample counts as non-compared provenance; class counts remain null. Historical environment,
 dataset/H5, label, and checkpoint fingerprints remain evidence gaps rather than
 inferred values. The comparator consumes only checked-in immutable reference
 records and verifies their hashes; it does not read a mutable private TorchBrain
@@ -461,7 +461,8 @@ claim hardware-repeat equivalence. Any future repeat-count or nondeterminism
 policy must be set before observing new candidate scores. Reports are
 machine-readable JSON plus Markdown under a caller-selected fresh directory
 (conventionally `artifacts/parity_reports/<run_id>/`). Historical sample/class
-counts are null, so they cannot be compared for the five frozen records.
+counts are not comparator fields. Most records keep them null; the MLP GPU record
+preserves log-derived sample counts as provenance only.
 
 ### Notebook-to-run provenance and smoke parity
 
@@ -507,7 +508,8 @@ and atomic completion markers before it can claim execution provenance.
 For every selected case, the candidate map links its case ID to one existing
 `population_*.json`. Compare model/preprocessor/task, subject/session, regime,
 seed, time-bin identity, config/preprocess hashes, folds and reported metrics.
-Sample/class counts are unavailable in the historical records. Use exact
+Sample/class counts are generally unavailable and are not compared; the MLP GPU
+record's log-derived sample counts are provenance only. Use exact
 comparison for deterministic identity/hash/fold fields and the manifest tolerance
 for metrics. Emit:
 
@@ -543,15 +545,17 @@ historical-rendering gap in the provenance manifest and change log.
    recreate it by launching from a TorchBrain checkout. The reduced reference
    records and tests are complete, while historical data/environment/checkpoint
    fingerprints remain gaps.
-3. **Partial:** Create the `imindbench` environment, package the copied runtime, then make the
+3. **Complete for development validation:** Create the `imindbench` environment, package the copied runtime, then make the
    dedicated `neuroprobe_eval` → `imindbench` namespace commit and migrate public
    imports/paths. Make one Logistic evaluation-code parity case pass against
-   identical immutable inputs. Packaging and namespace migration are complete;
-   clean-environment installation and the Logistic run/compare gate remain.
-4. **Tooling complete; execution pending:** Reduce the committed baseline using
+   the frozen metrics/config record. Packaging, namespace migration, environment
+   bootstrap, and the Logistic run/compare gate are complete. Built-artifact
+   installation remains part of step 7.
+4. **Complete for tooling and selected executions:** Reduce the committed baseline using
    retained/removed manifests and tests, then add the remaining parity matrix,
-   command builder, comparator and reports. The tool is intentionally not an
-   experiment runner, and no candidate report is a committed acceptance result.
+   command builder, comparator and reports. Logistic and the NeuroprobeV2 MLP
+   have strict `PASS` reports; BYD MLP has a transparent `FAIL` drift report.
+   Reports remain caller-owned evidence rather than committed generated output.
 5. **Complete:** Trace source paper notebooks to YAMLs/original outputs and add
    canonical launch mappings without requiring notebook execution; retain the
    documented Figure 4b and Appendix 6 gaps.
@@ -567,21 +571,16 @@ historical-rendering gap in the provenance manifest and change log.
    absolute paths, including one GPU case, lint/tests, two simplification/bug-risk
    reviews, and the documented smoke workflow.
 
-### GPU handoff and push pause
+### GPU evidence and remaining delivery gate
 
-After the clean CPU gates and at least one runnable parity comparison are
-reviewed, prepare a concise GPU handoff containing the exact iMINDBench and
-TorchBrain SHAs, environment/export and CUDA diagnostics, the runnable
-deterministic HTNet case above (replacing the earlier BYD MLP default),
-caller-owned data and checkpoint/resource mapping hashes, generated command, fresh
-output/report roots, and expected result/report files. Do not launch an unreviewed
-broad experiment matrix as the acceptance gate.
+The single-case GPU handoff has been executed with NeuroprobeV2 MLP and produced
+exact metric/config-record parity under the historical paper profile. Preserve
+the caller-owned result, resolved config, log, mapping, and report artifacts; do not
+replace this bounded evidence with a broad experiment matrix.
 
-Before pausing, commit every coherent CPU phase and, under the user's standing
-authorization for this GPU handoff, push both feature branches so another agent
-or machine can resume from the recorded SHAs. Do not merge branches or publish
-release artifacts. If credentials prevent the push, record the exact
-local SHAs, remotes, branch names, failed authentication method, and push commands
-in the handoff rather than losing or rewriting local history. Then pause after
-handing off the single GPU case. A metric/config `PASS` alone is not release
-acceptance because the current comparator does not verify execution provenance.
+The remaining release gate is step 7: commit and push coherent phases, build
+fresh iMINDBench and TorchBrain artifacts, install them non-editably in a clean
+environment, verify packaged resources/import provenance, and rerun the bounded
+GPU acceptance from those artifacts. Do not merge branches or publish release
+artifacts as part of this validation. A metric/config `PASS` alone is not release
+acceptance because the comparator does not verify execution provenance.

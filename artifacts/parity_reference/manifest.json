@@ -23,6 +23,23 @@
       },
       "checkpoint": {"required": false, "mapping_key": null, "reference_sha256": null}
     },
+    "neuroprobev2_mlp_multistft_onset_sub1_sess1": {
+      "comparability": "RUNNABLE",
+      "reference_record_uri": "imindbench://artifacts/parity_reference/cases/neuroprobev2_mlp_multistft_onset_sub1_sess1.json",
+      "reference_record_sha256": "3d90da48e524d3771abf4948c9d8447803a7eeac566185454ccab90802f83e72",
+      "dataset_config": "neuroprobev2",
+      "model_config": "mlp",
+      "preprocessor_config": "laplacian_multi_stft_2048Hz",
+      "overrides": {
+        "dataset.regime": "within-session", "dataset.label_mode": "binary", "dataset.task": "onset",
+        "dataset.test_subject": 1, "dataset.test_session": 1, "dataset.subset_tier": "lite",
+        "dataset.train_same_subject_only": false, "dataset.train_sample_fraction": 1.0,
+        "dataset.max_train_samples_per_subject": "auto", "runner.num_workers": 4,
+        "runner.pin_memory": true, "runner.persistent_workers": true, "runner.prefetch_factor": 2,
+        "runtime.preprocess_torch_num_threads": 6, "runtime.seed": 42
+      },
+      "checkpoint": {"required": false, "mapping_key": null, "reference_sha256": null}
+    },
     "byd_mlp_multistft_global_flow_sub41_sess1": {
       "comparability": "RUNNABLE",
       "reference_record_uri": "imindbench://artifacts/parity_reference/cases/byd_mlp_multistft_global_flow_sub41_sess1.json",

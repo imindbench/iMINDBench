@@ -18,7 +18,7 @@ The canonical environment is Python 3.10 in the root
 ```bash
 conda env create -f environment.yml
 conda activate imindbench
-python -m pip install "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@492f94a594e81d30ef38db32d8be145627421b0d"
+python -m pip install "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@e39f48ce0ec8c8f59be2507dca8ae172cce79d28"
 python -m pip install -e .
 python -m pip check
 imindbench --help
@@ -115,7 +115,7 @@ config rather than mixing groups blindly.
 
 [`scripts/parity_tools.py`](../scripts/parity_tools.py) is an offline tool. It
 constructs commands but never launches them, and it compares existing result
-JSONs against the five records in
+JSONs against the seven records in
 [`artifacts/parity_reference/`](../artifacts/parity_reference/). Inspect its
 validated interfaces with:
 
@@ -130,20 +130,21 @@ selected case needs them. `resource-map.json` maps auxiliary resource keys; an
 empty object is valid when the selected case needs none. Comparison additionally
 uses `candidate-map.json`, mapping case IDs to existing `population_*.json`
 files. Run and report output roots must not already exist.
-For the checkpoint-free Logistic example below, both `checkpoint-map.json` and
+For the checkpoint-free NeuroprobeV2 MLP example below, both `checkpoint-map.json` and
 `resource-map.json` may contain the single JSON object `{}`.
 
-Example dry-run construction for the checkpoint-free Logistic case:
+Example GPU command construction for the checkpoint-free MLP case:
 
 ```bash
 python scripts/parity_tools.py \
   --manifest artifacts/parity_reference/manifest.json \
   build-commands \
-  --case neuroprobev2_logistic_multistft_onset_sub1_sess1 \
+  --case neuroprobev2_mlp_multistft_onset_sub1_sess1 \
   --data-root /path/to/processed \
   --output-root /path/to/fresh-run-root \
   --checkpoint-map checkpoint-map.json \
-  --resource-map resource-map.json
+  --resource-map resource-map.json \
+  --device cuda:0
 ```
 
 Example comparison:
@@ -152,7 +153,7 @@ Example comparison:
 python scripts/parity_tools.py \
   --manifest artifacts/parity_reference/manifest.json \
   compare \
-  --case neuroprobev2_logistic_multistft_onset_sub1_sess1 \
+  --case neuroprobev2_mlp_multistft_onset_sub1_sess1 \
   --candidate-map candidate-map.json \
   --checkpoint-map checkpoint-map.json \
   --resource-map resource-map.json \
