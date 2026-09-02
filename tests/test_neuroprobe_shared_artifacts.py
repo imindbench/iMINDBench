@@ -160,15 +160,98 @@ def test_missing_selector_fails_when_recording_is_loaded(tmp_path):
 def test_manifest_and_imported_source_match_pinned_commit():
     manifest = smoke._load_manifest(ROOT / "config" / "brainsets_smoke_manifest.json")
 
-    source = smoke.validate_torch_brain_source(manifest["torch_brain_commit"])
+    source = smoke.validate_torch_brain_source(
+        manifest["torch_brain_commit"], manifest["torch_brain_artifact_sha256"]
+    )
 
     assert source["commit"] == manifest["torch_brain_commit"]
     assert manifest["datasets"]["neuroprobe2025"]["recording_id"] == ("sub_1_trial001")
 
 
 def test_imported_source_rejects_wrong_commit():
+    manifest = smoke._load_manifest(ROOT / "config" / "brainsets_smoke_manifest.json")
     with pytest.raises(RuntimeError, match="commit mismatch"):
-        smoke.validate_torch_brain_source("0" * 40)
+        smoke.validate_torch_brain_source(
+            "0" * 40, manifest["torch_brain_artifact_sha256"]
+        )
+
+
+@pytest.mark.parametrize(
+    ("version", "expected"),
+    [
+        ("0.2.1.dev11+ge39f48ce0", "e39f48ce0"),
+        ("0.2.1", None),
+    ],
+)
+def test_scm_version_commit_pattern(version, expected):
+    assert smoke._scm_commit_prefix(version) == expected
+
+
+def test_scm_version_rejects_dirty_artifact():
+    with pytest.raises(RuntimeError, match="artifact is dirty"):
+        smoke._scm_commit_prefix("0.2.1.dev11+ge39f48ce0.d20260902")
+
+
+def test_artifact_source_requires_matching_pinned_hash():
+    commit = "e39f48ce0ec8c8f59be2507dca8ae172cce79d28"
+    artifact_sha256 = "a" * 64
+    module_path = Path("/artifact/torch_brain/__init__.py")
+    direct_url = {
+        "url": "file:///dist/torch_brain.whl",
+        "archive_info": {"hashes": {"sha256": artifact_sha256}},
+    }
+
+    source = smoke._validate_artifact_source(
+        expected_commit=commit,
+        expected_artifact_sha256=artifact_sha256,
+        module_path=module_path,
+        distribution_module_path=module_path,
+        version="0.2.1.dev11+ge39f48ce0",
+        direct_url=direct_url,
+    )
+
+    assert source["commit"] == commit
+    assert source["artifact_sha256"] == artifact_sha256
+    with pytest.raises(RuntimeError, match="artifact SHA256 mismatch"):
+        smoke._validate_artifact_source(
+            expected_commit=commit,
+            expected_artifact_sha256="b" * 64,
+            module_path=module_path,
+            distribution_module_path=module_path,
+            version="0.2.1.dev11+ge39f48ce0",
+            direct_url=direct_url,
+        )
+
+
+def test_artifact_source_rejects_mismatched_commit_and_editable_install():
+    direct_url = {
+        "url": "file:///dist/torch_brain.whl",
+        "archive_info": {"hash": f"sha256={'a' * 64}"},
+    }
+    kwargs = {
+        "expected_commit": "e39f48ce0ec8c8f59be2507dca8ae172cce79d28",
+        "expected_artifact_sha256": "a" * 64,
+        "module_path": Path("/artifact/torch_brain/__init__.py"),
+        "distribution_module_path": Path("/artifact/torch_brain/__init__.py"),
+        "direct_url": direct_url,
+    }
+
+    with pytest.raises(RuntimeError, match="commit mismatch"):
+        smoke._validate_artifact_source(version="0.2.1.dev11+g0000000", **kwargs)
+    with pytest.raises(RuntimeError, match="must not be editable"):
+        smoke._validate_artifact_source(
+            version="0.2.1.dev11+ge39f48ce0",
+            **{**kwargs, "direct_url": {"dir_info": {"editable": True}}},
+        )
+
+    with pytest.raises(RuntimeError, match="does not match installed distribution"):
+        smoke._validate_artifact_source(
+            version="0.2.1.dev11+ge39f48ce0",
+            **{
+                **kwargs,
+                "distribution_module_path": Path("/shadow/torch_brain/__init__.py"),
+            },
+        )
 
 
 def test_neuroprobe_v2_regime_validator_opens_all_public_selections(monkeypatch):
@@ -242,6 +325,7 @@ def test_fixed_window_equivalence_uses_both_public_neuroprobe_views(tmp_path):
     "mutation",
     [
         {"torch_brain_commit": "not-a-commit"},
+        {"torch_brain_artifact_sha256": "not-a-sha256"},
         {"pipelines": []},
         {
             "datasets": {

@@ -293,3 +293,14 @@ corresponding change.
 - Evidence/report ID: 226 migrated dataset/pipeline tests passed with two expected real-data skips; full TorchBrain Ruff check and format check passed; tracked private-path scan is empty.
 - Reviewer/disposition: two review/fix passes found no behavioral or packaging regression; the public feature branch contains the immutable dependency commit.
 - Follow-up or user review needed: verify packaged resources and imports from fresh sdist-derived wheels.
+
+### 2026-09-02 — Validate installed TorchBrain wheel provenance
+
+- Change ID/commit subject: `fix: validate installed TorchBrain artifacts`
+- Files changed: `config/brainsets_smoke_manifest.json`, `scripts/validate_brainsets_smoke.py`, `tests/test_neuroprobe_shared_artifacts.py`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`.
+- Classification: runtime/test/docs
+- Reason: fresh artifact testing exposed that the smoke validator recognized clean Git checkouts and VCS installs but not a reviewed wheel installation.
+- Behavioral effect: smoke-manifest schema 2 pins the TorchBrain wheel SHA256. Validation accepts either the exact clean source checkout or the pinned non-editable wheel, binds distribution metadata to the imported module, rejects dirty SCM versions/shadow imports, and verifies installed package files against wheel `RECORD` hashes.
+- Evidence/report ID: TorchBrain wheel SHA256 `b2c318141f23bce4ff2749fd5e9000fd679760d735c02af9e8cc5557a140172d`; 20 focused source/artifact tests and 90 full iMINDBench tests pass before artifact rebuild.
+- Reviewer/disposition: two review/fix passes closed unchecked-hash, nested-environment, untracked-file, shadow-import, and installed-file-integrity gaps.
+- Follow-up or user review needed: rebuild iMINDBench from this commit and repeat the unrelated-directory installed-wheel suite.

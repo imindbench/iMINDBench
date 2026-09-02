@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 from importlib import metadata
 import json
@@ -18,6 +19,85 @@ DEFAULT_MANIFEST = (
     Path(__file__).resolve().parents[1] / "config" / "brainsets_smoke_manifest.json"
 )
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
+SCM_COMMIT_RE = re.compile(r"(?:^|[.+])g([0-9a-f]{7,40})(?:$|[.])")
+
+
+def _scm_commit_prefix(version: str) -> str | None:
+    match = SCM_COMMIT_RE.search(version)
+    if match is None:
+        return None
+    commit_prefix = match.group(1)
+    if f"g{commit_prefix}.d" in version:
+        raise RuntimeError(f"installed torch_brain artifact is dirty: {version}")
+    return commit_prefix
+
+
+def _archive_sha256(direct_url: dict[str, Any]) -> str | None:
+    archive_info = direct_url.get("archive_info", {})
+    value = archive_info.get("hashes", {}).get("sha256")
+    if value is None:
+        legacy = archive_info.get("hash")
+        if isinstance(legacy, str) and legacy.startswith("sha256="):
+            value = legacy.removeprefix("sha256=")
+    return value if isinstance(value, str) else None
+
+
+def _validate_artifact_source(
+    *,
+    expected_commit: str,
+    expected_artifact_sha256: str,
+    module_path: Path,
+    distribution_module_path: Path,
+    version: str,
+    direct_url: dict[str, Any],
+) -> dict[str, str]:
+    if module_path != distribution_module_path:
+        raise RuntimeError(
+            "imported torch_brain module does not match installed distribution: "
+            f"{module_path} != {distribution_module_path}"
+        )
+    if direct_url.get("dir_info", {}).get("editable") is True:
+        raise RuntimeError("installed torch_brain artifact must not be editable")
+    commit_prefix = _scm_commit_prefix(version)
+    if commit_prefix is None or not expected_commit.startswith(commit_prefix):
+        raise RuntimeError(
+            "imported torch_brain commit mismatch: "
+            f"expected {expected_commit}, installed artifact identifies "
+            f"{commit_prefix or 'no SCM commit'}"
+        )
+    actual_artifact_sha256 = _archive_sha256(direct_url)
+    if actual_artifact_sha256 != expected_artifact_sha256:
+        raise RuntimeError(
+            "installed torch_brain artifact SHA256 mismatch: "
+            f"expected {expected_artifact_sha256}, got {actual_artifact_sha256}"
+        )
+    return {
+        "commit": expected_commit,
+        "commit_prefix": commit_prefix,
+        "source": direct_url.get("url", str(module_path)),
+        "version": version,
+        "artifact_sha256": actual_artifact_sha256,
+    }
+
+
+def _validate_distribution_files(distribution: metadata.Distribution) -> None:
+    package_files = [
+        item
+        for item in distribution.files or []
+        if item.parts and item.parts[0] == "torch_brain" and item.hash is not None
+    ]
+    if not package_files:
+        raise RuntimeError("installed torch_brain distribution has no RECORD hashes")
+    for item in package_files:
+        if item.hash.mode != "sha256":
+            raise RuntimeError(f"unsupported RECORD hash for torch_brain file: {item}")
+        path = Path(distribution.locate_file(item))
+        if not path.is_file():
+            raise RuntimeError(f"installed torch_brain file is missing: {path}")
+        digest = base64.urlsafe_b64encode(hashlib.sha256(path.read_bytes()).digest())
+        actual = digest.rstrip(b"=").decode("ascii")
+        if actual != item.hash.value:
+            raise RuntimeError(f"installed torch_brain file hash mismatch: {path}")
 
 
 def _load_manifest(path: Path) -> dict[str, Any]:
@@ -25,16 +105,21 @@ def _load_manifest(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict) or set(value) != {
         "schema_version",
         "torch_brain_commit",
+        "torch_brain_artifact_sha256",
         "pipelines",
         "datasets",
     }:
         raise ValueError("smoke manifest has missing or unknown top-level fields")
-    if value["schema_version"] != 1:
-        raise ValueError("smoke manifest schema_version must be 1")
+    if value["schema_version"] != 2:
+        raise ValueError("smoke manifest schema_version must be 2")
     if not isinstance(value["torch_brain_commit"], str) or not COMMIT_RE.fullmatch(
         value["torch_brain_commit"]
     ):
         raise ValueError("torch_brain_commit must be a lowercase 40-character SHA")
+    if not isinstance(value["torch_brain_artifact_sha256"], str) or not re.fullmatch(
+        r"[0-9a-f]{64}", value["torch_brain_artifact_sha256"]
+    ):
+        raise ValueError("torch_brain_artifact_sha256 must be a lowercase SHA256")
     pipelines = value["pipelines"]
     if (
         not isinstance(pipelines, list)
@@ -71,13 +156,28 @@ def _load_manifest(path: Path) -> dict[str, Any]:
     return value
 
 
-def validate_torch_brain_source(expected_commit: str) -> dict[str, str]:
-    """Require the imported public package to identify the pinned source commit."""
+def validate_torch_brain_source(
+    expected_commit: str, expected_artifact_sha256: str
+) -> dict[str, str]:
+    """Require a clean checkout or immutable artifact from the pinned source."""
     import torch_brain
 
     module_path = Path(torch_brain.__file__).resolve()
     for candidate in module_path.parents:
         if not (candidate / ".git").exists():
+            continue
+        if module_path != (candidate / "torch_brain" / "__init__.py").resolve():
+            continue
+        top_level = subprocess.run(
+            ["git", "-C", str(candidate), "rev-parse", "--show-toplevel"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if (
+            top_level.returncode != 0
+            or Path(top_level.stdout.strip()).resolve() != candidate
+        ):
             continue
         result = subprocess.run(
             ["git", "-C", str(candidate), "rev-parse", "HEAD"],
@@ -98,7 +198,6 @@ def validate_torch_brain_source(expected_commit: str) -> dict[str, str]:
                 str(candidate),
                 "status",
                 "--porcelain",
-                "--untracked-files=no",
             ],
             check=True,
             capture_output=True,
@@ -110,18 +209,27 @@ def validate_torch_brain_source(expected_commit: str) -> dict[str, str]:
             )
         return {"commit": actual_commit, "source": str(candidate)}
 
-    direct_url_text = metadata.distribution("torch_brain").read_text("direct_url.json")
+    distribution = metadata.distribution("torch_brain")
+    distribution_module_path = Path(
+        distribution.locate_file("torch_brain/__init__.py")
+    ).resolve()
+    _validate_distribution_files(distribution)
+    direct_url_text = distribution.read_text("direct_url.json")
+    direct_url = json.loads(direct_url_text) if direct_url_text else {}
     if direct_url_text:
-        direct_url = json.loads(direct_url_text)
         actual_commit = direct_url.get("vcs_info", {}).get("commit_id")
-        if actual_commit == expected_commit:
-            return {
-                "commit": actual_commit,
-                "source": direct_url.get("url", str(module_path)),
-            }
-    raise RuntimeError(
-        "cannot verify imported torch_brain source commit; use the pinned public "
-        f"checkout at {expected_commit} (publication is blocked until that branch is pushed)"
+        if actual_commit is not None:
+            raise RuntimeError(
+                "installed torch_brain must be the pinned wheel artifact, not a VCS install"
+            )
+
+    return _validate_artifact_source(
+        expected_commit=expected_commit,
+        expected_artifact_sha256=expected_artifact_sha256,
+        module_path=module_path,
+        distribution_module_path=distribution_module_path,
+        version=metadata.version("torch_brain"),
+        direct_url=direct_url,
     )
 
 
@@ -319,7 +427,9 @@ def main() -> int:
     )
     args = parser.parse_args()
     manifest = _load_manifest(args.manifest)
-    source = validate_torch_brain_source(manifest["torch_brain_commit"])
+    source = validate_torch_brain_source(
+        manifest["torch_brain_commit"], manifest["torch_brain_artifact_sha256"]
+    )
     if args.list_datasets:
         print(json.dumps(sorted(manifest["datasets"])))
         return 0

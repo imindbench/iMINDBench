@@ -1,6 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "torch_brain_commit": "e39f48ce0ec8c8f59be2507dca8ae172cce79d28",
+  "torch_brain_artifact_sha256": "b2c318141f23bce4ff2749fd5e9000fd679760d735c02af9e8cc5557a140172d",
   "pipelines": [
     "neuroprobe_2025",
     "keles_byd_2024",

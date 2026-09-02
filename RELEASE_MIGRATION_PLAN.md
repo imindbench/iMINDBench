@@ -147,10 +147,11 @@ recording IDs into the smoke manifest rather than selecting them interactively o
 future runs.
 
 The current `config/brainsets_smoke_manifest.json` schema pins TorchBrain commit
-`e39f48c`, the three preparation pipeline IDs, and four public dataset
+`e39f48c`, the reviewed wheel SHA256, the three preparation pipeline IDs, and four public dataset
 class/directory/recording mappings (including NeuroprobeV2's shared directory).
 `scripts/validate_brainsets_smoke.py` is a CPU-only, read-only post-prepare
-checker: `--list-datasets` validates the source pin and lists mappings; `--root`
+checker: `--list-datasets` validates either the exact clean source checkout or
+the pinned non-editable wheel plus its installed `RECORD` files, then lists mappings; `--root`
 and `--dataset` inventory prepared H5 files and verify the pinned public loader;
 optional `--recording-id` overrides the selected recording and `--full-hash`
 hashes the complete corpus. It does not download or prepare data.
