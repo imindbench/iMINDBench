@@ -331,25 +331,67 @@ def test_compare_reports_pass_fail_and_missing(tmp_path, manifest):
 
 
 def test_missing_reference_checkpoint_is_not_comparable(tmp_path, manifest):
-    case_id = "pippi_popt_multistft_speech_sub1_sess1"
+    case_id = "neuroprobev2_popt_multistft_holdin_onset_sub1_sess1"
     candidate_path = tmp_path / "candidate.json"
     candidate_path.write_text(
         json.dumps(_candidate(manifest, case_id)), encoding="utf-8"
     )
     checkpoint = tmp_path / "popt.ckpt"
     checkpoint.write_bytes(b"caller supplied checkpoint")
+    resource = tmp_path / "decodable"
+    resource.mkdir()
     report = parity_tools.compare_case(
         manifest,
         case_id,
         candidate_path,
         checkpoint_map={"popt_checkpoint": checkpoint},
+        resource_map={"decodable_subject_sessions_dir": resource},
     )
     assert report["status"] == "NOT-COMPARABLE"
     assert report["checkpoint"]["reference_sha256"] is None
     assert len(report["checkpoint"]["supplied_sha256"]) == 64
 
 
-def test_mismatch_on_checkpoint_blocked_case_is_fail(tmp_path, manifest):
+def test_pippi_popt_known_checkpoint_is_runnable(tmp_path, manifest):
+    case_id = "pippi_popt_multistft_speech_sub1_sess1"
+    expected_hash = "cf4e835d5309559d468b2f1ebd9b76882398c30bedae6c0c8bc6fdb4c506b52f"
+    assert manifest["cases"][case_id]["checkpoint"]["reference_sha256"] == expected_hash
+
+    candidate_path = tmp_path / "candidate.json"
+    _write_json(candidate_path, _candidate(manifest, case_id))
+    checkpoint = tmp_path / "popt.ckpt"
+    checkpoint_bytes = b"checkpoint fixture"
+    checkpoint.write_bytes(checkpoint_bytes)
+    fixture_manifest = copy.deepcopy(manifest)
+    fixture_manifest["cases"][case_id]["checkpoint"]["reference_sha256"] = (
+        hashlib.sha256(checkpoint_bytes).hexdigest()
+    )
+    report = parity_tools.compare_case(
+        fixture_manifest,
+        case_id,
+        candidate_path,
+        checkpoint_map={"popt_checkpoint": checkpoint},
+    )
+    assert report["status"] == "PASS"
+
+    data_root = tmp_path / "data"
+    data_root.mkdir()
+    command = parity_tools.build_case_command(
+        fixture_manifest,
+        case_id,
+        data_root=data_root,
+        output_root=tmp_path / "output",
+        checkpoint_map={"popt_checkpoint": checkpoint},
+        resource_map={},
+        device="cuda:0",
+    )
+    assert "runner.num_workers=4" in command
+    assert "runner.persistent_workers=true" in command
+    assert "runner.coord_index_policy=legacy_truncation" in command
+    assert "runtime.preprocess_torch_num_threads=6" in command
+
+
+def test_mismatch_on_checkpoint_case_is_fail(tmp_path, manifest):
     case_id = "pippi_popt_multistft_speech_sub1_sess1"
     candidate = _candidate(manifest, case_id)
     candidate["evaluation_results"]["btbank1_1"]["population"][
@@ -532,14 +574,14 @@ def test_compare_cli_exit_codes(tmp_path, manifest):
 
 
 def test_not_comparable_cli_exit_is_nonzero(tmp_path, manifest):
-    case_id = "pippi_popt_multistft_speech_sub1_sess1"
+    case_id = "neuroprobev2_barista_waveform_onset_sub1_sess1"
     candidate = tmp_path / "candidate.json"
     _write_json(candidate, _candidate(manifest, case_id))
-    checkpoint = tmp_path / "popt.ckpt"
+    checkpoint = tmp_path / "barista.ckpt"
     checkpoint.write_bytes(b"caller checkpoint")
     mapping_values = {
         "candidates": {case_id: str(candidate)},
-        "checkpoints": {"popt_checkpoint": str(checkpoint)},
+        "checkpoints": {"barista_checkpoint": str(checkpoint)},
         "resources": {},
     }
     mapping_paths = {}

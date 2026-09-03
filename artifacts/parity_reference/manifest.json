@@ -107,8 +107,7 @@
       "checkpoint": {"required": false, "mapping_key": null, "reference_sha256": null}
     },
     "pippi_popt_multistft_speech_sub1_sess1": {
-      "comparability": "NOT-COMPARABLE",
-      "not_comparable_reason": "The historical PopT result does not identify the exact checkpoint or its SHA256.",
+      "comparability": "RUNNABLE",
       "reference_record_uri": "imindbench://artifacts/parity_reference/cases/pippi_popt_multistft_speech_sub1_sess1.json",
       "reference_record_sha256": "83e7554c4d183d35c701d08c7e91ed3af89fbd3e37aa24e246d2e0a0cf2f5e53",
       "dataset_config": "berezutskayapippi2022",
@@ -118,9 +117,12 @@
         "dataset.regime": "within-session", "dataset.label_mode": "binary", "dataset.task": "speech",
         "dataset.test_subject": 1, "dataset.test_session": 1, "dataset.subset_tier": "high-cov",
         "dataset.train_same_subject_only": false, "dataset.train_sample_fraction": 1.0,
-        "dataset.max_train_samples_per_subject": "auto", "runtime.seed": 42
+        "dataset.max_train_samples_per_subject": "auto", "runner.num_workers": 4,
+        "runner.pin_memory": true, "runner.persistent_workers": true, "runner.prefetch_factor": 2,
+        "runner.coord_index_policy": "legacy_truncation",
+        "runtime.preprocess_torch_num_threads": 6, "runtime.seed": 42
       },
-      "checkpoint": {"required": true, "mapping_key": "popt_checkpoint", "path_config_key": "paths.popt_checkpoint", "reference_sha256": null}
+      "checkpoint": {"required": true, "mapping_key": "popt_checkpoint", "path_config_key": "paths.popt_checkpoint", "reference_sha256": "cf4e835d5309559d468b2f1ebd9b76882398c30bedae6c0c8bc6fdb4c506b52f"}
     },
     "neuroprobev2_barista_waveform_onset_sub1_sess1": {
       "comparability": "NOT-COMPARABLE",

@@ -57,6 +57,38 @@ YAMLs, representative resolved configs were available for 101 paths: 57 used the
 historical profile and 44 used the newer profile. This is a path-level provenance
 inventory, not a weighting by the number of subject/task result files.
 
+### Historical window-indexing semantics
+
+The runtime profile was not the only historical condition needed for exact
+provider parity. The April 2026 BYD and Pippi runs used
+`temporaldata==0.1.1`, whose lazy regular-time-series slicing converted both
+window boundaries with `floor`. The migrated TorchBrain data implementation
+snaps boundaries to the sampling grid and uses `ceil`; for non-grid-aligned
+trial boundaries this shifts each otherwise equal one-second window by one
+sample. Direct comparison showed `historical[1:] == migrated[:-1]`, and a
+read-only diagnostic restoring the legacy floor conversion reproduced every
+historical BYD and Pippi Logistic metric exactly in both folds.
+
+The ceil-based helper was introduced upstream in TemporalData commit
+`ad3e9850b5103bb8cc4eca421431b65658563fcf` on 2026-03-16, after the 0.1.1
+release used by the paper environment. It reached TemporalData v0.1.2 on
+2026-05-29 and was carried into TorchBrain by the TemporalData/Brainsets merge
+`6069a76c84bcbc96eb9253d1263e032046853e8f` (authored 2026-05-29, committed
+2026-06-10). iMINDBench therefore inherited this semantic change during the
+migration; it did not originate it. This finding is separate from the loader
+and preprocessing-thread profile that restored NeuroprobeV2 MLP parity.
+
+The same legacy-slice diagnostic was also run for the coordinate-aware PopT-v2
+model on BYD global flow and Pippi speech. Both used the exact 1M-step
+main-results checkpoint (SHA256
+`cf4e835d5309559d468b2f1ebd9b76882398c30bedae6c0c8bc6fdb4c506b52f`),
+passed each sample's LIP coordinates through
+`MultiSubjBrainPositionalEncoding`, and reproduced every historical metric
+exactly in both folds. The historical resolved configs identify the same
+checkpoint path, closing the checkpoint-identity gap for the Pippi PopT parity
+case. Categorical `brain_area_key` is separate metadata; PopT consumes numerical
+channel coordinates.
+
 ## Recommended parity subset
 
 The five selected cases are immutable candidates, not copied reference fixtures:

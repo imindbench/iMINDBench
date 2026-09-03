@@ -34,8 +34,10 @@ profile; it also failed, ruling out that profile mismatch as a sufficient BYD fi
 The checkpoint-free NeuroprobeV2 MLP GPU case then matched every historical fold
 metric exactly on newly prepared public data after restoring the historical
 worker/thread profile. A second run from the final non-editable artifact stack
-reproduced the same exact result. PopT and BaRISTA remain
-`NOT-COMPARABLE` until the exact historical checkpoint hashes are established.
+reproduced the same exact result. The PIPPI PopT-v2 case is now checkpoint-bound
+and reproduced exactly with its coordinate-aware main-results checkpoint and
+legacy window indexing. The remaining NeuroprobeV2 PopT and BaRISTA cases remain
+`NOT-COMPARABLE` until their exact historical checkpoint hashes are established.
 
 ## 1. Validate the public Brainsets workflow
 
@@ -391,11 +393,11 @@ Logistic/multi-STFT onset, BYD MLP/multi-STFT global flow, PIPPI
 PopT/multi-STFT speech, NeuroprobeV2 BaRISTA/waveform onset, and NeuroprobeV2
 PopT/multi-STFT hold-in onset—plus NeuroprobeV2 MLP/multi-STFT onset and HTNet
 500 Hz references, plus BYD Logistic/multi-STFT global flow and PIPPI
-Logistic/multi-STFT speech. All three Logistic cases, both MLP cases, and HTNet
-are runnable metric/config-record cases. The two PopT cases and BaRISTA
-are `NOT-COMPARABLE` because the historical results do not establish exact
-checkpoint hashes; a checkable identity, config, fold, metric, or supplied known
-checkpoint mismatch is still `FAIL`.
+Logistic/multi-STFT speech. All three Logistic cases, both MLP cases, PIPPI
+PopT-v2, and HTNet are runnable metric/config-record cases. NeuroprobeV2 PopT
+and BaRISTA are `NOT-COMPARABLE` because their historical results do not
+establish exact checkpoint hashes; a checkable identity, config, fold, metric,
+or supplied known checkpoint mismatch is still `FAIL`.
 
 ### Provider Logistic diagnostic evidence
 
@@ -414,11 +416,22 @@ metric comparison nevertheless failed:
 The BYD raw/split/channel payload had already been shown byte-identical across
 the historical and migrated H5 files. A read-only follow-up compared PIPPI's
 entire neural array plus 42 channel and selected high-cov speech split datasets;
-all 43 arrays were identical. These results rule out ordinary repacking or split
-selection as the source of the Logistic drift, but they do not prove identical
-post-preprocessing tensors or historical scikit-learn/BLAS execution. The
-historical runs also predate the committed multi-STFT implementation and therefore
-depend on an unrecoverable pre-merge working-tree snapshot.
+all 43 arrays were identical. The discrepancy was subsequently localized to
+window indexing: the paper environment's `temporaldata==0.1.1` lazy slicer used
+`floor` for both boundaries, whereas the migrated TorchBrain slicer snaps to the
+sampling grid and uses `ceil`. Non-grid-aligned boundaries therefore select a
+one-sample-shifted window. The original evaluation package under `tb_buildathon`
+reproduced every historical BYD/PIPPI Logistic metric exactly, and a separate
+iMINDBench diagnostic that restored floor indexing did the same. Multi-STFT,
+sample/channel selection, training-row order, BLAS threads, and the tested
+scikit-learn stacks are not sufficient explanations.
+
+The ceil helper originated in TemporalData commit
+`ad3e9850b5103bb8cc4eca421431b65658563fcf` on 2026-03-16, after v0.1.1, reached
+v0.1.2 on 2026-05-29, and entered TorchBrain through merge
+`6069a76c84bcbc96eb9253d1263e032046853e8f` (authored 2026-05-29, committed
+2026-06-10). The migration inherited this upstream semantic change; no global
+TorchBrain behavior was changed during the diagnostic.
 
 The combined comparator report is `FAIL` and remains local under
 `data/imindbench_validation/runs/provider_logistic_parity_20260903/`. Candidate

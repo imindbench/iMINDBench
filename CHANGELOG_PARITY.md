@@ -353,3 +353,27 @@ corresponding change.
 - Evidence/report ID: source result SHA256 values `6467500145bd4bbdc950b83f1d2b51b06c8bdfdf3076d76100ae54697f769772` and `10c24e3fa0be7e972539f165c921983e51cdf0da565dd5cb968a803cb93f32c1`; candidate SHA256 values `da23d2984451475f23b9f07e72705bfc52a0bca368c4435491d93dcaa3307247` and `fc05207467f495851c3603606143fd36a6678252b7632c25c24e8fa6270af897`; combined report SHA256 `229b4f9aeaf4e0f50bd60703dec32e54c76830c27f81240d2ede7e9e370ce0b6`, status `FAIL`.
 - Reviewer/disposition: retain both as transparent strict-parity failures. BYD's previously audited raw payload and all 43 PIPPI neural/channel/selected-split arrays compared here are byte-identical across historical and migrated H5s, narrowing likely causes to post-load numeric/runtime or unrecoverable historical working-tree differences.
 - Follow-up or user review needed: only pursue post-preprocessing tensor hashes or historical scikit-learn/BLAS reconstruction if strict provider-specific metric identity is required; do not tune the public defaults to these two records.
+
+### 2026-09-03 — Identify the BYD/PIPPI window-indexing parity cause
+
+- Change ID/commit subject: `docs: record historical slicing semantics`
+- Files changed: `provenance/AUDIT.md`, `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`.
+- Classification: experiment evidence/docs
+- Reason: explain why byte-identical provider payloads and matching historical runtime settings still produced different Logistic metrics after migration.
+- Behavioral effect: none; the investigation used isolated diagnostics and did not modify TorchBrain, processed H5 files, or existing outputs.
+- Results: the paper environment's `temporaldata==0.1.1` lazy slicer used floor-based boundary conversion, while migrated TorchBrain uses grid snapping plus ceil. The resulting one-sample window shift changes every prepared feature tensor. Running the original evaluation package under `tb_buildathon`, and independently restoring floor indexing only for an iMINDBench diagnostic, reproduced all historical BYD and PIPPI Logistic metrics exactly in both folds.
+- Evidence/report ID: caller-owned, non-overwriting runs `original_scripts_tb_buildathon_20260903` and `imindbench_legacy_floor_slice_20260903` under `data/imindbench_validation/runs/`.
+- Reviewer/disposition: record this separately from the historical worker/thread profile that restored NeuroprobeV2 MLP parity. The slicing change originated in TemporalData commit `ad3e9850b5103bb8cc4eca421431b65658563fcf` on 2026-03-16, reached v0.1.2 on 2026-05-29, and was incorporated into TorchBrain by merge `6069a76c84bcbc96eb9253d1263e032046853e8f`.
+- Follow-up or user review needed: decide whether parity requires an explicit legacy window-indexing policy at the iMINDBench evaluation boundary; do not change TorchBrain globally.
+
+### 2026-09-03 — Reproduce coordinate-aware PopT-v2 provider cases
+
+- Change ID/commit subject: `test: record PopT-v2 provider parity`
+- Files changed: parity manifest/tests/README, package README, provenance audit, release plan, consulted-artifact inventory, and this changelog.
+- Classification: experiment evidence/test/docs
+- Reason: test the temporal slicing finding with the paper's pretrained, coordinate-aware PopT-v2 model rather than only Logistic regression.
+- Behavioral effect: no runtime code changed; PIPPI PopT moved from `NOT-COMPARABLE` to checkpoint-bound `RUNNABLE` because its historical resolved config names the retained checkpoint and both copies have SHA256 `cf4e835d5309559d468b2f1ebd9b76882398c30bedae6c0c8bc6fdb4c506b52f`.
+- Results: BYD global-flow subject 41/session 1 and PIPPI speech subject 1/session 1 reproduced every historical train/validation/test accuracy and ROC-AUC metric exactly in both folds with legacy floor slicing. Logs confirm numerical LIP coordinates reached `MultiSubjBrainPositionalEncoding`; BYD dropped six non-finite coordinate channels and retained the historical 74-channel shape.
+- Evidence/report ID: caller-owned, non-overwriting run `imindbench_popt_main_ckpt_legacy_floor_coords_20260903`; BYD result/config/log SHA256 `cc2b0ea4f415416f299432fffa1a74f24156599575069197d6be428f72c9cd91` / `f9eeafa96653ccd6ca5baf6e6cb9e8702c862f5fe5fc031cf43d7e0c2d5e6aac` / `00a38c9584f9ac911b5abfad17c84c36e3afedb2b3a0566d66775bad9fd6bd5d`; PIPPI result/config/log SHA256 `f4a01e9d125711b73fb52d3381f28b80ab9e921075ce3415cf7968d4efd8068f` / `ef9f1c8ee7d371e9c67313f702d40f050bb1ce947a12a371c24c218d1880f560` / `c3f9573726c81118bf05d4945030a74b3be50468418d0be19fb4460f0e38110a`; PIPPI comparator report JSON/Markdown SHA256 `42261b375edc7fd941f959aad49afa4be89e806bec09caf4a037c8a81724ec96` / `65328fdd253a70723d0487fd3bf176afaf160a71eb7c0c89017164b30f9b285f`, status `PASS`.
+- Reviewer/disposition: accept the same pretrained checkpoint used by the main PopT-v2 results for this parity case; keep the legacy slicing policy scoped to iMINDBench rather than reverting TorchBrain globally.
+- Follow-up or user review needed: implement and test an explicit legacy window-indexing policy before making the diagnostic path a supported release command.

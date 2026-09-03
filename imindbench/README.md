@@ -161,9 +161,10 @@ python scripts/parity_tools.py \
 ```
 
 `PASS` means metric/config-record parity only; it does not prove execution
-provenance. `FAIL` and `MISSING` are nonzero exits. PopT and BaRISTA references
-remain `NOT-COMPARABLE`—also a nonzero exit—when every checkable field matches
-but the exact historical checkpoint hash is unknown. See the
+provenance. `FAIL` and `MISSING` are nonzero exits. The PIPPI PopT-v2 reference
+is checkpoint-bound and runnable; the remaining NeuroprobeV2 PopT and BaRISTA
+references remain `NOT-COMPARABLE`—also a nonzero exit—when every checkable
+field matches but the exact historical checkpoint hash is unknown. See the
 [`parity reference README`](../artifacts/parity_reference/README.md) for the
 precise status contract.
 
