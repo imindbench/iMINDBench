@@ -186,6 +186,7 @@ imindbench/utils/fold_helpers.py	evaluation runtime	imported by the imindbench p
 imindbench/utils/logging_utils.py	evaluation runtime	imported by the imindbench package
 imindbench/utils/pipeline_contracts.py	evaluation runtime	imported by the imindbench package
 provenance/AUDIT.md	release documentation	public repository documentation
+provenance/PARITY_MATRIX.md	release documentation	public repository documentation
 provenance/consulted_artifacts.tsv	release provenance	audit and retained-surface evidence
 provenance/paper_figs_provenance.json	release provenance	audit and retained-surface evidence
 provenance/surface/generate_retained_manifest.py	release provenance	audit and retained-surface evidence

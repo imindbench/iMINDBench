@@ -6,9 +6,11 @@ identifiers, not local filesystem paths.
 
 The three Logistic cases, BYD MLP, NeuroprobeV2 MLP, PIPPI PopT-v2, and
 deterministic HTNet are runnable metric/config-record comparisons. NeuroprobeV2
-Logistic passes; fresh BYD and PIPPI Logistic executions match
-identity/configuration but fail the strict metric contract with small metric
-drift. The NeuroprobeV2 MLP case is the completed development GPU parity
+Logistic passes. Fresh BYD and PIPPI Logistic runs using current window indexing
+match identity/configuration but fail the strict metric contract; isolated runs
+restoring the historical floor-based slicing match every historical metric.
+That temporal policy is not yet exposed by the clean iMINDBench CLI. The
+NeuroprobeV2 MLP case is the completed development GPU parity
 evidence and records the historical paper-run worker/thread profile. Release
 acceptance also passed from the pinned, non-editable built artifacts; the
 comparator's `PASS` remains limited to the metric/config record.

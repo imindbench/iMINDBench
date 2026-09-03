@@ -524,6 +524,10 @@ preserves log-derived sample counts as provenance only.
 
 ### Notebook-to-run provenance and smoke parity
 
+The checked-in family-level parity matrix and replication guide is
+`provenance/PARITY_MATRIX.md`; the exhaustive machine-readable mapping remains
+`provenance/paper_figs_provenance.json`.
+
 Scope notebook analysis exclusively to
 `/home/geeling/Projects/ieeg_project/torch_brain/examples/neuroprobe_eval/notebooks/paper_figs/`.
 Use those paper-figure notebooks only to inventory what produced the reported

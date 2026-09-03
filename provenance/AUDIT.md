@@ -17,6 +17,11 @@ YAML entries resolve to 102 unique result directories under the read-only
 `09_neurips` tree; every directory was present during this audit. The notebooks
 contain no MVPFormer or SEEGnificant reference.
 
+`PARITY_MATRIX.md` summarizes those directories by dataset/model/preprocessor
+family, run era, data-layer lineage, and required backward-parity adjustments.
+It also gives a clean-checkout replication procedure without binding the
+documentation to one machine's absolute paths.
+
 BaRISTA is genuinely used: the Appendix 2 and Table 1 waveform YAMLs include its
 NeuroprobeV2, BYD, and Pippi result families. However, the only consulted BRANT/
 BaRISTA-style script does not reproduce the exact `barista_jun9` output roots,

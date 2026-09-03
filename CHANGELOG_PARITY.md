@@ -377,3 +377,16 @@ corresponding change.
 - Evidence/report ID: caller-owned, non-overwriting run `imindbench_popt_main_ckpt_legacy_floor_coords_20260903`; BYD result/config/log SHA256 `cc2b0ea4f415416f299432fffa1a74f24156599575069197d6be428f72c9cd91` / `f9eeafa96653ccd6ca5baf6e6cb9e8702c862f5fe5fc031cf43d7e0c2d5e6aac` / `00a38c9584f9ac911b5abfad17c84c36e3afedb2b3a0566d66775bad9fd6bd5d`; PIPPI result/config/log SHA256 `f4a01e9d125711b73fb52d3381f28b80ab9e921075ce3415cf7968d4efd8068f` / `ef9f1c8ee7d371e9c67313f702d40f050bb1ce947a12a371c24c218d1880f560` / `c3f9573726c81118bf05d4945030a74b3be50468418d0be19fb4460f0e38110a`; PIPPI comparator report JSON/Markdown SHA256 `42261b375edc7fd941f959aad49afa4be89e806bec09caf4a037c8a81724ec96` / `65328fdd253a70723d0487fd3bf176afaf160a71eb7c0c89017164b30f9b285f`, status `PASS`.
 - Reviewer/disposition: accept the same pretrained checkpoint used by the main PopT-v2 results for this parity case; keep the legacy slicing policy scoped to iMINDBench rather than reverting TorchBrain globally.
 - Follow-up or user review needed: implement and test an explicit legacy window-indexing policy before making the diagnostic path a supported release command.
+
+### 2026-09-03 — Summarize paper-output parity recipes
+
+- Change ID/commit subject: `docs: add paper-output parity matrix`
+- Files changed: `provenance/PARITY_MATRIX.md`, `provenance/AUDIT.md`, `RELEASE_MIGRATION_PLAN.md`, `artifacts/parity_reference/README.md`, `provenance/surface/retained.tsv`, `CHANGELOG_PARITY.md`, and the project command notes.
+- Classification: provenance/docs
+- Reason: give future agents one family-level map from the 102 notebook/YAML result directories to their run era, known BrainSets/TemporalData lineage, and required backward-parity adjustments.
+- Behavioral effect: none. The matrix distinguishes verified requirements from inferred or missing provenance and documents the unsupported legacy-floor CLI gap.
+- Reviewer/disposition: two documentation reviews corrected the mixed-profile
+  BYD exceptions, separated original and rebuttal HTNet/PopT families, and
+  verified coverage of all ten inventory family IDs. The 22 parity-tool tests
+  and all 94 tests in the retained non-editable artifact environment pass.
+- Follow-up or user review needed: implement the scoped legacy-floor window option before treating BYD/PIPPI floor-era cases as clean-checkout runnable commands.
