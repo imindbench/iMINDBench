@@ -92,6 +92,8 @@ def _htnet_preprocess() -> dict[str, object]:
 def _candidate(manifest: dict[str, object], case_id: str) -> dict[str, object]:
     record = parity_tools.load_reference_record(manifest, case_id)
     identity = record["identity"]
+    preprocessor_config = manifest["cases"][case_id]["preprocessor_config"]
+    sampling_rate = 1000 if preprocessor_config.endswith("1000Hz") else 2048
     return {
         "model_name": identity["model_name"],
         "evaluation_results": {
@@ -106,7 +108,7 @@ def _candidate(manifest: dict[str, object], case_id: str) -> dict[str, object]:
             }
         },
         "config": {
-            "preprocess": _multi_stft_preprocess(2048),
+            "preprocess": _multi_stft_preprocess(sampling_rate),
             "seed": identity["seed"],
             "subject_id": identity["subject"],
             "trial_id": identity["session"],
@@ -115,6 +117,56 @@ def _candidate(manifest: dict[str, object], case_id: str) -> dict[str, object]:
             "model_name": identity["model_name"],
         },
     }
+
+
+@pytest.mark.parametrize(
+    ("case_id", "dataset_config", "task", "expected_auc"),
+    [
+        (
+            "byd_logistic_multistft_global_flow_sub41_sess1",
+            "kelesbyd2024",
+            "global_flow",
+            (0.3745777777777778, 0.5322988699612076),
+        ),
+        (
+            "pippi_logistic_multistft_speech_sub1_sess1",
+            "berezutskayapippi2022",
+            "speech",
+            (0.6169217687074829, 0.7704081632653061),
+        ),
+    ],
+)
+def test_provider_logistic_case_builds_historical_command_and_compares(
+    tmp_path, manifest, case_id, dataset_config, task, expected_auc
+):
+    data_root = tmp_path / "data"
+    data_root.mkdir()
+    command = parity_tools.build_case_command(
+        manifest,
+        case_id,
+        data_root=data_root,
+        output_root=tmp_path / "output",
+        checkpoint_map={},
+        resource_map={},
+    )
+    assert f"dataset={dataset_config}" in command
+    assert "model=logistic" in command
+    assert f"dataset.task={task}" in command
+    assert "runner.num_workers=4" in command
+    assert "runner.pin_memory=true" in command
+    assert "runner.persistent_workers=true" in command
+    assert "runner.prefetch_factor=2" in command
+    assert "runtime.preprocess_torch_num_threads=6" in command
+
+    reference = parity_tools.load_reference_record(manifest, case_id)
+    assert tuple(fold["test_roc_auc"] for fold in reference["folds"]) == expected_auc
+
+    candidate_path = tmp_path / "candidate.json"
+    _write_json(candidate_path, _candidate(manifest, case_id))
+    report = parity_tools.compare_case(
+        manifest, case_id, candidate_path, checkpoint_map={}
+    )
+    assert report["status"] == "PASS"
 
 
 def _htnet_candidate(manifest: dict[str, object], case_id: str) -> dict[str, object]:

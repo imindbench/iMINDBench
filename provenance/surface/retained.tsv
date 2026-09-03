@@ -6,12 +6,14 @@ LICENSES/BaRISTA-LICENSE.md	license metadata	distributed with the release
 RELEASE_MIGRATION_PLAN.md	release documentation	public repository documentation
 THIRD_PARTY.md	license metadata	distributed with the release
 artifacts/parity_reference/README.md	release documentation	public repository documentation
+artifacts/parity_reference/cases/byd_logistic_multistft_global_flow_sub41_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/byd_mlp_multistft_global_flow_sub41_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/neuroprobev2_barista_waveform_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/neuroprobev2_htnet500_hpf_global_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/neuroprobev2_logistic_multistft_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/neuroprobev2_mlp_multistft_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/neuroprobev2_popt_multistft_holdin_onset_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
+artifacts/parity_reference/cases/pippi_logistic_multistft_speech_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/cases/pippi_popt_multistft_speech_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/manifest.json	canonical parity reference	consumed by scripts/parity_tools.py
 config/brainsets_smoke_manifest.json	public validation configuration	consumed by validation tooling

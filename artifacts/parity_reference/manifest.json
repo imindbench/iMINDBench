@@ -23,6 +23,40 @@
       },
       "checkpoint": {"required": false, "mapping_key": null, "reference_sha256": null}
     },
+    "byd_logistic_multistft_global_flow_sub41_sess1": {
+      "comparability": "RUNNABLE",
+      "reference_record_uri": "imindbench://artifacts/parity_reference/cases/byd_logistic_multistft_global_flow_sub41_sess1.json",
+      "reference_record_sha256": "173f2dabbfeb3c4f2336ef1a7dd278ad21c8ea8c40bd556d72b75e1bf2a36921",
+      "dataset_config": "kelesbyd2024",
+      "model_config": "logistic",
+      "preprocessor_config": "laplacian_multi_stft_1000Hz",
+      "overrides": {
+        "dataset.regime": "within-session", "dataset.label_mode": "binary", "dataset.task": "global_flow",
+        "dataset.test_subject": 41, "dataset.test_session": 1,
+        "dataset.train_same_subject_only": false, "dataset.train_sample_fraction": 1.0,
+        "dataset.max_train_samples_per_subject": "auto", "runner.num_workers": 4,
+        "runner.pin_memory": true, "runner.persistent_workers": true, "runner.prefetch_factor": 2,
+        "runtime.preprocess_torch_num_threads": 6, "runtime.seed": 42
+      },
+      "checkpoint": {"required": false, "mapping_key": null, "reference_sha256": null}
+    },
+    "pippi_logistic_multistft_speech_sub1_sess1": {
+      "comparability": "RUNNABLE",
+      "reference_record_uri": "imindbench://artifacts/parity_reference/cases/pippi_logistic_multistft_speech_sub1_sess1.json",
+      "reference_record_sha256": "bf1c67872b0774e1066aea5358410c9c961c3a75892025e2edfcb8adae1af468",
+      "dataset_config": "berezutskayapippi2022",
+      "model_config": "logistic",
+      "preprocessor_config": "laplacian_multi_stft_2048Hz",
+      "overrides": {
+        "dataset.regime": "within-session", "dataset.label_mode": "binary", "dataset.task": "speech",
+        "dataset.test_subject": 1, "dataset.test_session": 1, "dataset.subset_tier": "high-cov",
+        "dataset.train_same_subject_only": false, "dataset.train_sample_fraction": 1.0,
+        "dataset.max_train_samples_per_subject": "auto", "runner.num_workers": 4,
+        "runner.pin_memory": true, "runner.persistent_workers": true, "runner.prefetch_factor": 2,
+        "runtime.preprocess_torch_num_threads": 6, "runtime.seed": 42
+      },
+      "checkpoint": {"required": false, "mapping_key": null, "reference_sha256": null}
+    },
     "neuroprobev2_mlp_multistft_onset_sub1_sess1": {
       "comparability": "RUNNABLE",
       "reference_record_uri": "imindbench://artifacts/parity_reference/cases/neuroprobev2_mlp_multistft_onset_sub1_sess1.json",
