@@ -26,6 +26,8 @@ Neuroprobe artifacts. One fixed one-second window was byte-identical through the
 Neuroprobe2025 and NeuroprobeV2 explicit-recording views. The two checkpoint-free
 CPU parity cases have run: Logistic passed strict record parity, while BYD MLP
 completed but failed metric parity and is recorded as a provenance/drift finding.
+A follow-up BYD GPU diagnostic applied the Neuroprobe historical worker/thread
+profile; it also failed, ruling out that profile mismatch as a sufficient BYD fix.
 The checkpoint-free NeuroprobeV2 MLP GPU case then matched every historical fold
 metric exactly on newly prepared public data after restoring the historical
 worker/thread profile. A second run from the final non-editable artifact stack
@@ -564,6 +566,9 @@ historical-rendering gap in the provenance manifest and change log.
    retained/removed manifests and tests, then add the remaining parity matrix,
    command builder, comparator and reports. Logistic and the NeuroprobeV2 MLP
    have strict `PASS` reports; BYD MLP has a transparent `FAIL` drift report.
+   Its follow-up historical-profile diagnostic also failed: fold 0 test ROC-AUC
+   was `0.3784888889` versus `0.4259555556`, while fold 1 was `0.5952099848`
+   versus `0.5817169843`.
    Reports remain caller-owned evidence rather than committed generated output.
 5. **Complete:** Trace source paper notebooks to YAMLs/original outputs and add
    canonical launch mappings without requiring notebook execution; retain the

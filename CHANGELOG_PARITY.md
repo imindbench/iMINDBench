@@ -328,3 +328,15 @@ corresponding change.
 - Results: `conda env create --prefix <fresh-prefix> --file environment.yml` completed; Conda resolution finished in under 30 seconds and the full cached installation completed in roughly two minutes. Installing the reviewed iMINDBench and TorchBrain wheels produced no editable packages, passed `pip check`, resolved both imports from site-packages, reported PyTorch `2.9.1+cu128`/CUDA `12.8`/xformers `0.0.33.post2`, passed CLI help, and passed all 91 tests.
 - Reviewer/disposition: two independent reviews agreed this is the smallest maintainable change and matches the established parity environment; exact Conda build pins were rejected as brittle and unnecessary.
 - Follow-up or user review needed: none for the local release-migration gate. A generated pip constraints/lock artifact may be added later if byte-level cross-date dependency resolution is required.
+
+### 2026-09-03 — Test the Neuroprobe historical profile on BYD MLP
+
+- Change ID/commit subject: `test: record BYD historical-profile diagnostic`
+- Files changed: `RELEASE_MIGRATION_PLAN.md`, `CHANGELOG_PARITY.md`.
+- Classification: experiment evidence/docs
+- Reason: determine whether the four-worker, pinned/persistent-loader, prefetch-two, six-preprocessing-thread profile that restored exact NeuroprobeV2 MLP parity also explains the BYD MLP drift.
+- Behavioral effect: none; the profile was applied only as a caller-owned GPU diagnostic and the BYD manifest defaults were not changed.
+- Results: strict comparison remained `FAIL`. Fold 0 test accuracy/ROC-AUC was `0.4133333333`/`0.3784888889` versus historical `0.44`/`0.4259555556`; fold 1 was `0.5779220779`/`0.5952099848` versus historical `0.5519480519`/`0.5817169843`. The profile improved fold 1 beyond the historical score but did not restore record identity.
+- Evidence/report ID: caller-owned run `byd_mlp_historical_profile_20260903`; result SHA256 `0ad3c293101bb92688635a3744f8825e3e335f25ac583952ad25f1922ebee6c0`; resolved-config SHA256 `f2d5c88efa7b84d9c10829003783f24ff9cde3c3eceae840ae987328db7a3d7d`; run-log SHA256 `95ba0fdeaa1e6debe1bff617e4981e7e8a20c431c3994bc02977fe0b9de00d73`; comparator-report SHA256 `f435434d288ceceb57cc0dcdce9916b76fbd6050a746ac89999b914ee3cb0e7f`, status `FAIL`.
+- Reviewer/disposition: retain BYD as a transparent data/environment provenance drift finding. The Neuroprobe profile is dataset/run-specific evidence, not a global MLP setting.
+- Follow-up or user review needed: recover historical BYD H5/environment fingerprints before attributing the remaining difference or changing evaluation code.
