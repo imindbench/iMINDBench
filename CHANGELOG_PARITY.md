@@ -340,3 +340,16 @@ corresponding change.
 - Evidence/report ID: caller-owned run `byd_mlp_historical_profile_20260903`; result SHA256 `0ad3c293101bb92688635a3744f8825e3e335f25ac583952ad25f1922ebee6c0`; resolved-config SHA256 `f2d5c88efa7b84d9c10829003783f24ff9cde3c3eceae840ae987328db7a3d7d`; run-log SHA256 `95ba0fdeaa1e6debe1bff617e4981e7e8a20c431c3994bc02977fe0b9de00d73`; comparator-report SHA256 `f435434d288ceceb57cc0dcdce9916b76fbd6050a746ac89999b914ee3cb0e7f`, status `FAIL`.
 - Reviewer/disposition: retain BYD as a transparent data/environment provenance drift finding. The Neuroprobe profile is dataset/run-specific evidence, not a global MLP setting.
 - Follow-up or user review needed: recover historical BYD H5/environment fingerprints before attributing the remaining difference or changing evaluation code.
+
+### 2026-09-03 — Add BYD and PIPPI Logistic parity diagnostics
+
+- Change ID/commit subject: `test: add provider Logistic parity evidence`
+- Files changed: two reduced Logistic reference records, parity manifest/tests, parity READMEs, provenance inventories, release plan, and this changelog.
+- Classification: experiment evidence/test/docs
+- Reason: use deterministic CPU Logistic runs to distinguish BYD/PIPPI data-path drift from the neural-training discrepancy.
+- Behavioral effect: none; two paper-referenced runnable cases and their command/comparison tests were added without changing evaluation code.
+- Smoke cases affected: BYD full-tier global-flow subject 41/session 1 and PIPPI high-cov speech subject 1/session 1, both multi-STFT within-session with folds 0 and 1.
+- Results: both identities/config hashes and all historical split counts/feature shapes matched, but strict metrics failed. BYD candidate test AUCs were `0.3699555556`/`0.5471411705` versus `0.3745777778`/`0.5322988700`; PIPPI was `0.6150793651`/`0.7654478458` versus `0.6169217687`/`0.7704081633`.
+- Evidence/report ID: source result SHA256 values `6467500145bd4bbdc950b83f1d2b51b06c8bdfdf3076d76100ae54697f769772` and `10c24e3fa0be7e972539f165c921983e51cdf0da565dd5cb968a803cb93f32c1`; candidate SHA256 values `da23d2984451475f23b9f07e72705bfc52a0bca368c4435491d93dcaa3307247` and `fc05207467f495851c3603606143fd36a6678252b7632c25c24e8fa6270af897`; combined report SHA256 `229b4f9aeaf4e0f50bd60703dec32e54c76830c27f81240d2ede7e9e370ce0b6`, status `FAIL`.
+- Reviewer/disposition: retain both as transparent strict-parity failures. BYD's previously audited raw payload and all 43 PIPPI neural/channel/selected-split arrays compared here are byte-identical across historical and migrated H5s, narrowing likely causes to post-load numeric/runtime or unrecoverable historical working-tree differences.
+- Follow-up or user review needed: only pursue post-preprocessing tensor hashes or historical scikit-learn/BLAS reconstruction if strict provider-specific metric identity is required; do not tune the public defaults to these two records.

@@ -1,12 +1,14 @@
 # Frozen parity references
 
-`manifest.json` defines seven paper-figure parity cases and hashes every reduced
+`manifest.json` defines nine paper-figure parity cases and hashes every reduced
 reference record in `cases/`. The `original-results://` URIs are stable source
 identifiers, not local filesystem paths.
 
-Logistic, BYD MLP, NeuroprobeV2 MLP, and deterministic HTNet can pass
-metric/config-record comparison. The NeuroprobeV2 MLP case is the completed
-development GPU parity evidence and records the historical paper-run
+The three Logistic cases, BYD MLP, NeuroprobeV2 MLP, and deterministic HTNet are
+runnable metric/config-record comparisons. NeuroprobeV2 Logistic passes; fresh
+BYD and PIPPI Logistic executions match identity/configuration but fail the
+strict metric contract with small metric drift. The NeuroprobeV2 MLP case is the
+completed development GPU parity evidence and records the historical paper-run
 worker/thread profile. Release acceptance also passed from the pinned,
 non-editable built artifacts; the comparator's `PASS` remains limited to the
 metric/config record.

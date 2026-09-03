@@ -23,9 +23,12 @@ full suite, prepared and reloaded one recording for each provider, completed ful
 PIPPI and Neuroprobe2025 preparation plus idempotent full reruns, and opened every
 resolved recording for both folds of all four NeuroprobeV2 regimes from the shared
 Neuroprobe artifacts. One fixed one-second window was byte-identical through the
-Neuroprobe2025 and NeuroprobeV2 explicit-recording views. The two checkpoint-free
-CPU parity cases have run: Logistic passed strict record parity, while BYD MLP
-completed but failed metric parity and is recorded as a provenance/drift finding.
+Neuroprobe2025 and NeuroprobeV2 explicit-recording views. The initial two
+checkpoint-free CPU parity cases have run: NeuroprobeV2 Logistic passed strict
+record parity, while BYD MLP completed but failed metric parity and is recorded
+as a provenance/drift finding. Later paper-referenced BYD and PIPPI Logistic
+diagnostics matched identities, configs, split counts, and feature shapes but
+both failed the strict metric contract with small output drift.
 A follow-up BYD GPU diagnostic applied the Neuroprobe historical worker/thread
 profile; it also failed, ruling out that profile mismatch as a sufficient BYD fix.
 The checkpoint-free NeuroprobeV2 MLP GPU case then matched every historical fold
@@ -387,11 +390,42 @@ The manifest now contains the original five selected records—NeuroprobeV2
 Logistic/multi-STFT onset, BYD MLP/multi-STFT global flow, PIPPI
 PopT/multi-STFT speech, NeuroprobeV2 BaRISTA/waveform onset, and NeuroprobeV2
 PopT/multi-STFT hold-in onset—plus NeuroprobeV2 MLP/multi-STFT onset and HTNet
-500 Hz references. Logistic, both MLP cases, and HTNet are runnable
-metric/config-record cases. The two PopT cases and BaRISTA
+500 Hz references, plus BYD Logistic/multi-STFT global flow and PIPPI
+Logistic/multi-STFT speech. All three Logistic cases, both MLP cases, and HTNet
+are runnable metric/config-record cases. The two PopT cases and BaRISTA
 are `NOT-COMPARABLE` because the historical results do not establish exact
 checkpoint hashes; a checkable identity, config, fold, metric, or supplied known
 checkpoint mismatch is still `FAIL`.
+
+### Provider Logistic diagnostic evidence
+
+The paper-referenced BYD and PIPPI multi-STFT Logistic cases were run from the
+local iMINDBench and TorchBrain-public checkouts against newly processed public
+data with their historical four-worker/six-preprocessing-thread profile. Both
+reproduced the historical split totals and flattened feature shapes, and both
+matched the frozen identity and canonical config/preprocessor hashes. Strict
+metric comparison nevertheless failed:
+
+- BYD fold 0/1 test ROC-AUC was `0.3699555556` / `0.5471411705`, versus
+  `0.3745777778` / `0.5322988700` historically.
+- PIPPI fold 0/1 test ROC-AUC was `0.6150793651` / `0.7654478458`, versus
+  `0.6169217687` / `0.7704081633` historically.
+
+The BYD raw/split/channel payload had already been shown byte-identical across
+the historical and migrated H5 files. A read-only follow-up compared PIPPI's
+entire neural array plus 42 channel and selected high-cov speech split datasets;
+all 43 arrays were identical. These results rule out ordinary repacking or split
+selection as the source of the Logistic drift, but they do not prove identical
+post-preprocessing tensors or historical scikit-learn/BLAS execution. The
+historical runs also predate the committed multi-STFT implementation and therefore
+depend on an unrecoverable pre-merge working-tree snapshot.
+
+The combined comparator report is `FAIL` and remains local under
+`data/imindbench_validation/runs/provider_logistic_parity_20260903/`. Candidate
+SHA256 values are `da23d2984451475f23b9f07e72705bfc52a0bca368c4435491d93dcaa3307247`
+(BYD) and `fc05207467f495851c3603606143fd36a6678252b7632c25c24e8fa6270af897`
+(PIPPI); report JSON SHA256 is
+`229b4f9aeaf4e0f50bd60703dec32e54c76830c27f81240d2ede7e9e370ce0b6`.
 
 ### GPU acceptance evidence
 
@@ -564,11 +598,12 @@ historical-rendering gap in the provenance manifest and change log.
    installation was subsequently completed in step 7.
 4. **Complete for tooling and selected executions:** Reduce the committed baseline using
    retained/removed manifests and tests, then add the remaining parity matrix,
-   command builder, comparator and reports. Logistic and the NeuroprobeV2 MLP
-   have strict `PASS` reports; BYD MLP has a transparent `FAIL` drift report.
-   Its follow-up historical-profile diagnostic also failed: fold 0 test ROC-AUC
-   was `0.3784888889` versus `0.4259555556`, while fold 1 was `0.5952099848`
-   versus `0.5817169843`.
+   command builder, comparator and reports. NeuroprobeV2 Logistic and MLP have
+   strict `PASS` reports; BYD MLP and the added BYD/PIPPI Logistic diagnostics
+   have transparent `FAIL` drift reports.
+   The BYD MLP follow-up historical-profile diagnostic also failed: fold 0 test
+   ROC-AUC was `0.3784888889` versus `0.4259555556`, while fold 1 was
+   `0.5952099848` versus `0.5817169843`.
    Reports remain caller-owned evidence rather than committed generated output.
 5. **Complete:** Trace source paper notebooks to YAMLs/original outputs and add
    canonical launch mappings without requiring notebook execution; retain the

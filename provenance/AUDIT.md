@@ -81,6 +81,12 @@ memory, prefetch factor two, and six preprocessing threads) and matched every
 frozen fold metric exactly on newly prepared public data. The deterministic
 HTNet record remains a runnable but unexecuted optional reference.
 
+Two later provider-specific Logistic records supplement the original subset:
+BYD multi-STFT/global-flow subject 41/session 1 and PIPPI high-cov
+multi-STFT/speech subject 1/session 1. Both are referenced by the paper's
+flagship STFT YAMLs and retain their adjacent historical resolved configs and
+run-log hashes in `consulted_artifacts.tsv`.
+
 ## Gaps to carry forward
 
 - Figure 4b remains a manual four-panel selection rather than a notebook default.

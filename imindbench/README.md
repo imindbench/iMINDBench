@@ -115,7 +115,7 @@ config rather than mixing groups blindly.
 
 [`scripts/parity_tools.py`](../scripts/parity_tools.py) is an offline tool. It
 constructs commands but never launches them, and it compares existing result
-JSONs against the seven records in
+JSONs against the nine records in
 [`artifacts/parity_reference/`](../artifacts/parity_reference/). Inspect its
 validated interfaces with:
 
