@@ -41,28 +41,54 @@ imindbench-grid --recipe barista --dataset neuroprobev2 \
 ```
 
 The BaRISTA recipe uses a small target/task subset and sets explicit
-learning rates, worker settings and scheduler overrides. The exact paper checkpoint
-identity and retrieval instructions remain incomplete.
+learning rates, worker settings and scheduler overrides.
 
-## Recipe catalog and paper coverage
+## Data and checkpoints
 
-| Recipe | What it selects | Paper relationship |
-| --- | --- | --- |
-| `baselines` | Within-session; Neuroprobe Logistic/MLP/CNN/PopT; BYD/PIPPI PopT and native-rate HTNet | Partial Table 1/Appendix 2 coverage; selected model examples |
-| `brainbert` | Within-session BrainBERT encoder + linear readout | BrainBERT row; does not cover the three standalone STFT classifiers |
-| `barista` | Three tasks × two targets per dataset | BaRISTA command structure; historical checkpoint/launcher mapping incomplete |
-| `stft_sweep` | Logistic; 3 windows × 3 overlaps × 4 frequency ceilings | Figure 4 / STFT appendices |
-| `sample_efficiency` | Neuroprobe Logistic/MLP/CNN/PopT, fractions 1 through 1/16 | Explicit fraction workflow; not a recovered historical launcher |
-| `hold_in` | PopT hold-in-session with packaged decodable population | Figure 3 / Appendix 5 family |
-| `multisource` | PopT with three-provider training, within-session evaluation | Figure 3 / Appendix 5 family |
+Prepare recordings following the [quickstart](../README.md#prepare-public-data).
+Use absolute paths in your external paths config and keep data, checkpoints,
+caches and outputs outside the installation.
 
-Four additional `paper_*` recipes recover representative multi-STFT,
-BrainBERT-STFT classifier, HTNet 500 Hz and DIVER settings from saved configs.
-See [PAPER_COVERAGE.md](PAPER_COVERAGE.md) for exact scope and evidence. Use
-`baselines` for an introductory run and a paper recipe when those recovered
-settings are intended. All paper model families remain available; two unused rate-conversion presets
-have been archived as described in the coverage guide. Not every paper variant
-has a complete grid.
+| Model or preprocessing path | Required resources |
+| --- | --- |
+| Logistic, MLP, CNN, HTNet | No pretrained checkpoint |
+| BrainBERT encoder + linear readout | `paths.brainbert_checkpoint` |
+| PopT | `paths.popt_checkpoint`; numerical channel coordinates from the provider |
+| BaRISTA | `paths.barista_checkpoint`; coordinate/Destrieux metadata; compatible xformers runtime |
+| DIVER | `model.upstream_ckpt` and writable `model.model_dir`; matching coordinate and waveform config |
+
+Checkpoints are not bundled, and public retrieval instructions are not yet
+documented here for BrainBERT, PopT, BaRISTA or DIVER. The selected paper
+checkpoint identities remain unresolved for BrainBERT, BaRISTA and DIVER.
+The main-results PopT checkpoint has SHA256
+`cf4e835d5309559d468b2f1ebd9b76882398c30bedae6c0c8bc6fdb4c506b52f`;
+other PopT experiment families may use different weights. This hash identifies
+an artifact, not a download location, and the missing instructions do not imply
+that upstream projects lack published weights.
+
+Use the checkpoint required by your experiment and record its SHA256;
+substituting weights from the same model family can change the results.
+Start with Logistic, MLP, CNN or HTNet if the required checkpoint is unavailable.
+
+## Recipe catalog
+
+| Recipe | What it selects |
+| --- | --- |
+| `baselines` | Within-session; Neuroprobe Logistic/MLP/CNN/PopT; BYD/PIPPI PopT and native-rate HTNet |
+| `brainbert` | Within-session BrainBERT encoder + linear readout |
+| `barista` | Three tasks × two targets per dataset |
+| `stft_sweep` | Logistic; 3 windows × 3 overlaps × 4 frequency ceilings |
+| `sample_efficiency` | Neuroprobe Logistic/MLP/CNN/PopT, fractions 1 through 1/16 |
+| `hold_in` | PopT hold-in-session with packaged decodable population |
+| `multisource` | PopT with three-provider training, within-session evaluation |
+| `paper_multistft` | Multi-STFT Logistic/MLP/CNN/PopT on three datasets |
+| `paper_brainbert_stft` | Single-STFT Logistic/MLP/CNN on three datasets; no encoder checkpoint |
+| `paper_htnet500` | HTNet with 15-second waveform context at 500 Hz on three datasets |
+| `paper_diver` | Frozen DIVER encoder with 15-second waveform context at 500 Hz on three datasets |
+
+Use `baselines` for an introductory run. See
+[PAPER_COVERAGE.md](PAPER_COVERAGE.md) for the relationship between these recipes
+and paper experiments, including population and reproduction limits.
 
 Use repeated `--model`, `--task`, `--regime`, and `--target` flags to select a
 subset already present in a recipe. `--count` prints the count after filtering;

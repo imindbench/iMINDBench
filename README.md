@@ -87,11 +87,8 @@ optional and default to null in result JSONs.
 
 ## Experiments and reproduction
 
-- [Three examples and recipe catalog](docs/EXPERIMENTS.md): CPU, GPU, and checkpoint-backed runs.
-- [Paper coverage](docs/PAPER_COVERAGE.md): experiment families, settings and remaining gaps.
-- [Resources](docs/RESOURCES.md): required data and checkpoints.
-- [Reproduction](docs/REPRODUCTION.md): matching experiment inputs and runtime settings.
-- [Submission packaging](docs/SUBMISSION.md): export a reviewed source archive.
+- [Experiments](docs/EXPERIMENTS.md): three examples, checkpoints, recipes and launcher options.
+- [Paper coverage](docs/PAPER_COVERAGE.md): experiment mapping and reproduction limits.
 
 All eight model families are retained: Logistic, Linear/BrainBERT, MLP, CNN,
 HTNet, PopT, DIVER and BaRISTA. Exact reproduction depends on the dataset
@@ -109,6 +106,20 @@ python -m pytest -q
 
 Install the documented TorchBrain dependency first. Optional-model tests require
 the corresponding extras.
+
+Build a source archive from the repository root:
+
+```bash
+python scripts/build_submission.py --output /path/to/imindbench-submission.tar.gz
+```
+
+Choose an output path that does not already exist. The exporter uses
+`config/submission_files.json` to include release files and excludes Git history,
+local settings, data and checkpoints. It runs without Git. Optionally pass
+`--torch-brain-wheel /path/to/torch_brain-<version>-py3-none-any.whl` to bundle the
+exact dependency artifact pinned in `config/torch_brain_dependency.json` and
+update the exported installation command. Other dependencies must still be
+installed separately.
 
 ## Licensing
 
