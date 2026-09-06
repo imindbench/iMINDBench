@@ -1,4 +1,4 @@
-"""Check real config composition and captured historical launcher commands."""
+"""Check recipe composition, grid selection and execution behavior."""
 
 import json
 import subprocess
@@ -11,9 +11,6 @@ from hydra import compose, initialize_config_dir
 from imindbench import launch
 from imindbench.utils.pipeline_contracts import validate_eval_config
 
-REFERENCE = json.loads((Path(__file__).parent / "launcher_reference.json").read_text())[
-    "scripts"
-]
 CONF = Path(launch.__file__).parent / "conf"
 
 
@@ -41,68 +38,6 @@ def _overrides(command):
         for token in command
         if "=" in token
     }
-
-
-@pytest.mark.parametrize("script", sorted(REFERENCE))
-def test_commands_match_bounded_original_shell_capture(script):
-    reference = REFERENCE[script]
-    old = reference["inventory"]
-    dataset = old["DATASET_CFG"].removesuffix("_multisource_train")
-    family = next(
-        (
-            name
-            for name in ["brainbert", "barista", "stft_sweep", "hold_in", "multisource"]
-            if name in script
-        ),
-        "baselines",
-    )
-    first = _overrides(reference["commands"][0])
-    recipe = launch.load_recipe(family, dataset)
-    assert recipe["tasks"] == old["TASKS"].split()
-    assert recipe["targets"] == [
-        [int(value) for value in pair.split()]
-        for pair in old.get("SUBJECT_TRIALS", old.get("SUBJECT_SESSIONS"))
-    ]
-    assert list(recipe["models"]) == old.get("MODELS", ["barista"])
-    assert recipe["regimes"] == (
-        ["within-session"] if family in {"baselines", "brainbert"} else old["REGIMES"]
-    )
-    if family == "stft_sweep":
-        assert [dimension["values"] for dimension in recipe["sweep"].values()] == [
-            old[key] for key in ["NPERSEGS", "POVERLAPS", "MAX_FREQUENCIES"]
-        ]
-    target = f"sub{first['dataset.test_subject']}_sess{first['dataset.test_session']}"
-    extra = ["--task", "onset", "--target", target]
-    if family == "barista":
-        extra += ["--set", "paths.barista_checkpoint=/weights/barista.ckpt"]
-    jobs = launch.build_commands(_args(family, dataset, *extra))
-    if family == "stft_sweep":
-        assert len(jobs) == 36
-        jobs = jobs[:1]
-    assert len(jobs) == len(reference["commands"])
-    for job, old_command in zip(jobs, reference["commands"], strict=True):
-        expected = _overrides(old_command)
-        actual = _overrides(job["command"])
-        # Intentional corrections: HTNet waveform pairing and explicit packaged
-        # decodable-rule selection formerly supplied by forwarding wrappers.
-        if expected["model"].startswith("htnet_"):
-            previous = expected["preprocessor"]
-            expected["preprocessor"] = (
-                "laplacian_wav_" + expected["model"].split("_", 1)[1]
-            )
-            expected["hydra.run.dir"] = expected["hydra.run.dir"].replace(
-                previous, expected["preprocessor"]
-            )
-        if "preprocessor.chain.5.device" in expected:
-            expected.pop("preprocessor.chain.5.device")
-            expected["preprocessor.chain.4.device"] = "cpu"
-        if family in {"hold_in", "multisource"}:
-            group = old["OUTPUT_GROUP"]
-            expected["hydra.run.dir"] = expected["hydra.run.dir"].replace(
-                f"/runs/{group}/", f"/runs/{group}_stft_or_htnet_500hz_val_mean0p60/"
-            )
-            actual["paths.decodable_subject_sessions_dir"] = "/population"
-        assert actual == expected
 
 
 @pytest.mark.parametrize(
@@ -247,52 +182,6 @@ def test_execution_resume_and_existing_run_preflight(tmp_path):
         launch.execute_commands([job], tmp_path, resume=True)
 
 
-PAPER_REFERENCE = json.loads(
-    (Path(__file__).parent / "paper_recipe_reference.json").read_text()
-)["cases"]
-
-
-@pytest.mark.parametrize(
-    "reference",
-    PAPER_REFERENCE,
-    ids=lambda r: f"{r['recipe']}-{r['dataset']}-{r['model']}",
-)
-def test_paper_recipes_recover_saved_scientific_settings(reference):
-    from omegaconf import OmegaConf
-
-    jobs = launch.build_commands(
-        _args(
-            reference["recipe"],
-            reference["dataset"],
-            "--model",
-            reference["model"],
-            "--limit",
-            "1",
-        )
-    )
-    with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
-        cfg = compose(config_name="config", overrides=jobs[0]["command"][3:])
-        validate_eval_config(cfg)
-        # Resolve both sides against the composed environment; historical configs
-        # contain scientific interpolations such as ${model.total_steps}.
-        expected_cfg = OmegaConf.merge(cfg, reference["expected"])
-        expected = OmegaConf.to_container(expected_cfg, resolve=True)
-        actual = OmegaConf.to_container(cfg, resolve=True)
-
-    def check_fields(recorded, old, new):
-        if isinstance(recorded, dict):
-            for key, value in recorded.items():
-                check_fields(value, old[key], new[key])
-        elif isinstance(recorded, list):
-            assert len(new) == len(old)
-            for item, a, b in zip(recorded, old, new, strict=True):
-                check_fields(item, a, b)
-        else:
-            assert new == old
-
-    check_fields(reference["expected"], expected, actual)
-
-
 @pytest.mark.parametrize(
     "key", ["dataset.provider", "dataset.subset_tier", "model.name", "model.device"]
 )
@@ -305,3 +194,27 @@ def test_model_overrides_cannot_change_grid_identity(tmp_path, key):
     OmegaConf.save(recipe, path)
     with pytest.raises(ValueError, match="Invalid model-specific override"):
         launch.load_recipe(str(path), "neuroprobev2")
+
+
+def test_model_settings_are_scoped_and_caller_tuning_takes_precedence(tmp_path):
+    from omegaconf import OmegaConf
+
+    recipe = OmegaConf.load(launch.RECIPE_DIR / "baselines.yaml")
+    recipe.datasets.neuroprobev2.models.mlp.overrides = {
+        "model.learning_rate": 0.02,
+        "dataset.max_train_samples_per_subject": 12,
+    }
+    path = tmp_path / "recipe.yaml"
+    OmegaConf.save(recipe, path)
+    args = _args(str(path), "neuroprobev2", "--model", "mlp", "--limit", "1")
+    first = _overrides(launch.build_commands(args)[0]["command"])
+    assert first["model.learning_rate"] == "0.02"
+    assert first["dataset.max_train_samples_per_subject"] == "12"
+    args.overrides = ["model.learning_rate=0.03"]
+    tuned = _overrides(launch.build_commands(args)[0]["command"])
+    assert tuned["model.learning_rate"] == "0.03"
+    args.model = ["logistic"]
+    args.overrides = []
+    other = _overrides(launch.build_commands(args)[0]["command"])
+    assert "model.learning_rate" not in other
+    assert other["dataset.max_train_samples_per_subject"] == "auto"

@@ -41,18 +41,13 @@ def build_submission(
         # These are local identity leaks, not third-party attribution notices.
         if re.search(r"/(?:home|Users)/[^\s/]+|git[@][\w.-]+:", text):
             raise ValueError(f"Personal path or identity in submission file: {name}")
-        if name == "tests/launcher_reference.json":
-            # Keep command evidence; omit incidental private migration identity.
-            reference = json.loads(payload)
-            reference.pop("source_commit", None)
-            payload = (json.dumps(reference, indent=2) + "\n").encode()
         contents[name] = payload
 
     if torch_brain_wheel is not None:
         if torch_brain_wheel.suffix != ".whl":
             raise ValueError("torch-brain-wheel must be a wheel file")
         wheel_bytes = torch_brain_wheel.read_bytes()
-        manifest_name = "config/brainsets_smoke_manifest.json"
+        manifest_name = "config/torch_brain_dependency.json"
         dependency = json.loads(contents[manifest_name])
         with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as wheel:
             metadata_files = [
@@ -105,7 +100,7 @@ def build_submission(
             "# Bundled TorchBrain dependency\n\n"
             f"Install `{wheel_name}` using the included quickstart.\n"
             f"SHA256: `{digest}`.\n\n"
-            "The source-validation manifest pins this exact wheel. Required upstream\n"
+            "The dependency manifest pins this exact wheel. Required upstream\n"
             "attribution and source fingerprints are retained. Inspect the final\n"
             "archive for submission-specific identifying information before sharing.\n"
             "This bundle supplies code, not data, checkpoints or the full environment.\n"

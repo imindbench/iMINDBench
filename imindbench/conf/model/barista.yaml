@@ -41,7 +41,7 @@ validation_interval: 100
 
 # epoch_based. The paper trains 30 epochs with 15-epoch early stopping; the
 # generous max_iter here lets early stopping decide, so a slow-converging
-# variant is not truncated. For paper parity pass
+# variant is not truncated. For the published epoch limits, pass
 # ++model.max_iter=30 ++model.patience=15.
 max_iter: 100
 patience: 15

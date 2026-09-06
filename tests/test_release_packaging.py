@@ -51,7 +51,7 @@ def test_submission_bundles_only_the_reviewed_dependency(tmp_path):
     (source / "config").mkdir(parents=True)
     (source / "imindbench").mkdir()
     commit = "abcdef0" + "1" * 33
-    config_name = "config/brainsets_smoke_manifest.json"
+    config_name = "config/torch_brain_dependency.json"
     (source / "README.md").write_text(
         'python -m pip install "torch_brain @ git+https://example.org/upstream@commit"\n'
     )
@@ -102,25 +102,17 @@ def test_submission_bundles_only_the_reviewed_dependency(tmp_path):
         module.build_submission(source, tmp_path / "wrong.tar.gz", wheel)
 
 
-def test_submission_omits_migration_identity_but_preserves_commands(tmp_path):
+def test_release_allowlist_excludes_private_verification_material(tmp_path):
     spec = importlib.util.spec_from_file_location(
         "build_submission", ROOT / "scripts/build_submission.py"
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    source = tmp_path / "source"
-    (source / "config").mkdir(parents=True)
-    (source / "tests").mkdir()
-    fixture_name = "tests/launcher_reference.json"
-    reference = {
-        "source_commit": "private-commit",
-        "scripts": {"old.sh": ["python", "-m", "imindbench.run_eval"]},
-    }
-    (source / fixture_name).write_text(json.dumps(reference))
-    (source / "config/submission_files.json").write_text(json.dumps([fixture_name]))
-    output = tmp_path / "archive.tar.gz"
-    module.build_submission(source, output)
+    output = tmp_path / "release.tar.gz"
+    module.build_submission(ROOT, output)
     with tarfile.open(output) as archive:
-        exported = json.load(archive.extractfile("imindbench/" + fixture_name))
-    assert exported == {"scripts": reference["scripts"]}
-    assert json.loads((source / fixture_name).read_text()) == reference
+        names = [member.name.removeprefix("imindbench/") for member in archive]
+    assert not any(name.startswith(("provenance/", "artifacts/")) for name in names)
+    assert not any("parity" in name or "reference.json" in name for name in names)
+    assert "config/torch_brain_dependency.json" in names
+    assert "scripts/build_submission.py" in names

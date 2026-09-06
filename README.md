@@ -90,12 +90,12 @@ optional and default to null in result JSONs.
 - [Three examples and recipe catalog](docs/EXPERIMENTS.md): CPU, GPU, and checkpoint-backed runs.
 - [Paper coverage](docs/PAPER_COVERAGE.md): experiment families, settings and remaining gaps.
 - [Resources](docs/RESOURCES.md): required data and checkpoints.
-- [Reproduction](docs/REPRODUCTION.md): accepted parity evidence and offline comparison commands.
+- [Reproduction](docs/REPRODUCTION.md): matching experiment inputs and runtime settings.
 - [Submission packaging](docs/SUBMISSION.md): export a reviewed source archive.
 
 All eight model families are retained: Logistic, Linear/BrainBERT, MLP, CNN,
-HTNet, PopT, DIVER and BaRISTA. Existing parity results are preserved; the
-ordinary CLI does not guarantee exact reproduction of every historical number.
+HTNet, PopT, DIVER and BaRISTA. Exact reproduction depends on the dataset
+version, preprocessing, runtime settings and checkpoint used.
 Data and pretrained weights are not bundled.
 
 ## Development
@@ -108,8 +108,7 @@ python -m pytest -q
 ```
 
 Install the documented TorchBrain dependency first. Optional-model tests require
-the corresponding extras. Historical migration records live under
-`provenance/history/`; they are not current installation instructions.
+the corresponding extras.
 
 ## Licensing
 

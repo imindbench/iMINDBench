@@ -9,7 +9,7 @@ families used by the scoped paper notebooks remain available.
 The three evaluation datasets below are NeuroprobeV2, BYD and PIPPI. Dataset
 population, task and preprocessing matter as much as model selection.
 
-| Paper family | Release workflow | Population / settings | Evidence and remaining limits |
+| Paper family | Release workflow | Population / settings | Notes and remaining limits |
 | --- | --- | --- | --- |
 | Multi-STFT baselines: Table 1, Appendix 2 | `paper_multistft` | Three datasets; Logistic/MLP/CNN/PopT; within-session; 1000 Hz BYD, 2048 Hz others; PIPPI high-cov | Saved model tolerances, PopT learning rates, caps and historical worker profile recovered. BYD/PIPPI historical floor windows remain unavailable in the normal CLI. |
 | BrainBERT-STFT baseline classifiers: Table 1 | `paper_brainbert_stft` | Three datasets; Logistic/MLP/CNN; single STFT with 40-bin cutoff; BYD overlap 0.75 | Saved classifier/preprocessor settings recovered. No encoder checkpoint required for these classifiers. |
@@ -23,14 +23,11 @@ population, task and preprocessing matter as much as model selection.
 | Hold-in / multisource: Figure 3 / Appendix 5 | `hold_in`, `multisource` | Three datasets; PopT; selected decodable populations; within-session or hold-in-session | Retained launcher structure. Original checkpoint, population, output family and historical window policy still determine comparability. |
 | Processed-data figures: Figure 2 / Appendix 6 | TorchBrain prepared data and retained Neuroprobe2025 view | Prepared recording/channel metadata; Appendix 6 multi-STFT path | Rendering not ported. Keep the Neuroprobe2025 config; Figure 4b manual assembly and Appendix 6 rendering caveats remain. |
 
-## Recovered recipes
+## Using the paper recipes
 
-The four `paper_*` recipes recover scientific fields from **27 representative
-saved configs**, one per selected dataset/model/result family. Their hashes and
-sanitized scientific fields are preserved in
-[`tests/paper_recipe_reference.json`](../tests/paper_recipe_reference.json).
-Tests compose the real Hydra configs and compare those fields. This is config
-recovery evidence, not a new numerical parity experiment.
+The four `paper_*` recipes specify model, preprocessing, training and runtime
+settings for the corresponding paper experiment families. The public tests
+check that the configurations compose and satisfy the evaluation contracts.
 
 These grids use the release task/target catalog in `recipes/datasets.yaml`.
 They do not recover every historical per-task change, exact paper population or
@@ -58,22 +55,11 @@ configuration; use a fresh output root when changing it.
   models. They are outside the introductory examples, not unused functionality.
 - **Compatibility:** Neuroprobe2025 and the direct Laplacian-STFT class remain
   for figure inputs and external historical configs.
-- **Archived presets:** `laplacian_stft_1000Hz_2048Hz` and
-  `laplacian_wav_HPF_sample_per_channel_time_1000Hz_1024Hz` had no name or exact
-  chain matches across 90,526 saved paper-tree configs. Their original YAMLs
-  remain in maintainer provenance, outside the installed package. The shared
-  resampler and 36 other preprocessor presets remain.
-
-Long migration narratives are archived under `provenance/history/` in the
-maintained repository. The original notebook/config hashes remain historical
-records; this catalog does not silently replace them.
-
 ## Reproduction boundary
 
-Existing selected-case parity evidence is sufficient for this cleanup. No
-training, experiment matrix expansion or notebook execution is needed to verify
-these code and packaging changes. See [REPRODUCTION.md](REPRODUCTION.md) for the
-legacy-window limitation and verified versus unresolved checkpoint cases.
+See [REPRODUCTION.md](REPRODUCTION.md) for dataset/window semantics and
+[RESOURCES.md](RESOURCES.md) for checkpoint requirements. Matching a recipe alone
+does not guarantee identical results across data, checkpoints or environments.
 
 Paper-panel regeneration is a separate remaining capability. A future compact
 analysis entrypoint should consume existing result JSONs and explicit panel

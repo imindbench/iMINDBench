@@ -1,7 +1,7 @@
 # HTNet single-session decoder for 1000 Hz time-domain inputs.
 # These defaults are adapted for 1 s imindbench windows. Peterson et al.
 # tuned HTNet on 2 s segments resampled to 250 Hz, so this config should not be
-# treated as an exact paper-parity setting.
+# treated as the original HTNet experiment configuration.
 name: htnet
 requires_aligned_channels: true
 requires_coords: false

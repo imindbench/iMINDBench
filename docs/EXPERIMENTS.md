@@ -40,15 +40,15 @@ imindbench-grid --recipe barista --dataset neuroprobev2 \
   --set paths.barista_checkpoint=/path/to/barista.ckpt
 ```
 
-The BaRISTA recipe uses a small target/task subset and retains the old launcher
-learning rates, worker settings and scheduler overrides. It is not proof of the
-missing historical `barista_jun9` checkpoint identity.
+The BaRISTA recipe uses a small target/task subset and sets explicit
+learning rates, worker settings and scheduler overrides. The exact paper checkpoint
+identity and retrieval instructions remain incomplete.
 
 ## Recipe catalog and paper coverage
 
 | Recipe | What it selects | Paper relationship |
 | --- | --- | --- |
-| `baselines` | Within-session; Neuroprobe Logistic/MLP/CNN/PopT; BYD/PIPPI PopT and original-rate HTNet | Partial Table 1/Appendix 2 coverage; old active model selections retained |
+| `baselines` | Within-session; Neuroprobe Logistic/MLP/CNN/PopT; BYD/PIPPI PopT and native-rate HTNet | Partial Table 1/Appendix 2 coverage; selected model examples |
 | `brainbert` | Within-session BrainBERT encoder + linear readout | BrainBERT row; does not cover the three standalone STFT classifiers |
 | `barista` | Three tasks × two targets per dataset | BaRISTA command structure; historical checkpoint/launcher mapping incomplete |
 | `stft_sweep` | Logistic; 3 windows × 3 overlaps × 4 frequency ceilings | Figure 4 / STFT appendices |
@@ -95,7 +95,7 @@ or establish scientific compatibility.
 Each evaluation writes its normal Hydra files and `population_*.json`, plus
 `launch.json` (exact argv), `launcher.log` and a `completed.sha256` marker after
 successful completion and JSON parsing. This is operational completion evidence,
-not proof of checkpoint/environment/data identity or historical parity.
+not proof of checkpoint/environment/data identity or numerical reproduction.
 
 The launcher locks the output root while executing. A second launcher using the
 same root fails immediately. Use separate roots for independent GPU workers.
@@ -105,23 +105,5 @@ There is no machine-specific GPU selection or artificial startup delay. Standard
 `--execute --resume` accepts only directories with the same saved command.
 Completed results must match their completion hash to be skipped. Failed jobs
 without results can be retried; changed/unverified result files are rejected.
-Results from the old shell launchers have no completion record: preserve them
-and use a fresh root. Changing inputs in place is not detected by command
+Results without a completion record cannot be resumed; use a fresh root. Changing inputs in place is not detected by command
 identity, so keep inputs immutable and retain their hashes separately.
-
-## Changes from the old shell scripts
-
-The 26 shell files were consolidated. The bounded command captures in
-`tests/launcher_reference.json` verify
-the retained settings independently of the new generator.
-
-- Baseline and BrainBERT recipes default to within-session. Their old
-  cross-subject combinations lacked required channel pooling; no new pooling
-  transform was silently added. Dedicated PopT scaling recipes remain available.
-- HTNet now explicitly selects waveform input instead of the incompatible
-  multi-STFT shared default in the BYD/PIPPI scripts.
-- BrainBERT's device override uses encoder stage 4; the old BYD/PIPPI scripts
-  addressed nonexistent stage 5.
-- Decodability-rule wrappers become one explicit recipe field; GPU index is a
-  caller flag. Retained output layouts, task/target lists, sweep points and
-  BaRISTA learning-rate/scheduler settings are preserved where compatible.

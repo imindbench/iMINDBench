@@ -25,7 +25,7 @@ def prepare_cnn_batch(batch, **kwargs):
     else:
         x = x.float()
     if x.ndim == 4:
-        # Keep parity with legacy reshape_data_for_model for CNN-style models.
+        # Place time before frequency for the CNN input layout.
         x = x.permute(0, 1, 3, 2).contiguous()
 
     out = dict(batch)
