@@ -17,73 +17,59 @@ python -m pip check
 imindbench --help
 ```
 
-The base install supports Logistic, MLP, CNN and HTNet. Torch is required even
-for CPU preprocessing. Specialized dependencies are opt-in:
-
-| Extra | Use |
-| --- | --- |
-| `.[warmup]` | PopT or BrainBERT linear readout with the configured warmup scheduler |
-| `.[barista,warmup]` | BaRISTA, including its scheduler |
-| `.[diver]` | DIVER |
-| `.[paper]` | All retained model dependencies at the reviewed version constraints |
-| `.[logging]` | Optional Weights & Biases logging |
-
-For example, install the complete paper stack with `python -m pip install '.[paper]'`.
-This adds dependencies, not pretrained weights. The warmup extra retains its
-pinned Git source, so that extra still needs Git and network access. A submission
-bundle can provide TorchBrain as a local wheel; follow its included install step.
-
-TorchBrain is installed separately at the reviewed immutable commit. It owns
-`brainsets` and the dataset loaders; do not install the former standalone
-BrainSets package. Avoid the TorchBrain development extra, which has a separate
-training stack. Dependency constraints live in `pyproject.toml`;
-`environment.yml` only creates the Python environment.
+This setup supports Logistic, MLP, CNN and HTNet without pretrained weights.
+TorchBrain provides data preparation and loaders; install it at the version
+shown above, without the former standalone BrainSets package. Optional model
+dependencies are listed in [Experiments](docs/EXPERIMENTS.md#optional-models).
 
 ## Prepare public data
 
-Keep raw data, processed H5 files, caches, and run outputs outside this Git
-checkout. The high-level preparation flow is:
+For the first example, prepare Neuroprobe data outside the checkout:
 
 ```bash
-brainsets list
 brainsets prepare neuroprobe_2025 --raw-dir /path/to/raw --processed-dir /path/to/processed
-brainsets prepare keles_byd_2024 --raw-dir /path/to/raw --processed-dir /path/to/processed
-brainsets prepare berezutskaya_pippi_2022 --raw-dir /path/to/raw --processed-dir /path/to/processed
 ```
 
-Preparation may download large datasets and uses each pipeline's isolated
-environment. Review `brainsets prepare --help`, storage requirements, dataset
-terms, and any required credentials before starting. NeuroprobeV2 is an
-alternate split/recording view over the artifacts produced by
-`brainsets prepare neuroprobe_2025`; there is no separate NeuroprobeV2 prepare
-command.
+Preparation may download a large dataset and creates an isolated preparation
+environment. NeuroprobeV2 uses these same prepared artifacts. Preparation
+commands for BYD and PIPPI are in [Experiments](docs/EXPERIMENTS.md#other-datasets).
 
-Create a machine-local configuration directory outside the installation, with
-`paths/local.yaml` copied from [`imindbench/conf/paths/example.yaml`](imindbench/conf/paths/example.yaml).
-Set its `dataset_root` and any required checkpoint/cache paths to absolute paths.
-Pass `--config-dir /path/to/config paths=local` to the CLI. This works with both
-source and wheel installs and keeps private settings out of the package.
+Create an external paths file from the example:
+
+```bash
+mkdir -p /path/to/config/paths
+cp imindbench/conf/paths/example.yaml /path/to/config/paths/local.yaml
+```
+
+Edit `paths/local.yaml`: set `dataset_root` to your processed-data root and
+`dataset_dirname` to its dataset directory. Leave checkpoint paths null for the
+first example. Replace the `/path/to/...` placeholders with your own absolute paths.
 
 ## First evaluation
 
-Preview one checkpoint-free NeuroprobeV2 Logistic evaluation on CPU:
+From the repository or extracted source archive, preview one CPU Logistic evaluation:
 
 ```bash
-imindbench-grid --recipe baselines --dataset neuroprobev2 \
-  --model logistic --task onset --target sub1_sess1 --device cpu \
-  --config-dir /path/to/config --paths local --output-root /path/to/runs/logistic
+bash scripts/run_logistic.sh \
+  --config-dir /path/to/config --output-root /path/to/runs/logistic
 ```
 
-Add `--execute` to run it after preparing data and setting the external paths.
-The default is a dry run. Outputs include `population_*.json`, the resolved Hydra
-config, launch command and log under your output root. Reuse completed grid
-outputs only through the documented `--resume` behavior.
+Then run it:
 
-For one custom configuration, use `imindbench` (equivalently
-`python -m imindbench.run_eval`) with Hydra overrides. NeuroprobeV2 is the default
-view; Neuroprobe2025 remains available for historical splits and data figures.
-Remote logging is disabled by default. Author and organization metadata are
-optional and default to null in result JSONs.
+```bash
+bash scripts/run_logistic.sh \
+  --config-dir /path/to/config --output-root /path/to/runs/logistic --execute
+```
+
+The scripts use the active Python environment. Outputs include `population_*.json`,
+the resolved configuration, launch command and log. Add `--resume` to an executed
+command to reuse verified completed outputs. Remote logging is disabled by default.
+
+Use `scripts/run_mlp.sh` for a GPU example or `scripts/run_barista.sh` after
+installing its optional dependencies and setting a checkpoint. Each script selects
+one NeuroprobeV2 onset evaluation; see [Experiments](docs/EXPERIMENTS.md) for
+customization and larger grids. The same scripts are exercised by the test suite
+in dry-run mode, without downloading data or training models.
 
 ## Experiments and reproduction
 

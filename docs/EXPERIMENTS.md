@@ -15,33 +15,74 @@ Each example previews one evaluation. Inspect the command, then add `--execute`
 when the data and any checkpoint are available. Use a distinct external output
 root for each experiment configuration.
 
-CPU Logistic:
+The source checkout and submission archive include three Bash launchers:
+
+| Script | Evaluation | Setup |
+| --- | --- | --- |
+| `scripts/run_logistic.sh` | CPU Logistic | Base install |
+| `scripts/run_mlp.sh` | GPU MLP | Base install and a CUDA-capable runtime |
+| `scripts/run_barista.sh` | GPU BaRISTA | BaRISTA dependencies and checkpoint below |
+
+Run from the source root, replacing the script name as needed:
 
 ```bash
-imindbench-grid --recipe baselines --dataset neuroprobev2 \
-  --model logistic --task onset --target sub1_sess1 --device cpu \
-  --config-dir /path/to/config --paths local --output-root /path/to/runs/cpu
+bash scripts/run_mlp.sh \
+  --config-dir /path/to/config --output-root /path/to/runs/mlp
 ```
 
-GPU MLP, without a pretrained checkpoint:
+Add `--execute` to run or `--execute --resume` to resume. All three select
+NeuroprobeV2, onset and `sub1_sess1`. They use the active Python environment and
+forward arguments to the grid launcher. For example, append `--device cuda:1`
+to select another GPU or `--set model.max_iter=5` for a shorter trial. Use a new
+output root when changing settings.
 
-```bash
-imindbench-grid --recipe baselines --dataset neuroprobev2 \
-  --model mlp --task onset --target sub1_sess1 --device cuda:0 \
-  --config-dir /path/to/config --paths local --output-root /path/to/runs/mlp
-```
+Model/task/target flags select lists, so repeating them adds selections. To
+replace these selections, edit a caller-owned copy of the example or use
+`imindbench-grid` directly with the recipe and selections you want. Shell scripts
+are source examples; wheel installations provide `imindbench-grid` directly.
+You can also copy the scripts elsewhere and invoke them by absolute path.
 
-Checkpoint-backed BaRISTA:
-
-```bash
-imindbench-grid --recipe barista --dataset neuroprobev2 \
-  --task onset --target sub1_sess1 --device cuda:0 \
-  --config-dir /path/to/config --paths local --output-root /path/to/runs/barista \
-  --set paths.barista_checkpoint=/path/to/barista.ckpt
-```
+For BaRISTA, set `paths.barista_checkpoint` in your external paths file or append
+`--set paths.barista_checkpoint=/path/to/barista.ckpt`.
 
 The BaRISTA recipe uses a small target/task subset and sets explicit
 learning rates, worker settings and scheduler overrides.
+
+## Optional models
+
+The README's base install is sufficient for Logistic, MLP, CNN and HTNet.
+For all other retained model dependencies, install the paper extra from the
+source root:
+
+```bash
+python -m pip install '.[paper]'
+```
+
+This installs dependencies, not weights. It includes a pinned warmup scheduler
+that requires Git and network access. To install only what a particular model
+needs, use one of these extras instead:
+
+| Extra | Models |
+| --- | --- |
+| `.[warmup]` | PopT and BrainBERT linear readout |
+| `.[barista,warmup]` | BaRISTA |
+| `.[diver]` | DIVER |
+| `.[logging]` | Optional Weights & Biases logging |
+
+## Other datasets
+
+Prepare BYD or PIPPI with the same public TorchBrain installation:
+
+```bash
+brainsets prepare keles_byd_2024 --raw-dir /path/to/byd/raw --processed-dir /path/to/processed
+brainsets prepare berezutskaya_pippi_2022 --raw-dir /path/to/pippi/raw --processed-dir /path/to/processed
+```
+
+Review each pipeline's storage requirements, dataset terms and credentials
+before downloading. Select `kelesbyd2024` or `berezutskayapippi2022` through
+`imindbench-grid --dataset`; use the appropriate dataset directory in your paths
+configuration. Neuroprobe2025 remains available through `imindbench` for
+historical splits and data figures; the examples use NeuroprobeV2.
 
 ## Data and checkpoints
 

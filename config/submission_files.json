@@ -156,6 +156,9 @@
   "imindbench/utils/pipeline_contracts.py",
   "pyproject.toml",
   "scripts/build_submission.py",
+  "scripts/run_barista.sh",
+  "scripts/run_logistic.sh",
+  "scripts/run_mlp.sh",
   "tests/test_brainsets_public_contract.py",
   "tests/test_imindbench_pipelines/test_barista.py",
   "tests/test_imindbench_pipelines/test_brainbert_encoder_preprocessor_variable.py",
@@ -168,5 +171,6 @@
   "tests/test_launcher.py",
   "tests/test_neuroprobe_shared_artifacts.py",
   "tests/test_optional_dependencies.py",
-  "tests/test_release_packaging.py"
+  "tests/test_release_packaging.py",
+  "tests/test_shell_examples.py"
 ]
