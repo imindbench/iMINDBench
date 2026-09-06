@@ -5,7 +5,8 @@ TorchBrain provides public data preparation and dataset loaders; iMINDBench
 provides preprocessing, models, and evaluation.
 
 Start with the [installation and single-recording quickstart](imindbench/README.md).
-For larger runs, see the [launcher guide](docs/EXPERIMENTS.md).
+For larger runs, see the [three examples and recipe catalog](docs/EXPERIMENTS.md).
+Required checkpoints are listed in the [resource guide](docs/RESOURCES.md).
 For reviewer distribution, see [submission packaging](docs/SUBMISSION.md).
 
 The retained model families are Logistic, Linear/BrainBERT, MLP, CNN, HTNet,

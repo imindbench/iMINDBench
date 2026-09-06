@@ -112,7 +112,8 @@ config rather than mixing groups blindly.
 - A CPU smoke result does not substitute for the final GPU acceptance run for a
   GPU-targeted model.
 
-For larger grids, see the [launcher guide](../docs/EXPERIMENTS.md). Remote logging
+For larger grids, use `imindbench-grid`; see the [recipe guide](../docs/EXPERIMENTS.md)
+and [resource requirements](../docs/RESOURCES.md). Remote logging
 is disabled by default; enable it explicitly only when wanted.
 
 ## Paper-reference parity tools

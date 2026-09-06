@@ -1,0 +1,36 @@
+description: BrainBERT encoder with a linear readout.
+target_set: brainbert
+overrides:
+  dataset.label_mode: binary
+  dataset.train_same_subject_only: false
+  dataset.train_sample_fraction: 1.0
+datasets:
+  neuroprobev2:
+    dataset: neuroprobev2
+    output_group: neuroprobev2
+    preprocessor: laplacian_stft_brainbert_2048Hz
+    models:
+      linear_baseline: {}
+    regimes:
+    - within-session
+  kelesbyd2024:
+    dataset: kelesbyd2024
+    output_group: kelesbyd2024
+    preprocessor: laplacian_stft_brainbert_1000Hz
+    models:
+      linear_baseline: {}
+    regimes:
+    - within-session
+  berezutskayapippi2022:
+    dataset: berezutskayapippi2022
+    output_group: berezutskayapippi2022
+    preprocessor: laplacian_stft_brainbert_2048Hz
+    models:
+      linear_baseline: {}
+    regimes:
+    - within-session
+    overrides:
+      dataset.subset_tier: high-cov
+    output_subset: true
+device_overrides:
+- ++preprocessor.chain.4.device

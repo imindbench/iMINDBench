@@ -421,3 +421,41 @@ corresponding change.
   explicit limitations, not reasons to rerun the full experiment matrix.
 - Review: completed simplification and bug-risk passes over launcher paths,
   configuration forwarding, style diffs, and source-export boundaries.
+
+### 2026-09-06 — Consolidate experiment scripts into reviewed recipes
+
+- Classification: launcher/refactor, compatibility fixes, docs and packaging.
+- Checkpoint: prior cleanup committed as `81330f8` before replacing the scripts.
+- Surface: removed 26 shell files; added `imindbench-grid`, seven recipe YAMLs
+  and one shared task/target catalog. The evaluation entrypoint is unchanged.
+- Preserved: all retained model/task/target selections, STFT sweep dimensions,
+  BaRISTA learning rates/scheduler settings and compatible output layouts.
+  The original 18 substantive launchers were captured without running models;
+  `tests/launcher_reference.json` is independent command/default evidence.
+- Explicit exceptions: baseline/BrainBERT release recipes use within-session,
+  removing unsupported cross-subject defaults without adding a pooling transform.
+  BYD/PIPPI HTNet now selects waveform input; their BrainBERT encoder device
+  override targets stage 4 instead of the nonexistent stage 5. Device indices
+  are caller-selected. Population wrappers become a named decodable rule, and
+  root locking replaces machine-specific delays. These are configuration/routing
+  corrections, not a change to the numerical model/preprocessor implementation.
+- New sample-efficiency recipe: Neuroprobe within-session fractions 1 through
+  1/16, with explicit output tags; historical exact-launcher provenance remains
+  incomplete and no new reproduction claim is made.
+- Execution: dry-run by default; count/subset options; explicit execution and
+  same-command resume; completion hashes prevent skipping partial/changed output.
+  The launcher does not claim input/environment identity from command equality.
+- Packaging: optional reviewed TorchBrain wheel bundle requires exact source
+  identity AND the pre-existing artifact SHA256. The reviewed validation wheel
+  is reused. The source pin is not rewritten to trust an arbitrary wheel.
+- Validation: all 18 bounded command comparisons passed, all distinct recipe
+  model/preprocessor/sweep configurations composed and passed runtime contracts,
+  and the installed two-wheel bundle passed 133 tests with 7 optional-model skips
+  using the existing tb_buildathon dependencies. Later exporter hash-hardening
+  and stronger inventory assertions passed their focused tests. No scientific
+  experiments or paper results were rerun or changed.
+- Reviews: first pass caught BaRISTA learning-rate/output-layout preservation
+  mistakes in draft recipes and corrected them against shell captures. Second
+  pass tightened resume completion evidence and exporter exact-artifact checks.
+- Guides: three introductory examples, resource settings, paper-family coverage,
+  script migration notes and explicit historical limitations are documented.

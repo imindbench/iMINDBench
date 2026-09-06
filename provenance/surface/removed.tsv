@@ -57,3 +57,29 @@ imindbench/environment.yml	duplicate nested environment	root environment is cano
 imindbench/utils/data_adapter.py::lip_to_mni152_ras	SEEG-only coordinate transform	no retained model/config consumes seegnificant_mni
 imindbench/utils/data_adapter.py::COORDINATE_PROFILES[seegnificant_mni]	SEEG-only profile	generic popt_lip and diver_mni routing retained
 imindbench/utils/pipeline_contracts.py::VALID_COORDINATE_PROFILES[seegnificant_mni]	SEEG-only profile	validation now rejects removed profile
+imindbench/scripts/decodable_subject_sessions.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_brainbert_byd.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_brainbert_neuroprobev2.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_brainbert_pippi.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_byd.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_byd_barista.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_byd_decodable_subjects_hold_in.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_byd_decodable_subjects_hold_in_stft_or_htnet_500hz_val_mean0p60.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_byd_decodable_subjects_multisource.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_byd_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_byd_stft_sweep.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_neuroprobev2.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_neuroprobev2_barista.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_neuroprobev2_decodable_subjects_hold_in.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_neuroprobev2_decodable_subjects_hold_in_stft_or_htnet_500hz_val_mean0p60.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_neuroprobev2_decodable_subjects_multisource.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_neuroprobev2_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_neuroprobev2_stft_sweep.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_pippi.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_pippi_barista.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_pippi_decodable_subjects_hold_in.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_pippi_decodable_subjects_hold_in_stft_or_htnet_500hz_val_mean0p60.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_pippi_decodable_subjects_multisource.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_pippi_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/run_pippi_stft_sweep.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/scripts/runtime_paths.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json

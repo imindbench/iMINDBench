@@ -1,0 +1,28 @@
+description: NeuroprobeV2 sample-fraction recipe; historical launcher provenance remains
+  incomplete.
+target_set: all
+overrides:
+  dataset.label_mode: binary
+  dataset.train_same_subject_only: false
+  dataset.max_train_samples_per_subject: auto
+datasets:
+  neuroprobev2:
+    dataset: neuroprobev2
+    output_group: neuroprobev2_sample_efficiency
+    preprocessor: laplacian_multi_stft_2048Hz
+    models:
+      logistic: {}
+      mlp: {}
+      cnn: {}
+      popt: {}
+    regimes:
+    - within-session
+    sweep:
+      dataset.train_sample_fraction:
+        label: fraction
+        values:
+        - '1.0'
+        - '0.5'
+        - '0.25'
+        - '0.125'
+        - '0.0625'

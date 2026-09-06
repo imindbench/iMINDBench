@@ -22,8 +22,20 @@ The current cleanup removes Git and package-local output assumptions from
 evaluation launchers, supports external config directories, makes remote logging
 opt-in, aligns formatting/lint rules with public TorchBrain, and adds an
 allowlisted submission source exporter. Existing loop selections and numerical
-settings remain intact. Consolidating the historical script families into
-declarative recipes is deferred to a separate, behavior-preserving change.
+settings remain intact in that checkpoint (`81330f8`). The follow-up consolidation
+now replaces 26 shell files with `imindbench-grid`, seven recipe files and shared
+target lists. Bounded original-shell command captures verify retained task,
+target, model and sweep selections. Baseline/BrainBERT recipes are explicitly
+within-session; invalid cross-subject defaults were removed rather than silently
+adding pooling. HTNet waveform pairing and stale BrainBERT encoder device
+indices were corrected. Exact exceptions are documented in `docs/EXPERIMENTS.md`.
+
+The source exporter can include the already reviewed TorchBrain wheel, requiring
+both its source identity and exact pinned SHA256. The exported quickstart installs
+that local artifact. Upstream attribution and source fingerprints remain visible;
+submission-specific anonymity inspection is still necessary. No experiment
+matrix was expanded or rerun. The small new sample-efficiency recipe is an
+explicit workflow, not a claim of recovered historical launcher provenance.
 
 Table 1 was recomputed from existing result JSONs: all 15 saved rows match,
 including equal support across tracks and the equal-dataset overall mean. The

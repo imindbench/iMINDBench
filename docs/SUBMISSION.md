@@ -13,12 +13,22 @@ file hashes, code, configs, tests, reduced parity references and required licens
 notices. It excludes Git history, local paths profiles, model weights, datasets,
 outputs, build remnants and personal migration records.
 
+To include the reviewed TorchBrain dependency, add
+`--torch-brain-wheel /path/to/torch_brain-<version>-py3-none-any.whl`.
+The exporter checks its package/source identity and the exact reviewed SHA256,
+scans textual wheel contents,
+bundles it under `vendor/`, and points the exported quickstart at the local wheel.
+The source-validation manifest retains its existing pin. This avoids requiring a Git
+installation step for TorchBrain. Normal environment dependencies may still
+require network access.
+
 Extract into a fresh directory and follow the quickstart. TorchBrain is a
 separate required dependency; the documented immutable public commit remains
 the tested source pin. If linking that benchmark-specific dependency could
 identify the submission, provide its reviewed artifact separately and document
-its hash and installation in the submission. This exporter packages iMINDBench;
-it does not create or anonymize TorchBrain artifacts.
+its hash and installation in the submission. The exporter can bundle an existing
+reviewed TorchBrain wheel; it does not
+build that wheel or remove required upstream attribution/source fingerprints.
 
 Before submission, inspect the final archive and rendered documentation for
 identifying links, scientific names and third-party metadata. A known-pattern

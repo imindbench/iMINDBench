@@ -1,0 +1,42 @@
+description: Retained baseline script selections; HTNet uses waveform input.
+target_set: all
+overrides:
+  dataset.label_mode: binary
+  dataset.train_same_subject_only: false
+  dataset.train_sample_fraction: 1.0
+  dataset.max_train_samples_per_subject: auto
+datasets:
+  neuroprobev2:
+    dataset: neuroprobev2
+    output_group: neuroprobev2
+    preprocessor: laplacian_multi_stft_2048Hz
+    models:
+      logistic: {}
+      mlp: {}
+      cnn: {}
+      popt: {}
+    regimes:
+    - within-session
+  kelesbyd2024:
+    dataset: kelesbyd2024
+    output_group: kelesbyd2024_tercile
+    preprocessor: laplacian_multi_stft_1000Hz
+    models:
+      htnet_1000Hz:
+        preprocessor: laplacian_wav_1000Hz
+      popt: {}
+    regimes:
+    - within-session
+  berezutskayapippi2022:
+    dataset: berezutskayapippi2022
+    output_group: berezutskayapippi2022_tercile
+    preprocessor: laplacian_multi_stft_2048Hz
+    models:
+      popt: {}
+      htnet_2048Hz:
+        preprocessor: laplacian_wav_2048Hz
+    regimes:
+    - within-session
+    overrides:
+      dataset.subset_tier: high-cov
+    output_subset: true

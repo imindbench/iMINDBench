@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "release_launcher_note": "Historical script:// URIs describe consulted sources. Current release recipes run through imindbench-grid; they do not close missing historical launcher/checkpoint provenance.",
   "scope": "notebooks/paper_figs only",
   "source": {
     "repository_uri": "torch-brain-dirty://",
@@ -222,6 +223,7 @@
   ],
   "output_families": {
     "stft_sweeps": {
+      "release_recipes": ["imindbench://imindbench/recipes/stft_sweep.yaml"],
       "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
       "regimes": ["within-session"],
       "models": ["Logistic"],
@@ -242,6 +244,7 @@
       "launch_status": "missing_exact_launcher"
     },
     "flagship_multistft": {
+      "release_recipes": ["imindbench://imindbench/recipes/baselines.yaml"],
       "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
       "regimes": ["within-session"],
       "models": ["Logistic", "MLP", "CNN", "PopT-v2"],
@@ -250,6 +253,7 @@
       "launch_status": "partial_current_script_state; model arrays do not activate every historical YAML entry"
     },
     "flagship_waveform": {
+      "release_recipes": ["imindbench://imindbench/recipes/barista.yaml"],
       "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
       "regimes": ["within-session"],
       "models": ["Linear", "Logistic", "MLP", "CNN", "HTNet", "BaRISTA", "DIVER-1"],
@@ -266,6 +270,7 @@
       "launch_status": "partial_historical_mapping"
     },
     "neuroprobev2_sample_efficiency": {
+      "release_recipes": ["imindbench://imindbench/recipes/sample_efficiency.yaml"],
       "datasets": ["NeuroprobeV2"],
       "regimes": ["within-session", "hold-in-session"],
       "models": ["Logistic", "MLP", "CNN", "PopT-v2"],
@@ -275,6 +280,7 @@
       "launch_status": "missing_canonical_launcher"
     },
     "holdin_multisource": {
+      "release_recipes": ["imindbench://imindbench/recipes/hold_in.yaml", "imindbench://imindbench/recipes/multisource.yaml"],
       "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
       "regimes": ["within-session", "hold-in-session"],
       "models": ["PopT-v2"],
@@ -294,6 +300,7 @@
       "launch_status": "missing_exact_launcher"
     },
     "brainbert_stft": {
+      "release_recipes": ["imindbench://imindbench/recipes/brainbert.yaml"],
       "datasets": ["NeuroprobeV2", "KelesBYD2024", "BerezutskayaPippi2022"],
       "regimes": ["within-session"],
       "models": ["Logistic", "MLP", "CNN", "BrainBERT linear baseline"],
