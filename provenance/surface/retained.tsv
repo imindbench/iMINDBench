@@ -46,7 +46,6 @@ imindbench/conf/model/linear_baseline.yaml	runtime configuration	composed by imi
 imindbench/conf/model/logistic.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/model/mlp.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/model/popt.yaml	runtime configuration	composed by imindbench.run_eval
-imindbench/conf/paths/default.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/paths/example.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_multi_stft_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_multi_stft_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval

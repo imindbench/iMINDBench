@@ -198,6 +198,15 @@ def test_build_command_is_dry_run_and_requires_fresh_output(tmp_path, manifest):
         resource_map={},
     )
     assert command[1:3] == ["-m", "imindbench.run_eval"]
+    from hydra import compose, initialize_config_dir
+
+    with initialize_config_dir(
+        config_dir=str(ROOT / "imindbench/conf"), version_base="1.1"
+    ):
+        cfg = compose(config_name="config", overrides=command[3:])
+    assert cfg.paths.dataset_root == str(data_root)
+    assert cfg.paths.barista_checkpoint is None
+    assert cfg.runtime.train_source_cache_dir is None
     assert "dataset.task=onset" in command
     assert f"hydra.run.dir={output_root}" in command
     assert not output_root.exists()

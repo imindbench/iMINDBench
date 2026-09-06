@@ -89,3 +89,4 @@ imindbench/decodable_subject_sessions/berezutskayapippi2022.json	obsolete popula
 imindbench/decodable_subject_sessions/kelesbyd2024.json	obsolete population selection	removed unused top-level manifests/docs; shipped recipes explicitly select stft_or_htnet_500hz_val_mean0p60
 imindbench/decodable_subject_sessions/neuroprobev2.json	obsolete population selection	removed unused top-level manifests/docs; shipped recipes explicitly select stft_or_htnet_500hz_val_mean0p60
 imindbench/decodable_subject_sessions/README.md	obsolete population selection	removed unused top-level manifests/docs; shipped recipes explicitly select stft_or_htnet_500hz_val_mean0p60
+imindbench/conf/paths/default.yaml	consolidated paths profile	use documented paths/example.yaml or an external paths/local.yaml

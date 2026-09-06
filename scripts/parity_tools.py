@@ -430,7 +430,7 @@ def build_case_command(
         sys.executable,
         "-m",
         str(manifest["runner_module"]),
-        "paths=default",
+        "paths=example",
         f"dataset={case['dataset_config']}",
         f"model={case['model_config']}",
         f"preprocessor={case['preprocessor_config']}",

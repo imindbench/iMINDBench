@@ -32,7 +32,7 @@ def test_cli_composes_required_groups_for_bare_help(monkeypatch):
 
 
 def test_cli_preserves_explicit_help_group_overrides(monkeypatch):
-    original_argv = ["imindbench", "--help", "model=mlp", "paths=default"]
+    original_argv = ["imindbench", "--help", "model=mlp", "paths=local"]
     captured_argv = []
     monkeypatch.setattr(sys, "argv", original_argv)
     monkeypatch.setattr(run_eval_module, "main", lambda: captured_argv.extend(sys.argv))

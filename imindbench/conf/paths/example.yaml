@@ -2,7 +2,7 @@
 # and select it with --config-dir <config-dir> paths=local.
 # Use absolute paths for data, checkpoints and caches.
 #
-# conf/paths/default.yaml leaves every path null, so it cannot drive a run.
+# Replace dataset_root before running; optional resources can remain null.
 # Every key below must be present even when unused: conf/runtime/default.yaml
 # interpolates preprocessed_split_cache_dir, and a missing key raises
 # InterpolationKeyError before the run starts.
@@ -11,14 +11,15 @@
 dataset_root: /path/to/brainsets/processed
 dataset_dirname: neuroprobe_2025
 
-# Pretrained checkpoints. Only the one your model needs has to be real.
-barista_checkpoint: /path/to/barista.ckpt
+# Pretrained checkpoints. Set only those your model needs to absolute paths.
+barista_checkpoint: null
 brainbert_checkpoint: null
 popt_checkpoint: null
 
-# Caches. train_source_cache_dir is written during multi-source training;
-# preprocessed_split_cache_dir is optional but the key is mandatory.
-train_source_cache_dir: /path/to/brainsets/cache
+# Caches. When enabled, a null train_source_cache_dir uses
+# <dataset_root>/.neuroprobe_eval_train_source_cache. Set an absolute path to
+# place it elsewhere. preprocessed_split_cache_dir is optional, but keep the key.
+train_source_cache_dir: null
 preprocessed_split_cache_dir: null
 
 # Optional inputs, null unless you are using the feature that reads them.

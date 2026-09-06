@@ -422,7 +422,7 @@ def parser():
         "--dataset", required=True, help="Canonical dataset/provider name"
     )
     result.add_argument("--output-root", type=Path, required=True)
-    result.add_argument("--paths", default="default", help="Hydra paths group")
+    result.add_argument("--paths", default="example", help="Hydra paths group")
     result.add_argument("--config-dir", type=Path)
     result.add_argument("--device", default="cuda:0")
     result.add_argument("--model", action="append")
