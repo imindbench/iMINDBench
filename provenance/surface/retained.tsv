@@ -86,10 +86,6 @@ imindbench/conf/preprocessor/laplacian_wav_session_HPF_global_robust_scalar_1000
 imindbench/conf/preprocessor/laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/runtime/default.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/submitter/default.yaml	runtime configuration	composed by imindbench.run_eval
-imindbench/decodable_subject_sessions/README.md	release documentation	public repository documentation
-imindbench/decodable_subject_sessions/berezutskayapippi2022.json	stable evaluation artifact	consumed by retained launchers
-imindbench/decodable_subject_sessions/kelesbyd2024.json	stable evaluation artifact	consumed by retained launchers
-imindbench/decodable_subject_sessions/neuroprobev2.json	stable evaluation artifact	consumed by retained launchers
 imindbench/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/README.md	release documentation	public repository documentation
 imindbench/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/berezutskayapippi2022.json	stable evaluation artifact	consumed by retained launchers
 imindbench/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60/kelesbyd2024.json	stable evaluation artifact	consumed by retained launchers
