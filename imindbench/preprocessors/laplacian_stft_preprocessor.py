@@ -2,15 +2,16 @@
 Laplacian rereferencing building blocks and Laplacian+STFT chain.
 """
 
-import torch
 import numpy as np
+import torch
+
+from . import CompositePreprocessor, register_preprocessor
 from .base_preprocessor import BasePreprocessor
-from .stft_preprocessor import STFTPreprocessor
-from . import register_preprocessor, CompositePreprocessor
 from .preprocessor_utils import (
     project_channel_metadata,
     validate_named_channel_sample,
 )
+from .stft_preprocessor import STFTPreprocessor
 
 
 def laplacian_rereference_neural_data(

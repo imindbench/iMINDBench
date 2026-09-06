@@ -1,9 +1,10 @@
 # Ported from BaRISTA: https://github.com/ShanechiLab/BaRISTA
 # USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
 
-import numpy as np
 import os
 import random
+
+import numpy as np
 import torch
 import torch.nn as nn
 

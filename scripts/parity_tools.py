@@ -8,14 +8,14 @@ import hashlib
 import json
 import math
 import os
-from pathlib import Path
 import re
 import shlex
 import shutil
 import sys
 import tempfile
-from typing import Any, Mapping, Sequence
-
+from collections.abc import Mapping, Sequence
+from pathlib import Path
+from typing import Any
 
 VALID_STATUSES = {"PASS", "FAIL", "MISSING", "NOT-COMPARABLE"}
 PARITY_SCOPE = "metric-config-record"

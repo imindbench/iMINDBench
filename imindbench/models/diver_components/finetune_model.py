@@ -1,10 +1,11 @@
 import torch
-from torch import nn
 from mup import MuReadout
+from torch import nn
+
 from . import mup_utils
 from .diver import DIVER
-from .model_builders import MakeModelIgnoreDataInfoList, CustomIdentity
 from .finetune_builders import MLPProjector, get_dims_from_input_shape
+from .model_builders import CustomIdentity, MakeModelIgnoreDataInfoList
 
 
 class FineTuneModel(nn.Module):

@@ -5,6 +5,7 @@ Contains both simple sinusoidal and multi-subject brain coordinate encodings.
 """
 
 import math
+
 import torch
 import torch.nn as nn
 

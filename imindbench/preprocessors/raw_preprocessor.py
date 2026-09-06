@@ -4,8 +4,9 @@ Raw preprocessor - no preprocessing applied.
 
 import numpy as np
 import torch
-from .base_preprocessor import BasePreprocessor
+
 from . import register_preprocessor
+from .base_preprocessor import BasePreprocessor
 
 
 @register_preprocessor("raw")

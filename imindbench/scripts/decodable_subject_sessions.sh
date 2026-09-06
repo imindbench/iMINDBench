@@ -36,6 +36,11 @@ subject_session = sys.argv[5]
 def resolve_config_path(config_group, value):
     if "/" in value or value.endswith(".yaml"):
         return Path(value)
+    config_dir = os.environ.get("IMINDBENCH_CONFIG_DIR")
+    if config_dir:
+        candidate = Path(config_dir) / config_group / f"{value}.yaml"
+        if candidate.is_file():
+            return candidate
     return project_dir / "conf" / config_group / f"{value}.yaml"
 
 def read_simple_yaml_key(path, requested_key):

@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from .base_preprocessor import BasePreprocessor
 from . import register_preprocessor
+from .base_preprocessor import BasePreprocessor
 
 
 @register_preprocessor("time_domain_filter_diver_style")

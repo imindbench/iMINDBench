@@ -7,13 +7,13 @@ Matches PopT-BYD-BTB architecture.
 
 from .brainbert_encoder import BrainBERTEncoder
 from .positional_encoding import (
-    PositionalEncoding,
     MultiSubjBrainPositionalEncoding,
+    PositionalEncoding,
 )
 from .transformer_input import TransformerEncoderInput
 from .transformer_layers import (
-    TransformerEncoderLayer,
     TransformerEncoder,
+    TransformerEncoderLayer,
 )
 
 __all__ = [

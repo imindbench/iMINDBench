@@ -1,9 +1,10 @@
 import torch
 from torch import nn
-from .layers import OriginalMoiraiEncoder
+
 from .embedder import Embedder
-from .special_token import TokenManager
 from .header import CustomIdentity, Header
+from .layers import OriginalMoiraiEncoder
+from .special_token import TokenManager
 
 
 class DIVER(nn.Module):
@@ -104,7 +105,7 @@ class DIVER(nn.Module):
 
 class Patchify(nn.Module):
     def __init__(self, patch_len, stride, lr_padding=(0, 0), padding_method=None):
-        super(Patchify, self).__init__()
+        super().__init__()
         self.patch_len = patch_len
         self.stride = stride
         self.lr_padding = lr_padding

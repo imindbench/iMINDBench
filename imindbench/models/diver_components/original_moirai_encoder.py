@@ -1,13 +1,14 @@
-import torch
-from torch import nn
-import torch.nn.functional as F
-from jaxtyping import Float, Int, Bool
 import abc
-from collections.abc import Callable
 import math
+from collections.abc import Callable
 from functools import cached_property, partial
-from typing import Any, Optional
+from typing import Any
+
+import torch
+import torch.nn.functional as F
 from einops import einsum, rearrange, repeat
+from jaxtyping import Bool, Float, Int
+from torch import nn
 
 
 class AttentionBias(nn.Module, abc.ABC):
@@ -66,7 +67,7 @@ class RMSNorm(nn.Module):
         normalized_shape: int | list[int] | torch.Size,
         eps: float = 1e-5,
         weight: bool = True,
-        dtype: Optional[torch.dtype] = None,
+        dtype: torch.dtype | None = None,
     ):
         super().__init__()
         if isinstance(normalized_shape, int):
@@ -111,7 +112,7 @@ class Projection(nn.Module, abc.ABC):
     def forward(
         self,
         x: Float[torch.Tensor, "*batch group hpg seq dim"],
-        seq_id: Optional[Int[torch.Tensor, "*batch #group #hpg seq"]],
+        seq_id: Int[torch.Tensor, "*batch #group #hpg seq"] | None,
     ) -> Float[torch.Tensor, "*batch group hpg seq dim"]: ...
 
 
@@ -122,16 +123,16 @@ class QueryKeyProjection(nn.Module):
         num_heads: int,
         num_groups: int,
         proj_layer: type[Projection],
-        kwargs: Optional[dict[str, Any]] = None,
-        key_proj_layer: Optional[type[Projection]] = None,
-        key_kwargs: Optional[dict[str, Any]] = None,
-        partial_factor: Optional[tuple[float, float]] = None,
+        kwargs: dict[str, Any] | None = None,
+        key_proj_layer: type[Projection] | None = None,
+        key_kwargs: dict[str, Any] | None = None,
+        partial_factor: tuple[float, float] | None = None,
     ):
         super().__init__()
         if partial_factor is not None:
-            assert (
-                0.0 <= partial_factor[0] < partial_factor[1] <= 1.0
-            ), f"got {partial_factor[0]}, {partial_factor[1]}"
+            assert 0.0 <= partial_factor[0] < partial_factor[1] <= 1.0, (
+                f"got {partial_factor[0]}, {partial_factor[1]}"
+            )
         assert num_heads > 0 and dim % num_heads == 0
         assert (num_heads % num_groups == 0) and (num_heads >= num_groups)
 
@@ -173,8 +174,8 @@ class QueryKeyProjection(nn.Module):
         self,
         query: Float[torch.Tensor, "*batch group hpg q_len dim"],
         key: Float[torch.Tensor, "*batch group hpg kv_len dim"],
-        query_id: Optional[Int[torch.Tensor, "*batch #group #hpg q_len"]],
-        kv_id: Optional[Int[torch.Tensor, "*batch #group #hpg kv_len"]],
+        query_id: Int[torch.Tensor, "*batch #group #hpg q_len"] | None,
+        kv_id: Int[torch.Tensor, "*batch #group #hpg kv_len"] | None,
     ) -> tuple[
         Float[torch.Tensor, "*batch group hpg seq dim"],
         Float[torch.Tensor, "*batch group hpg seq dim"],
@@ -203,9 +204,9 @@ class RotaryProjection(Projection):
         base: int = 10000,
     ):
         super().__init__(proj_width, num_heads, num_groups)
-        assert (
-            self.proj_width % 2 == 0
-        ), f"proj_width must be even, got {self.proj_width}"
+        assert self.proj_width % 2 == 0, (
+            f"proj_width must be even, got {self.proj_width}"
+        )
         self.register_buffer(
             "theta",
             1.0
@@ -238,7 +239,7 @@ class RotaryProjection(Projection):
     def forward(
         self,
         x: Float[torch.Tensor, "*batch group hpg seq dim"],
-        seq_id: Optional[Int[torch.Tensor, "*batch #group #hpg seq"]],
+        seq_id: Int[torch.Tensor, "*batch #group #hpg seq"] | None,
     ) -> Float[torch.Tensor, "*batch group hpg seq dim"]:
         self._init_freq(max_len=seq_id.max() + 1)
         rot_cos = self.cos[seq_id]
@@ -250,8 +251,8 @@ class FeedForward(nn.Module):
     def __init__(
         self,
         in_dim: int,
-        hidden_dim: Optional[int] = None,
-        out_dim: Optional[int] = None,
+        hidden_dim: int | None = None,
+        out_dim: int | None = None,
         activation: Callable[[torch.Tensor], torch.Tensor] = F.gelu,
         bias: bool = True,
         ffn_dropout_p: float = 0.0,
@@ -275,7 +276,7 @@ class FeedForward(nn.Module):
     def forward(
         self,
         x: Float[torch.Tensor, "... in_dim"],
-        centroid: Optional[Float[torch.Tensor, "expert in_dim"]] = None,
+        centroid: Float[torch.Tensor, "expert in_dim"] | None = None,
     ) -> Float[torch.Tensor, "... out_dim"]:
         x = self._in_proj(x)
         return self.dropout2(self.fc2(self.dropout1(x)))
@@ -290,8 +291,8 @@ class GatedLinearUnitFeedForward(FeedForward):
     def __init__(
         self,
         in_dim: int,
-        hidden_dim: Optional[int] = None,
-        out_dim: Optional[int] = None,
+        hidden_dim: int | None = None,
+        out_dim: int | None = None,
         activation: Callable[[torch.Tensor], torch.Tensor] = F.silu,
         bias: bool = True,
         ffn_dropout_p: float = 0.0,
@@ -323,13 +324,13 @@ class GroupedQueryAttention(nn.Module):
         num_heads: int,
         num_groups: int,
         bias: bool = True,
-        norm_layer: Optional[type[nn.Module] | partial[nn.Module]] = nn.LayerNorm,
-        softmax_scale: Optional[float] = None,
+        norm_layer: type[nn.Module] | partial[nn.Module] | None = nn.LayerNorm,
+        softmax_scale: float | None = None,
         attn_dropout_p: float = 0.0,
-        var_attn_bias: Optional[Callable[[], AttentionBias]] = None,
-        time_attn_bias: Optional[Callable[[], AttentionBias]] = None,
-        var_qk_proj: Optional[Callable[[], QueryKeyProjection]] = None,
-        time_qk_proj: Optional[Callable[[], QueryKeyProjection]] = None,
+        var_attn_bias: Callable[[], AttentionBias] | None = None,
+        time_attn_bias: Callable[[], AttentionBias] | None = None,
+        var_qk_proj: Callable[[], QueryKeyProjection] | None = None,
+        time_qk_proj: Callable[[], QueryKeyProjection] | None = None,
         flash_attention: bool = True,
     ):
         super().__init__()
@@ -364,11 +365,11 @@ class GroupedQueryAttention(nn.Module):
         self,
         query: Float[torch.Tensor, "*batch group hpg q_len dim"],
         key: Float[torch.Tensor, "*batch group hpg kv_len dim"],
-        query_var_id: Optional[Int[torch.Tensor, "*batch q_len"]],
-        kv_var_id: Optional[Int[torch.Tensor, "*batch kv_len"]],
+        query_var_id: Int[torch.Tensor, "*batch q_len"] | None,
+        kv_var_id: Int[torch.Tensor, "*batch kv_len"] | None,
     ) -> tuple[
-        Optional[Int[torch.Tensor, "*batch #group #hpg q_len"]],
-        Optional[Int[torch.Tensor, "*batch #group #hpg kv_len"]],
+        Int[torch.Tensor, "*batch #group #hpg q_len"] | None,
+        Int[torch.Tensor, "*batch #group #hpg kv_len"] | None,
     ]:
         if self.var_attn_bias is not None or self.var_qk_proj is not None:
             if query_var_id is None:
@@ -393,11 +394,11 @@ class GroupedQueryAttention(nn.Module):
         self,
         query: Float[torch.Tensor, "*batch group hpg q_len dim"],
         key: Float[torch.Tensor, "*batch group hpg kv_len dim"],
-        query_time_id: Optional[Int[torch.Tensor, "*batch q_len"]],
-        kv_time_id: Optional[Int[torch.Tensor, "*batch kv_len"]],
+        query_time_id: Int[torch.Tensor, "*batch q_len"] | None,
+        kv_time_id: Int[torch.Tensor, "*batch kv_len"] | None,
     ) -> tuple[
-        Optional[Int[torch.Tensor, "*batch 1 1 q_len"]],
-        Optional[Int[torch.Tensor, "*batch 1 1 kv_len"]],
+        Int[torch.Tensor, "*batch 1 1 q_len"] | None,
+        Int[torch.Tensor, "*batch 1 1 kv_len"] | None,
     ]:
         if self.time_attn_bias is not None or self.time_qk_proj is not None:
             if query_time_id is None:
@@ -422,17 +423,18 @@ class GroupedQueryAttention(nn.Module):
 
     def _update_attn_mask(
         self,
-        attn_mask: Optional[Bool[torch.Tensor, "*batch q_len kv_len"]],
+        attn_mask: Bool[torch.Tensor, "*batch q_len kv_len"] | None,
         query: Float[torch.Tensor, "*batch group hpg q_len dim"],
         key: Float[torch.Tensor, "*batch group hpg kv_len dim"],
-        query_var_id: Optional[Int[torch.Tensor, "*batch 1 1 q_len"]] = None,
-        kv_var_id: Optional[Int[torch.Tensor, "*batch 1 1 kv_len"]] = None,
-        query_time_id: Optional[Int[torch.Tensor, "*batch 1 1 q_len"]] = None,
-        kv_time_id: Optional[Int[torch.Tensor, "*batch 1 1 kv_len"]] = None,
-    ) -> Optional[
+        query_var_id: Int[torch.Tensor, "*batch 1 1 q_len"] | None = None,
+        kv_var_id: Int[torch.Tensor, "*batch 1 1 kv_len"] | None = None,
+        query_time_id: Int[torch.Tensor, "*batch 1 1 q_len"] | None = None,
+        kv_time_id: Int[torch.Tensor, "*batch 1 1 kv_len"] | None = None,
+    ) -> (
         Bool[torch.Tensor, "*batch #group #hpg q_len kv_len"]
         | Float[torch.Tensor, "*batch #group #hpg q_len kv_len"]
-    ]:
+        | None
+    ):
         if attn_mask is not None:
             attn_mask = rearrange(
                 attn_mask,
@@ -471,10 +473,10 @@ class GroupedQueryAttention(nn.Module):
         self,
         query: Float[torch.Tensor, "*batch group hpg q_len dim"],
         key: Float[torch.Tensor, "*batch group hpg kv_len dim"],
-        query_var_id: Optional[Int[torch.Tensor, "*batch #group #hpg q_len"]],
-        kv_var_id: Optional[Int[torch.Tensor, "*batch #group #hpg kv_len"]],
-        query_time_id: Optional[Int[torch.Tensor, "*batch #group #hpg q_len"]],
-        kv_time_id: Optional[Int[torch.Tensor, "*batch #group #hpg kv_len"]],
+        query_var_id: Int[torch.Tensor, "*batch #group #hpg q_len"] | None,
+        kv_var_id: Int[torch.Tensor, "*batch #group #hpg kv_len"] | None,
+        query_time_id: Int[torch.Tensor, "*batch #group #hpg q_len"] | None,
+        kv_time_id: Int[torch.Tensor, "*batch #group #hpg kv_len"] | None,
     ) -> tuple[
         Float[torch.Tensor, "*batch group hpg q_len dim"],
         Float[torch.Tensor, "*batch group hpg kv_len dim"],
@@ -496,11 +498,11 @@ class GroupedQueryAttention(nn.Module):
         query: Float[torch.Tensor, "*batch q_len dim"],
         key: Float[torch.Tensor, "*batch kv_len dim"],
         value: Float[torch.Tensor, "*batch kv_len dim"],
-        attn_mask: Optional[Bool[torch.Tensor, "*batch q_len kv_len"]] = None,
-        query_var_id: Optional[Int[torch.Tensor, "*batch q_len"]] = None,
-        kv_var_id: Optional[Int[torch.Tensor, "*batch kv_len"]] = None,
-        query_time_id: Optional[Int[torch.Tensor, "*batch q_len"]] = None,
-        kv_time_id: Optional[Int[torch.Tensor, "*batch kv_len"]] = None,
+        attn_mask: Bool[torch.Tensor, "*batch q_len kv_len"] | None = None,
+        query_var_id: Int[torch.Tensor, "*batch q_len"] | None = None,
+        kv_var_id: Int[torch.Tensor, "*batch kv_len"] | None = None,
+        query_time_id: Int[torch.Tensor, "*batch q_len"] | None = None,
+        kv_time_id: Int[torch.Tensor, "*batch kv_len"] | None = None,
     ) -> Float[torch.Tensor, "*batch q_len dim"]:
         query = self.q_proj(query)
         key = self.k_proj(key)
@@ -601,8 +603,8 @@ class TransformerEncoderLayer(nn.Module):
         self,
         self_attn: GroupedQueryAttention,
         ffn: FeedForward,
-        norm1: Optional[nn.Module],
-        norm2: Optional[nn.Module],
+        norm1: nn.Module | None,
+        norm2: nn.Module | None,
         post_attn_dropout_p: float = 0.0,
         pre_norm: bool = True,
     ):
@@ -619,10 +621,10 @@ class TransformerEncoderLayer(nn.Module):
     def forward(
         self,
         x: Float[torch.Tensor, "*batch time_len dim"],
-        attn_mask: Optional[Bool[torch.Tensor, "*batch time_len time_len"]] = None,
-        var_id: Optional[Int[torch.Tensor, "*batch time_len"]] = None,
-        time_id: Optional[Int[torch.Tensor, "*batch time_len"]] = None,
-        centroid: Optional[Float[torch.Tensor, "expert dim"]] = None,
+        attn_mask: Bool[torch.Tensor, "*batch time_len time_len"] | None = None,
+        var_id: Int[torch.Tensor, "*batch time_len"] | None = None,
+        time_id: Int[torch.Tensor, "*batch time_len"] | None = None,
+        centroid: Float[torch.Tensor, "expert dim"] | None = None,
     ) -> Float[torch.Tensor, "*batch time_len dim"]:
         if self.pre_norm:
             x = x + self._sa_block(
@@ -639,9 +641,9 @@ class TransformerEncoderLayer(nn.Module):
     def _sa_block(
         self,
         x: Float[torch.Tensor, "*batch time_len dim"],
-        attn_mask: Optional[Bool[torch.Tensor, "*batch time_len time_len"]],
-        var_id: Optional[Int[torch.Tensor, "*batch time_len"]] = None,
-        time_id: Optional[Int[torch.Tensor, "*batch time_len"]] = None,
+        attn_mask: Bool[torch.Tensor, "*batch time_len time_len"] | None,
+        var_id: Int[torch.Tensor, "*batch time_len"] | None = None,
+        time_id: Int[torch.Tensor, "*batch time_len"] | None = None,
     ) -> Float[torch.Tensor, "*batch time_len dim"]:
         x = self.self_attn(
             x,
@@ -661,29 +663,25 @@ class TransformerEncoder(nn.Module):
         self,
         d_model: int,
         num_layers: int,
-        num_heads: Optional[int] = None,
-        num_groups: Optional[int] = None,
+        num_heads: int | None = None,
+        num_groups: int | None = None,
         pre_norm: bool = True,
         attn_dropout_p: float = 0.0,
         dropout_p: float = 0.0,
-        norm_layer: Optional[Callable[[int], nn.Module]] = nn.LayerNorm,
+        norm_layer: Callable[[int], nn.Module] | None = nn.LayerNorm,
         activation: Callable[[torch.Tensor], torch.Tensor] = F.silu,
         use_moe: bool = False,
         use_glu: bool = True,
         use_qk_norm: bool = True,
-        var_attn_bias_layer: Optional[Callable[[int, int, int], AttentionBias]] = None,
-        time_attn_bias_layer: Optional[Callable[[int, int, int], AttentionBias]] = None,
-        var_qk_proj_layer: Optional[
-            Callable[[int, int, int], QueryKeyProjection]
-        ] = None,
-        time_qk_proj_layer: Optional[
-            Callable[[int, int, int], QueryKeyProjection]
-        ] = None,
+        var_attn_bias_layer: Callable[[int, int, int], AttentionBias] | None = None,
+        time_attn_bias_layer: Callable[[int, int, int], AttentionBias] | None = None,
+        var_qk_proj_layer: Callable[[int, int, int], QueryKeyProjection] | None = None,
+        time_qk_proj_layer: Callable[[int, int, int], QueryKeyProjection] | None = None,
         shared_var_attn_bias: bool = False,
         shared_time_attn_bias: bool = False,
         shared_var_qk_proj: bool = False,
         shared_time_qk_proj: bool = False,
-        d_ff: Optional[int] = None,
+        d_ff: int | None = None,
         use_bias: bool = False,
         flash_attention: bool = False,
         use_mup: bool = False,
@@ -766,7 +764,7 @@ class TransformerEncoder(nn.Module):
         num_groups: int,
         layer: Callable,
         shared_layer: bool,
-    ) -> Optional[Callable[[], nn.Module]]:
+    ) -> Callable[[], nn.Module] | None:
         if layer is None:
             return None
         if shared_layer:
@@ -777,9 +775,9 @@ class TransformerEncoder(nn.Module):
     def forward(
         self,
         x: Float[torch.Tensor, "*batch time_len dim"],
-        attn_mask: Optional[Bool[torch.Tensor, "*batch time_len time_len"]] = None,
-        var_id: Optional[Int[torch.Tensor, "*batch time_len"]] = None,
-        time_id: Optional[Int[torch.Tensor, "*batch time_len"]] = None,
+        attn_mask: Bool[torch.Tensor, "*batch time_len time_len"] | None = None,
+        var_id: Int[torch.Tensor, "*batch time_len"] | None = None,
+        time_id: Int[torch.Tensor, "*batch time_len"] | None = None,
     ) -> Float[torch.Tensor, "*batch time_len dim"]:
         if self.use_moe:
             for idx, layer in enumerate(self.layers):

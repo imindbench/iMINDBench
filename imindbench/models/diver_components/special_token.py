@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class TokenManager(nn.Module):
     def __init__(self, d_model, input_format="BCND"):
-        super(TokenManager, self).__init__()
+        super().__init__()
         self.d_model = d_model
         self.special_tokens = nn.ParameterDict()
         self.input_format = input_format
@@ -31,17 +31,17 @@ class TokenManager(nn.Module):
             if expand_along_dimension is None:
                 return token.unsqueeze(0).expand(B, -1, -1, -1)
             elif expand_along_dimension == "C":
-                assert (
-                    token.shape[0] == 1
-                ), "Token must have c_count=1 to expand along C"
+                assert token.shape[0] == 1, (
+                    "Token must have c_count=1 to expand along C"
+                )
                 return token.expand(B, C, -1, -1)
             elif expand_along_dimension == "N":
-                assert (
-                    token.shape[1] == 1
-                ), "Token must have n_count=1 to expand along N"
+                assert token.shape[1] == 1, (
+                    "Token must have n_count=1 to expand along N"
+                )
                 return token.expand(B, -1, N, -1)
             else:
-                raise ValueError(f"expand_along_dimension must be None, 'N', or 'C'")
+                raise ValueError("expand_along_dimension must be None, 'N', or 'C'")
         else:
             raise ValueError(f"Unsupported input format: {self.input_format}")
 
@@ -56,7 +56,7 @@ class TokenManager(nn.Module):
         expand_c_along_dimensions: bool = False,
     ):
         assert (
-            self.RAN_PREPEND == False
+            self.RAN_PREPEND == False  # noqa: E712 - preserve upstream boolean comparison
         ), "prepend_x_with_tokens should be called only once per forward pass"
         self.RAN_PREPEND = True
 
@@ -101,7 +101,7 @@ class TokenManager(nn.Module):
 
     def extract_prepended_x(self, x):
         assert (
-            self.RAN_PREPEND == True
+            self.RAN_PREPEND == True  # noqa: E712 - preserve upstream boolean comparison
         ), "extract_prepended_x should be called after prepend_x_with_tokens"
         self.RAN_PREPEND = False
 

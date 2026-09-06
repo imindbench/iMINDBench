@@ -8,8 +8,9 @@ import numpy as np
 import torch
 from omegaconf import DictConfig
 
-from .base_model import BaseModel
 from imindbench.utils.logging_utils import log
+
+from .base_model import BaseModel
 
 
 class TorchBaseModel(BaseModel):
@@ -49,7 +50,8 @@ class TorchBaseModel(BaseModel):
                     import warnings
 
                     warnings.warn(
-                        f"GPU {device.index} not available (only {torch.cuda.device_count()} GPUs). Falling back to CPU."
+                        f"GPU {device.index} not available (only {torch.cuda.device_count()} GPUs). Falling back to CPU.",
+                        stacklevel=2,
                     )
                     device = torch.device("cpu")
                 else:

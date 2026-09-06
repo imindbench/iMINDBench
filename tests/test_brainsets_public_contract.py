@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from click.testing import CliRunner
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = json.loads(
     (ROOT / "config" / "brainsets_smoke_manifest.json").read_text(encoding="utf-8")

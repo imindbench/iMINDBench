@@ -119,8 +119,8 @@ def test_missing_brain_areas_is_allowed_when_spatial_encoding_is_off():
 @requires_barista
 def test_non_destrieux_labels_raise():
     """Desikan-Killiany names resolve to UNKNOWN, which must not pass silently."""
-    from imindbench.models.barista_model import Barista
     from imindbench.models.barista_components.atlas import DestrieuxAseg
+    from imindbench.models.barista_model import Barista
 
     model = Barista.__new__(Barista)
     model.cfg = _barista_cfg()
@@ -135,8 +135,8 @@ def test_non_destrieux_labels_raise():
 
 @requires_barista
 def test_mostly_resolved_labels_pass():
-    from imindbench.models.barista_model import Barista
     from imindbench.models.barista_components.atlas import DestrieuxAseg
+    from imindbench.models.barista_model import Barista
 
     model = Barista.__new__(Barista)
     model.cfg = _barista_cfg()

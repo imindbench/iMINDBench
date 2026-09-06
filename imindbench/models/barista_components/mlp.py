@@ -1,7 +1,6 @@
 # Ported from BaRISTA: https://github.com/ShanechiLab/BaRISTA
 # USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
 
-from typing import List
 
 import torch.nn as nn
 
@@ -20,7 +19,7 @@ class MLP(nn.Module):
         self,
         d_input: int,
         d_out: int,
-        layer_list: List = None,
+        layer_list: list = None,
         dropout: float = 0.1,
         bias: bool = True,
         use_first_dropout: bool = True,
@@ -30,7 +29,7 @@ class MLP(nn.Module):
         use_identity_stub: bool = True,
         **kwargs,
     ):
-        super(MLP, self).__init__()
+        super().__init__()
 
         self.d_input = d_input
         self.d_out = d_out

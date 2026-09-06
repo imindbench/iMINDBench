@@ -3,9 +3,10 @@ Linear baseline model from PopT-BYD-BTB.
 Single linear layer with optional dropout, batch normalization, and sensor dropout.
 """
 
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
+
 from . import register_model
 from .torch_base_model import TorchBaseModel
 

@@ -1,5 +1,4 @@
 import torch
-from typing import Tuple, Union, Optional
 
 DEFAULT_TIME_DOMAIN_MSE_CONFIG = {"use": True, "weight": 1.0, "criterion": "MSELoss"}
 
@@ -108,7 +107,7 @@ def single_stft_transform(
     cutofffreq=None,
     sr=500,
     center: bool = True,
-) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
 
     if window is None or window == "hann":
         window = torch.hann_window(n_fft if win_length is None else win_length)
@@ -135,7 +134,7 @@ def single_stft_transform(
     )
     stft_result = stft_result.to(x.dtype)
 
-    if cutofffreq != None:
+    if cutofffreq is not None:
         cutofffreq_index = min(int(cutofffreq // (sr / n_fft)), stft_result.shape[-2])
         stft_result_freqcut = stft_result[..., 0:cutofffreq_index, :]
         return stft_result_freqcut
@@ -190,7 +189,7 @@ def multiscale_stft_transform(
 def fft_transform(
     x: torch.Tensor,
     n_fft: int = 256,
-    freqcutoff: Optional[float] = None,
+    freqcutoff: float | None = None,
     loss_type: str = "complex",
     normalize: bool = False,
     compress_func="identity",
@@ -205,7 +204,7 @@ def fft_transform(
 
     fft_result = fft_result.to(x.dtype)
 
-    if cutofffreq != None:
+    if cutofffreq is not None:
         cutofffreq_index = min(int(cutofffreq // (sr / n_fft)), fft_result.shape[-1])
         fft_result = fft_result[..., 0:cutofffreq_index]
 

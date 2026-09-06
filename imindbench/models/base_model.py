@@ -3,8 +3,9 @@ Base model interface that all models must implement.
 This provides a unified interface for both sklearn and PyTorch models.
 """
 
-import numpy as np
 from abc import ABC, abstractmethod
+
+import numpy as np
 
 
 class BaseModel(ABC):

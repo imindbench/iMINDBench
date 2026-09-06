@@ -3,8 +3,8 @@
 
 import torch
 import torch.nn as nn
-from einops import rearrange, repeat
 import xformers.ops as xops
+from einops import rearrange, repeat
 
 from imindbench.models.barista_components.utils import get_activation_function
 
@@ -84,7 +84,6 @@ class RMSNorm(nn.Module):
 
 
 class SelfAttention(nn.Module):
-
     def __init__(self, d_hidden, num_heads=8, dropout=0.1, **kwargs):
         super().__init__()
         self.d_hidden = d_hidden
@@ -92,9 +91,9 @@ class SelfAttention(nn.Module):
         self.d_head = self.d_hidden // self.num_heads
         self.dropout = nn.Dropout(dropout)
 
-        assert (
-            self.d_hidden % self.num_heads == 0
-        ), f"Number of attention heads: {self.num_heads} must divide embedding dimension: {self.d_hidden}."
+        assert self.d_hidden % self.num_heads == 0, (
+            f"Number of attention heads: {self.num_heads} must divide embedding dimension: {self.d_hidden}."
+        )
 
         self.qkv_proj = nn.Linear(self.d_hidden, 3 * self.d_hidden, bias=True)
         self.o_proj = nn.Linear(self.d_hidden, self.d_hidden, bias=True)
@@ -141,7 +140,7 @@ class SelfAttention(nn.Module):
     def forward(self, x, seq_lens=None, **kwargs):
         if seq_lens is None and x.shape[0] == 1:
             raise ValueError(
-                f"'seq_lens' for memory efficient attention with variable length sequences (x.shape[0] == 1) must be non-None."
+                "'seq_lens' for memory efficient attention with variable length sequences (x.shape[0] == 1) must be non-None."
             )
         q, k, v = self.get_qkv(x)
         out, att_weights = self.get_attention_out(q, k, v, seq_lens)

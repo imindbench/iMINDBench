@@ -2,12 +2,13 @@
 Logging and result formatting utilities.
 """
 
-import time
-import torch
 import json
-import os
 import logging
+import os
+import time
+
 import numpy as np
+import torch
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import OmegaConf
 
@@ -60,9 +61,7 @@ def log(message, priority=0, indent=0):
     )
     ram_usage = _resolve_ram_usage_gb()
     ram_display = f"{ram_usage:05.1f}G" if ram_usage is not None else "  n/a"
-    formatted_message = (
-        f"[gpu {gpu_memory_reserved:04.1f}G ram {ram_display}] {' '*4*indent}{message}"
-    )
+    formatted_message = f"[gpu {gpu_memory_reserved:04.1f}G ram {ram_display}] {' ' * 4 * indent}{message}"
 
     # Use logger - Hydra handles routing to console and file automatically
     logger.info(formatted_message)

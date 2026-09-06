@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import bisect
-from collections.abc import Iterable
-from copy import deepcopy
 import hashlib
 import itertools
 import json
-from pathlib import Path
 import pickle
 import re
 import shutil
 import tempfile
 import time
 import uuid
+from collections.abc import Iterable
+from copy import deepcopy
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
@@ -23,6 +23,7 @@ import torch
 from omegaconf import OmegaConf
 
 from imindbench.preprocessors import build_preprocessor
+from imindbench.utils.logging_utils import log, log_fold_split_sample_counts
 from imindbench.utils.pipeline_contracts import (
     AUTO_MAX_TRAIN_SAMPLES_PER_SUBJECT,
     build_processed_split_provider,
@@ -30,7 +31,6 @@ from imindbench.utils.pipeline_contracts import (
     resolve_train_source_configs,
     validate_decodable_train_source_regimes,
 )
-from imindbench.utils.logging_utils import log, log_fold_split_sample_counts
 
 
 def _normalize_brain_area_array(
@@ -176,7 +176,7 @@ def _resolve_coordinate_transform(
 def _validate_provider_key(provider_key: Any) -> str:
     if not isinstance(provider_key, str):
         raise TypeError(
-            "provider_key must be a str, got " f"{type(provider_key).__name__}."
+            f"provider_key must be a str, got {type(provider_key).__name__}."
         )
     if provider_key.strip() != provider_key:
         raise ValueError(
@@ -259,7 +259,7 @@ def _build_preprocessor_from_name(name: str):
     cfg_path = _PREPROCESSOR_CONFIG_DIR / f"{name}.yaml"
     if not cfg_path.exists():
         raise ValueError(
-            "Unknown preprocessor config " f"'{name}'. Expected file at '{cfg_path}'."
+            f"Unknown preprocessor config '{name}'. Expected file at '{cfg_path}'."
         )
     return build_preprocessor(OmegaConf.load(cfg_path))
 
@@ -414,7 +414,7 @@ def _resolve_preprocessed_split_cache_dir(
 def _build_train_source_cache_identity(
     *,
     source_cfg: dict[str, Any],
-    source_dataset: "WindowedNeuroprobeSplitDataset",
+    source_dataset: WindowedNeuroprobeSplitDataset,
     preprocessor_identity: Any,
     fold_idx: int,
     require_coords: bool,
@@ -733,7 +733,9 @@ def _validate_train_source_feature_shapes(
     per_source_shapes: dict[str, tuple[int, ...] | None] = {}
     expected_shape: tuple[int, ...] | None = None
     expected_provider: str | None = None
-    for source_cfg, source_dataset in zip(train_sources, train_source_datasets):
+    for source_cfg, source_dataset in zip(
+        train_sources, train_source_datasets, strict=False
+    ):
         provider = str(source_cfg["provider"])
         source_shape = _infer_split_feature_shape(
             source_dataset,
@@ -945,7 +947,7 @@ def _balanced_sample_positions_by_label(
 
 
 def _count_dataset_subject_session_samples(
-    dataset: "WindowedNeuroprobeSplitDataset",
+    dataset: WindowedNeuroprobeSplitDataset,
 ) -> dict[tuple[int, int], int]:
     subject_session_sample_counts: dict[tuple[int, int], int] = {}
     for position in range(len(dataset._flat_index)):
@@ -972,7 +974,7 @@ def _build_target_auto_reference_dataset(
     max_samples_setting: int | str | None = None,
     sample_fraction: float,
     sample_seed: int,
-) -> "WindowedNeuroprobeSplitDataset":
+) -> WindowedNeuroprobeSplitDataset:
     resolved_max_samples = (
         None
         if max_samples_setting == AUTO_MAX_TRAIN_SAMPLES_PER_SUBJECT
@@ -994,10 +996,10 @@ def _build_target_auto_reference_dataset(
 
 
 def _clone_train_dataset_with_subject_cap(
-    dataset: "WindowedNeuroprobeSplitDataset",
+    dataset: WindowedNeuroprobeSplitDataset,
     *,
     max_samples_per_subject: int,
-) -> "WindowedNeuroprobeSplitDataset":
+) -> WindowedNeuroprobeSplitDataset:
     if dataset.split != "train":
         raise ValueError("Subject-cap cloning is only supported for train datasets.")
     resolved_cap = _normalize_max_train_samples_per_subject(max_samples_per_subject)
@@ -1034,7 +1036,7 @@ def _clone_train_dataset_with_subject_cap(
 
 
 def _resolve_target_auto_max_samples_per_subject(
-    target_dataset: "WindowedNeuroprobeSplitDataset",
+    target_dataset: WindowedNeuroprobeSplitDataset,
     *,
     test_subject: int,
     test_session: int,
@@ -1858,7 +1860,7 @@ class _ConcatenatedTrainSplitDataset(torch.utils.data.Dataset):
 
     def set_materialized_samples(
         self, samples: Iterable[dict[str, Any]]
-    ) -> "_ConcatenatedTrainSplitDataset":
+    ) -> _ConcatenatedTrainSplitDataset:
         out_samples = []
         for sample in samples:
             validate_sample_dict(
@@ -1876,7 +1878,7 @@ class _ConcatenatedTrainSplitDataset(torch.utils.data.Dataset):
         *,
         profile_preprocessor: bool = False,
         log_prefix: str = "",
-    ) -> "_ConcatenatedTrainSplitDataset":
+    ) -> _ConcatenatedTrainSplitDataset:
         if self._materialized is not None:
             return self
         self._materialized = _materialize_split_samples(
@@ -1938,8 +1940,7 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
         self.coordinate_profile = resolve_coordinate_profile(coordinate_profile)
         if not isinstance(require_coords, bool):
             raise TypeError(
-                "require_coords must be a bool, got "
-                f"{type(require_coords).__name__}."
+                f"require_coords must be a bool, got {type(require_coords).__name__}."
             )
         if brain_area_key is not None and not isinstance(brain_area_key, str):
             raise TypeError(
@@ -2221,7 +2222,7 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
 
     def set_materialized_samples(
         self, samples: Iterable[dict[str, Any]]
-    ) -> "WindowedNeuroprobeSplitDataset":
+    ) -> WindowedNeuroprobeSplitDataset:
         out_samples = []
         for sample in samples:
             validate_sample_dict(
@@ -2239,7 +2240,7 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
         *,
         profile_preprocessor: bool = False,
         log_prefix: str = "",
-    ) -> "WindowedNeuroprobeSplitDataset":
+    ) -> WindowedNeuroprobeSplitDataset:
         if self._materialized is not None:
             return self
         self._materialized = _materialize_split_samples(
@@ -2363,8 +2364,7 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
             coords = np.asarray(legacy_coords, dtype=np.float32).reshape(-1, 3)
             if len(coords) != len(ids_all):
                 raise ValueError(
-                    f"legacy coords must have length {len(ids_all)}, got "
-                    f"{len(coords)}."
+                    f"legacy coords must have length {len(ids_all)}, got {len(coords)}."
                 )
             # Otherwise convert the provider's native coordinates to the profile.
             already_profile_coords = already_in_profile_frame
@@ -3214,7 +3214,7 @@ def build_neuroprobe_torch_fold(
                 # Each train source can override the top-level preprocessor, so
                 # fitted state and cache identity are tracked per source provider.
                 for source_cfg, source_dataset in zip(
-                    active_train_sources, train_source_datasets
+                    active_train_sources, train_source_datasets, strict=False
                 ):
                     source_provider = str(source_cfg["provider"])
                     source_preprocessor_name = train_source_preprocessor_names[

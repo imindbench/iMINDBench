@@ -29,6 +29,7 @@ dependencies = [
 [project.optional-dependencies]
 logging = ["wandb>=0.21,<0.25"]
 test = ["pytest>=7.2,<9"]
+dev = ["pytest>=7.2,<9", "ruff==0.15.10", "build>=1.2,<2"]
 
 [project.scripts]
 imindbench = "imindbench.run_eval:cli"
@@ -43,3 +44,15 @@ imindbench = [
     "decodable_subject_sessions/**/README.md",
     "scripts/*.sh",
 ]
+
+[tool.ruff]
+target-version = "py310"
+extend-exclude = ["build", "*.ipynb"]
+
+[tool.ruff.lint]
+select = ["I", "F", "UP", "B", "E"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+# Jaxtyping tensor-shape strings are not Python forward references.
+"imindbench/models/diver_components/*.py" = ["F722"]

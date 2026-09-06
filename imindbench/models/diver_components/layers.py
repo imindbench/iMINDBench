@@ -1,11 +1,19 @@
+import math
+from functools import partial
+
+import numpy as np
 import torch
 import torch.nn as nn
-from einops import rearrange
 import torch.nn.functional as F
-import numpy as np
-from functools import partial
-from typing import Tuple
-from .original_moirai_encoder import *
+from einops import rearrange
+
+from .original_moirai_encoder import (
+    BinaryAttentionBias,
+    QueryKeyProjection,
+    RMSNorm,
+    RotaryProjection,
+    TransformerEncoder,
+)
 
 
 class Test_CNN_KernelSize_Effect_500(nn.Module):
@@ -129,7 +137,7 @@ class CBraModSpectralEmbedding(nn.Module):
 
 class PositionalEncoding3D(nn.Module):
     def __init__(self, d_model):
-        super(PositionalEncoding3D, self).__init__()
+        super().__init__()
         self.d_model = d_model
         self.temperature = 2000
         self.scale = 1 / 256
@@ -173,7 +181,7 @@ class PositionEmbeddingCoordsSine(nn.Module):
     def __init__(
         self, n_dim: int = 1, d_model: int = 256, temperature=10000, scale=1 / 256
     ):
-        super(PositionEmbeddingCoordsSine, self).__init__()
+        super().__init__()
 
         self.n_dim = n_dim
         self.num_pos_feats = d_model // n_dim // 2 * 2
@@ -205,7 +213,7 @@ class PositionEmbeddingCoordsSine(nn.Module):
 
 class ChannelTypeEmbedding(nn.Module):
     def __init__(self, channel_types, d_emb_model, learnable=True):
-        super(ChannelTypeEmbedding, self).__init__()
+        super().__init__()
         if channel_types is None or len(channel_types) == 0:
             raise ValueError("Warning: available channel_types is None or empty.")
         self.channel_types = channel_types
@@ -238,7 +246,7 @@ class ChannelTypeEmbedding(nn.Module):
 
 class ChannelSubTypeEmbedding(nn.Module):
     def __init__(self, channel_subtypes, d_emb_model, learnable=True):
-        super(ChannelSubTypeEmbedding, self).__init__()
+        super().__init__()
         if channel_subtypes is None or len(channel_subtypes) == 0:
             raise ValueError("Warning: available channel_subtypes is None or empty.")
         self.channel_subtypes = channel_subtypes
@@ -352,14 +360,14 @@ class SlidingWindowTransformer(nn.Module):
         model: nn.Module,
         c_kernel_size: int = None,
         n_kernel_size: int = None,
-        stride: Tuple[int, int] = (1, 1),
-        padding: Tuple[int, int] = (0, 0),
+        stride: tuple[int, int] = (1, 1),
+        padding: tuple[int, int] = (0, 0),
         normalize: bool = True,
     ):
         super().__init__()
-        assert (
-            c_kernel_size is not None or n_kernel_size is not None
-        ), "Either c_kernel_size or n_kernel_size or both must be provided."
+        assert c_kernel_size is not None or n_kernel_size is not None, (
+            "Either c_kernel_size or n_kernel_size or both must be provided."
+        )
         self.c_kernel_size = c_kernel_size
         self.n_kernel_size = n_kernel_size
         self.model = model
@@ -370,7 +378,7 @@ class SlidingWindowTransformer(nn.Module):
     def _get_normalization_factor(
         self,
         x_unfolded: torch.Tensor,
-        output_size: Tuple[int, int],
+        output_size: tuple[int, int],
         fold_kwargs_dict: dict,
     ) -> torch.Tensor:
         ones = torch.ones_like(
@@ -382,7 +390,7 @@ class SlidingWindowTransformer(nn.Module):
         overlap_count = F.fold(ones, output_size=output_size, **fold_kwargs_dict)
         return overlap_count
 
-    def _get_kernel_size(self, input_C_dim, input_N_dim) -> Tuple[int, int]:
+    def _get_kernel_size(self, input_C_dim, input_N_dim) -> tuple[int, int]:
         if self.n_kernel_size is not None:
             return (input_C_dim, self.n_kernel_size)
 
@@ -503,9 +511,9 @@ class OriginalMoiraiEncoder(nn.Module):
         tau=None,
         delta=None,
     ):
-        assert (
-            len(x.shape) == 4
-        ), f"Input shape should be [B, C, N, D], (D : model dim, analagous to P (patch_len)) but got {x.shape}"
+        assert len(x.shape) == 4, (
+            f"Input shape should be [B, C, N, D], (D : model dim, analagous to P (patch_len)) but got {x.shape}"
+        )
         B, C, N, D = x.shape
         device = x.device
         x = rearrange(x, "b c n d -> b (c n) d")
@@ -520,7 +528,7 @@ class OriginalMoiraiEncoder(nn.Module):
             data_info_list is not None
             and len(data_info_list) > 0
             and "input_was_resampled_and_padded" in data_info_list[0]
-            and data_info_list[0]["input_was_resampled_and_padded"] == True
+            and data_info_list[0]["input_was_resampled_and_padded"] == True  # noqa: E712 - preserve upstream boolean comparison
         ):
             padding_array = np.array(
                 [data_info["padding"] for data_info in data_info_list]

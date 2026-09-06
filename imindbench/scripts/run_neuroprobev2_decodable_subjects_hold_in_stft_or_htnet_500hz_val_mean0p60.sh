@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+source "${SCRIPT_DIR}/runtime_paths.sh"
 RULE_NAME="stft_or_htnet_500hz_val_mean0p60"
 
 export PATHS_CFG="${PATHS_CFG:-default}"

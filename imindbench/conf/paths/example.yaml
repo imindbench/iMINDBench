@@ -1,6 +1,6 @@
-# Example paths config. Copy to conf/paths/server_<name>.yaml, fill in the
-# values, and select it with paths=server_<name>. That filename is gitignored,
-# so machine-local paths stay out of the repository.
+# Example paths config. Copy outside the installation to <config-dir>/paths/local.yaml
+# and select it with --config-dir <config-dir> paths=local.
+# Use absolute paths for data, checkpoints and caches.
 #
 # conf/paths/default.yaml leaves every path null, so it cannot drive a run.
 # Every key below must be present even when unused: conf/runtime/default.yaml

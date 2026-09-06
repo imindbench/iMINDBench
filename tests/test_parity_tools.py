@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "artifacts" / "parity_reference" / "manifest.json"
 SPEC = importlib.util.spec_from_file_location(

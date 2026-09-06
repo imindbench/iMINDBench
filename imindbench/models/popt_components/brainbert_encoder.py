@@ -9,8 +9,9 @@ import torch
 import torch.nn as nn
 from omegaconf import OmegaConf
 
-from .transformer_input import TransformerEncoderInput
 from imindbench.utils.logging_utils import log
+
+from .transformer_input import TransformerEncoderInput
 
 
 class BrainBERTEncoder(nn.Module):

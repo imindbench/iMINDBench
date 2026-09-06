@@ -2,25 +2,25 @@
 Main evaluation script for neuroprobe using Hydra configuration.
 """
 
-from functools import partial
 import logging
 import sys
-
-from omegaconf import DictConfig, OmegaConf
-import hydra
-import torch
-import numpy as np
 import time
+from functools import partial
+
+import hydra
+import numpy as np
+import torch
+from omegaconf import DictConfig, OmegaConf
 
 from imindbench.preprocessors import build_preprocessor
 from imindbench.sklearn_runner import SKLearnRunner
 from imindbench.torch_runner import TorchRunner
+from imindbench.utils import fold_helpers, logging_utils
 from imindbench.utils.pipeline_contracts import (
-    validate_eval_config,
     needs_region_intersection_pool,
     resolve_provider_n_folds,
+    validate_eval_config,
 )
-from imindbench.utils import fold_helpers, logging_utils
 
 # Optional wandb import
 try:
@@ -35,7 +35,6 @@ from imindbench.utils.logging_utils import (
     normalize_wandb_tags,
     set_verbose,
 )
-
 
 _HELP_COMPOSITION_DEFAULTS = (
     "paths=example",

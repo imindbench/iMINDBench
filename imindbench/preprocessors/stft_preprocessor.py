@@ -8,12 +8,13 @@ time-domain inputs are ``(channels, time)`` and STFT outputs are
 
 from numbers import Integral
 
+import numpy as np
 import torch
 import torch.nn.functional as F
-import numpy as np
 from scipy import signal
-from .base_preprocessor import BasePreprocessor
+
 from . import register_preprocessor
+from .base_preprocessor import BasePreprocessor
 
 
 def _optional_int(cfg, key):
@@ -243,8 +244,7 @@ class STFTPreprocessor(BasePreprocessor):
         x = np.asarray(sample["x"], dtype=np.float32)
         if x.ndim != 2:
             raise ValueError(
-                "stft expects sample['x'] with shape (channels, time), "
-                f"got {x.shape}."
+                f"stft expects sample['x'] with shape (channels, time), got {x.shape}."
             )
         x_out = self._run_stft_tensor(torch.from_numpy(x).unsqueeze(0))
         out = dict(sample)

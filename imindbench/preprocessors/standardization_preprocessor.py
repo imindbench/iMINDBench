@@ -8,9 +8,11 @@ STFT samples this means ``(channels, timebins, freqs)``.
 from __future__ import annotations
 
 from copy import deepcopy
+
 import numpy as np
-from .base_preprocessor import BasePreprocessor
+
 from . import register_preprocessor
+from .base_preprocessor import BasePreprocessor
 
 
 @register_preprocessor("standardize")
@@ -131,7 +133,7 @@ class StandardizationPreprocessor(BasePreprocessor):
                 channel_ids = self._require_channel_ids(
                     sample, expected_n=x_matrix.shape[0]
                 )
-                for channel_id, row in zip(channel_ids, x_matrix):
+                for channel_id, row in zip(channel_ids, x_matrix, strict=False):
                     ch_key = str(channel_id)
                     ch_stats = state["per_channel"].setdefault(
                         ch_key,
@@ -149,7 +151,9 @@ class StandardizationPreprocessor(BasePreprocessor):
                 channel_ids = self._require_channel_ids(
                     sample, expected_n=x_matrix.shape[0]
                 )
-                for channel_id, channel_matrix in zip(channel_ids, x_matrix):
+                for channel_id, channel_matrix in zip(
+                    channel_ids, x_matrix, strict=False
+                ):
                     ch_key = str(channel_id)
                     ch_stats = state["per_channel"].setdefault(
                         ch_key,
@@ -354,8 +358,7 @@ class StandardizationPreprocessor(BasePreprocessor):
         x = np.asarray(sample["x"])
         if x.ndim < 2:
             raise ValueError(
-                "sample['x'] must be at least 2D (channels, time, ...), "
-                f"got {x.shape}."
+                f"sample['x'] must be at least 2D (channels, time, ...), got {x.shape}."
             )
         channels = int(x.shape[0])
         time_steps = int(x.shape[1])
@@ -369,8 +372,7 @@ class StandardizationPreprocessor(BasePreprocessor):
         x = np.asarray(sample["x"])
         if x.ndim < 2:
             raise ValueError(
-                "sample['x'] must be at least 2D (channels, time, ...), "
-                f"got {x.shape}."
+                f"sample['x'] must be at least 2D (channels, time, ...), got {x.shape}."
             )
         return x.reshape(-1, 1)
 

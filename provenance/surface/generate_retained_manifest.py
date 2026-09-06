@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import subprocess
-
+from pathlib import Path
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_PATH = Path("provenance/surface/retained.tsv")
@@ -30,7 +29,10 @@ def classify_path(path: Path) -> tuple[str, str]:
     if source_path.startswith("imindbench/models/"):
         return "retained model implementation", "registered by imindbench.models"
     if source_path.startswith("imindbench/preprocessors/"):
-        return "retained preprocessing implementation", "registered by imindbench.preprocessors"
+        return (
+            "retained preprocessing implementation",
+            "registered by imindbench.preprocessors",
+        )
     if source_path.startswith("imindbench/scripts/"):
         return "operational evaluation launcher", "packaged shell entrypoint"
     if source_path.startswith("imindbench/"):

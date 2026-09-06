@@ -10,6 +10,29 @@ its `brainsets` CLI and `torch_brain.datasets` loaders.
 
 ## Current implementation status
 
+### Accepted release-cleanup scope (2026-09-06)
+
+The existing parity experiments are sufficient evidence of core migration
+compatibility. Preserve the frozen results, diagnostics and limitations; do not
+rerun or expand the experiment matrix for this cleanup. Legacy-floor CLI
+integration remains a documented follow-up, not a prerequisite for these
+portability/documentation changes.
+
+The current cleanup removes Git and package-local output assumptions from
+evaluation launchers, supports external config directories, makes remote logging
+opt-in, aligns formatting/lint rules with public TorchBrain, and adds an
+allowlisted submission source exporter. Existing loop selections and numerical
+settings remain intact. Consolidating the historical script families into
+declarative recipes is deferred to a separate, behavior-preserving change.
+
+Table 1 was recomputed from existing result JSONs: all 15 saved rows match,
+including equal support across tracks and the equal-dataset overall mean. The
+earlier inventory already included BrainBERT; its untracked notebook snapshot
+is unavailable for an exact cell diff. Preserve that old hash rather than
+silently replacing its historical identity.
+
+### Prior artifact and experiment evidence
+
 The built-artifact execution was audited at iMINDBench commit
 `302b66073a201823639700b284579db9ba7390ff` and the public TorchBrain dependency
 commit `e39f48ce0ec8c8f59be2507dca8ae172cce79d28`. Repository bootstrap, the filtered

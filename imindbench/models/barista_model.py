@@ -1,20 +1,20 @@
 # Ported from BaRISTA: https://github.com/ShanechiLab/BaRISTA
 # USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
 
+
 import numpy as np
-from omegaconf import DictConfig
 import torch
 import torch.nn as nn
-from typing import List
+from omegaconf import DictConfig
 
-from imindbench.models.barista_components.atlas import (
-    destrieux_label_to_region_enum,
-    DestrieuxAseg,
-)
 from imindbench.models import register_model
-from imindbench.models.torch_base_model import TorchBaseModel
+from imindbench.models.barista_components.atlas import (
+    DestrieuxAseg,
+    destrieux_label_to_region_enum,
+)
 from imindbench.models.barista_components.tokenizer import Tokenizer
 from imindbench.models.barista_components.transformer import Transformer
+from imindbench.models.torch_base_model import TorchBaseModel
 from imindbench.utils.logging_utils import log
 
 
@@ -61,7 +61,7 @@ class BaristaNetwork(nn.Module):
         self.binary_classifier = nn.Linear(self.d_hidden, output_dim)
 
     def get_latent_embeddings(
-        self, x: torch.Tensor, subject_sessions: List, region_enum_ids: torch.Tensor
+        self, x: torch.Tensor, subject_sessions: list, region_enum_ids: torch.Tensor
     ):
         #  Get tokens
         tokenized_x = self.tokenizer(
@@ -232,7 +232,7 @@ class Barista(TorchBaseModel):
         return super().prepare_batch(batch, **kwargs)
 
     def _get_region_enum_ids(
-        self, recording_ids: List[str], all_brain_areas: List[List[str]]
+        self, recording_ids: list[str], all_brain_areas: list[list[str]]
     ):
         if not self.cfg.tokenizer.add_spatial_encoding:
             return torch.zeros(len(recording_ids))
@@ -254,7 +254,9 @@ class Barista(TorchBaseModel):
             )
 
         all_enum_ids = []
-        for recording_id, brain_areas in zip(recording_ids, all_brain_areas):
+        for recording_id, brain_areas in zip(
+            recording_ids, all_brain_areas, strict=False
+        ):
             if recording_id in self._region_enum_cache:
                 enum_ids = self._region_enum_cache[recording_id]
             else:
@@ -272,7 +274,7 @@ class Barista(TorchBaseModel):
         return all_enum_ids
 
     def _check_region_labels_are_destrieux(
-        self, *, recording_id: str, brain_areas: List[str], enum_ids: List[int]
+        self, *, recording_id: str, brain_areas: list[str], enum_ids: list[int]
     ):
         """Fail loudly when channel labels are not from the Destrieux atlas.
 

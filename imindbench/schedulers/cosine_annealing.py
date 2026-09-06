@@ -1,5 +1,6 @@
-from .base_scheduler import BaseScheduler
 from torch.optim.lr_scheduler import CosineAnnealingLR
+
+from .base_scheduler import BaseScheduler
 
 
 class CosineAnnealing(BaseScheduler):

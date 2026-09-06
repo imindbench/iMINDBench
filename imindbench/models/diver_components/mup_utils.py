@@ -1,5 +1,6 @@
 import os
-from typing import Callable
+from collections.abc import Callable
+
 from mup import get_shapes, make_base_shapes, set_base_shapes
 
 

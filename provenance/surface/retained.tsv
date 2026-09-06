@@ -1,8 +1,10 @@
 source_path	reason	reachability
+.github/workflows/checks.yml	release support file	retained in the public repository
 .gitignore	repository metadata	controls public source selection
 CHANGELOG_PARITY.md	release documentation	public repository documentation
 LICENSE.txt	license metadata	distributed with the release
 LICENSES/BaRISTA-LICENSE.md	license metadata	distributed with the release
+README.md	release documentation	public repository documentation
 RELEASE_MIGRATION_PLAN.md	release documentation	public repository documentation
 THIRD_PARTY.md	license metadata	distributed with the release
 artifacts/parity_reference/README.md	release documentation	public repository documentation
@@ -17,6 +19,10 @@ artifacts/parity_reference/cases/pippi_logistic_multistft_speech_sub1_sess1.json
 artifacts/parity_reference/cases/pippi_popt_multistft_speech_sub1_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
 artifacts/parity_reference/manifest.json	canonical parity reference	consumed by scripts/parity_tools.py
 config/brainsets_smoke_manifest.json	public validation configuration	consumed by validation tooling
+config/submission_files.json	public validation configuration	consumed by validation tooling
+docs/EXPERIMENTS.md	release documentation	public repository documentation
+docs/REPRODUCTION.md	release documentation	public repository documentation
+docs/SUBMISSION.md	release documentation	public repository documentation
 environment.yml	build and environment metadata	used for installation
 imindbench/.gitignore	repository metadata	controls public source selection
 imindbench/README.md	release documentation	public repository documentation
@@ -177,6 +183,7 @@ imindbench/scripts/run_pippi_decodable_subjects_hold_in_stft_or_htnet_500hz_val_
 imindbench/scripts/run_pippi_decodable_subjects_multisource.sh	operational evaluation launcher	packaged shell entrypoint
 imindbench/scripts/run_pippi_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh	operational evaluation launcher	packaged shell entrypoint
 imindbench/scripts/run_pippi_stft_sweep.sh	operational evaluation launcher	packaged shell entrypoint
+imindbench/scripts/runtime_paths.sh	operational evaluation launcher	packaged shell entrypoint
 imindbench/sklearn_runner.py	evaluation runtime	imported by the imindbench package
 imindbench/torch_runner.py	evaluation runtime	imported by the imindbench package
 imindbench/utils/__init__.py	evaluation runtime	imported by the imindbench package
@@ -193,6 +200,7 @@ provenance/surface/generate_retained_manifest.py	release provenance	audit and re
 provenance/surface/removed.tsv	release provenance	audit and retained-surface evidence
 provenance/surface/retained.tsv	release provenance	audit and retained-surface evidence
 pyproject.toml	build and environment metadata	used for installation
+scripts/build_submission.py	release validation tooling	public validation entrypoint
 scripts/parity_tools.py	parity validation tooling	public dry-run and comparison entrypoint
 scripts/validate_brainsets_smoke.py	release validation tooling	public validation entrypoint
 tests/source_manifest.json	verification and source identity	exercised by the test suite
@@ -207,3 +215,4 @@ tests/test_imindbench_pipelines/test_region_intersection_pool_preprocessor.py	ve
 tests/test_imindbench_pipelines/test_torch_brain_dataset_imports.py	verification and source identity	exercised by the test suite
 tests/test_neuroprobe_shared_artifacts.py	verification and source identity	exercised by the test suite
 tests/test_parity_tools.py	verification and source identity	exercised by the test suite
+tests/test_release_packaging.py	verification and source identity	exercised by the test suite

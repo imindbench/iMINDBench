@@ -2,10 +2,10 @@
 # USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
 
 from abc import ABC, abstractmethod
+
 import einops
 import torch
 import torch.nn as nn
-from typing import Optional
 
 from imindbench.models.barista_components.atlas import DestrieuxAseg
 
@@ -83,9 +83,9 @@ class BaseSpatialEncoder(ABC, nn.Module):
         """
         region_enum_ids = region_enum_ids.unsqueeze(0).to(x.device)
         session_PE = self._get_position_encoding(x, region_enum_ids)
-        assert (
-            x.shape[-1] == session_PE.shape[-1]
-        ), f"Region dimension mismatch: {x.shape[-1]} vs {session_PE.shape[-1]}."
+        assert x.shape[-1] == session_PE.shape[-1], (
+            f"Region dimension mismatch: {x.shape[-1]} vs {session_PE.shape[-1]}."
+        )
 
         position_encoding = einops.repeat(
             session_PE, "r d -> b (t r) d", b=x.shape[0], t=timepoints
@@ -94,9 +94,9 @@ class BaseSpatialEncoder(ABC, nn.Module):
         if mask is not None:
             position_encoding = position_encoding[:, mask, :]
 
-        assert (
-            x.shape == position_encoding.shape
-        ), "Output position encoding does not match in shape"
+        assert x.shape == position_encoding.shape, (
+            "Output position encoding does not match in shape"
+        )
         return position_encoding
 
 
@@ -105,7 +105,7 @@ class EmbeddingTable(BaseSpatialEncoder):
         self,
         dim_h: int,
         spatial_encoder_meta: SpatialEncoderMeta,
-        embedding_max_dim: Optional[float] = None,
+        embedding_max_dim: float | None = None,
         embedding_init_scale: float = 1.0,
     ):
         """A lookup table of different embeddings for different spatial fields."""
@@ -157,7 +157,6 @@ class EmbeddingTable(BaseSpatialEncoder):
 
 
 class EmbeddingTablePool(EmbeddingTable):
-
     def _encode(self, x: torch.tensor) -> torch.tensor:
         """
         Args:

@@ -2,10 +2,10 @@
 Runner for sklearn models (like PopulationTransformer's Runner pattern).
 """
 
-from contextlib import contextmanager
 import gc
 import inspect
 import time
+from contextlib import contextmanager
 
 import numpy as np
 from threadpoolctl import threadpool_limits

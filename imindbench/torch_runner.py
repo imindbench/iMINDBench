@@ -2,18 +2,20 @@
 Runner for PyTorch models.
 """
 
-import os
-from copy import deepcopy
-import torch
-import torch.nn as nn
-import numpy as np
 import gc
 import inspect
-from torch.utils.data import DataLoader
+import os
+from copy import deepcopy
+
+import numpy as np
+import torch
+import torch.nn as nn
 from omegaconf import OmegaConf
 from sklearn.metrics import f1_score
-from imindbench.utils.logging_utils import log
+from torch.utils.data import DataLoader
+
 from imindbench.base_runner import BaseRunner
+from imindbench.utils.logging_utils import log
 
 
 class TorchRunner(BaseRunner):
@@ -74,7 +76,8 @@ class TorchRunner(BaseRunner):
                     import warnings
 
                     warnings.warn(
-                        f"GPU {device.index} not available (only {torch.cuda.device_count()} GPUs). Falling back to CPU."
+                        f"GPU {device.index} not available (only {torch.cuda.device_count()} GPUs). Falling back to CPU.",
+                        stacklevel=2,
                     )
                     device = torch.device("cpu")
                 else:
@@ -257,7 +260,7 @@ class TorchRunner(BaseRunner):
                     raise TypeError("Class labels must be integers, got bool.")
                 if not isinstance(value, (int, np.integer)):
                     raise TypeError(
-                        "Class labels must be integers, got " f"{type(value).__name__}."
+                        f"Class labels must be integers, got {type(value).__name__}."
                     )
                 labels.add(int(value))
 

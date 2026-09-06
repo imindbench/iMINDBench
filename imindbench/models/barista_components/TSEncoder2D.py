@@ -2,8 +2,8 @@
 # USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
 
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 from torch.utils.checkpoint import checkpoint
 
 

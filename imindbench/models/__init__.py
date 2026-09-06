@@ -5,6 +5,7 @@ Model registry for automatic model discovery and instantiation.
 import importlib
 import os
 from pathlib import Path
+
 from omegaconf import DictConfig
 
 MODEL_REGISTRY = {}

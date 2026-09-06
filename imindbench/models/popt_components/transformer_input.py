@@ -5,7 +5,8 @@ Matches PopT-BYD-BTB architecture: ONE TransformerEncoderInput class that works 
 """
 
 import torch.nn as nn
-from .positional_encoding import PositionalEncoding, MultiSubjBrainPositionalEncoding
+
+from .positional_encoding import MultiSubjBrainPositionalEncoding, PositionalEncoding
 
 
 class TransformerEncoderInput(nn.Module):

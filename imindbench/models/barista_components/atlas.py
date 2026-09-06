@@ -12,7 +12,6 @@ Useful references for mapping atlas parcels to lobes (see below):
 # Ported from BaRISTA: https://github.com/ShanechiLab/BaRISTA
 # USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
 import enum
-import re
 
 UNKNWON_STR = "UNKNOWN"
 

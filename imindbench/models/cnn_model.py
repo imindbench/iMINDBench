@@ -2,9 +2,10 @@
 Convolutional Neural Network model (PyTorch).
 """
 
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
+
 from . import register_model
 from .model_utils import to_int_list
 from .torch_base_model import TorchBaseModel

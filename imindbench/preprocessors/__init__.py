@@ -7,6 +7,7 @@ import math
 import os
 from copy import deepcopy
 from pathlib import Path
+
 from omegaconf import DictConfig, ListConfig
 
 from .base_preprocessor import BasePreprocessor
@@ -130,7 +131,7 @@ class CompositePreprocessor(BasePreprocessor):
                 f"expected {len(self.preprocessors)}, got {len(state)}."
             )
 
-        for pre, pre_state in zip(self.preprocessors, state):
+        for pre, pre_state in zip(self.preprocessors, state, strict=False):
             pre.set_state(pre_state)
 
     def get_state(self):

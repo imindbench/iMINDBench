@@ -1,8 +1,9 @@
-import torch
-from torch import nn
-from typing import List, Union, Dict
 from types import SimpleNamespace
+
+import torch
 from mup import MuReadout
+from torch import nn
+
 from .model_builders import MakeModelIgnoreDataInfoList
 
 
@@ -10,20 +11,17 @@ def create_multi_heads_generic(configs):
     heads_dict = {}
     for head_name, head_dict in configs.items():
         head_config = SimpleNamespace(**head_dict)
-        creator_fn = lambda head_config_i: MakeModelIgnoreDataInfoList(
-            nn.Linear(head_config_i.d_model, head_config_i.out_dim)
-            if not getattr(head_config_i, "use_mup", True)
-            else MuReadout(
-                head_config_i.d_model, head_config_i.out_dim, output_mult=1.0
-            )
+        heads_dict[head_name] = MakeModelIgnoreDataInfoList(
+            nn.Linear(head_config.d_model, head_config.out_dim)
+            if not getattr(head_config, "use_mup", True)
+            else MuReadout(head_config.d_model, head_config.out_dim, output_mult=1.0)
         )
-        heads_dict[head_name] = creator_fn(head_config)
 
     return MultiHeadOnSameInput(heads_dict)
 
 
 class MultiHeadOnSameInput(nn.Module):
-    def __init__(self, heads: Union[Dict[str, nn.Module], List[nn.Module]]):
+    def __init__(self, heads: dict[str, nn.Module] | list[nn.Module]):
         super().__init__()
         self.heads = nn.ModuleDict(heads)
 
@@ -37,7 +35,7 @@ class MultiHeadOnSameInput(nn.Module):
 def getMultiMultiheadDict_fromDummy(
     input_dim, d_model, loss_configs, hidden_projection_cnt=None
 ):
-    if hidden_projection_cnt == None:
+    if hidden_projection_cnt is None:
         hidden_projcetion = [int(d_model * 4)]
     else:
         hidden_projcetion = [int(d_model * 4) for i in range(hidden_projection_cnt)]

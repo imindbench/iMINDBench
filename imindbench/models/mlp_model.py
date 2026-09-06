@@ -2,9 +2,10 @@
 Multi-Layer Perceptron model (PyTorch).
 """
 
-import torch.nn as nn
 import numpy as np
+import torch.nn as nn
 from omegaconf import DictConfig
+
 from . import register_model
 from .model_utils import to_int_list
 from .torch_base_model import TorchBaseModel

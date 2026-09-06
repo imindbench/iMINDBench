@@ -1,8 +1,9 @@
-from scipy.signal import resample_poly
-import torch
 import numpy as np
-from .base_preprocessor import BasePreprocessor
+import torch
+from scipy.signal import resample_poly
+
 from . import register_preprocessor
+from .base_preprocessor import BasePreprocessor
 
 
 @register_preprocessor("downsample")

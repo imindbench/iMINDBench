@@ -3,9 +3,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+source "${SCRIPT_DIR}/runtime_paths.sh"
 RULE_NAME="stft_or_htnet_500hz_val_mean0p60"
 START_DELAY_SECONDS="${MULTISOURCE_START_DELAY_SECONDS:-0}"
-LOCK_DIR="${PROJECT_DIR}/outputs/.multisource_locks"
+LOCK_DIR="${IMINDBENCH_OUTPUT_ROOT}/.multisource_locks"
 LOCK_NAME="${MULTISOURCE_LOCK_NAME:-byd_${RULE_NAME}}"
 mkdir -p "${LOCK_DIR}"
 exec 9> "${LOCK_DIR}/${LOCK_NAME}.lock"

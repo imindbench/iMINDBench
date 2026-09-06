@@ -1,8 +1,9 @@
 """Warmup + decay scheduler adapter used by PopT-style training configs."""
 
-from .base_scheduler import BaseScheduler
 from torch.optim.lr_scheduler import StepLR
 from warmup_scheduler import GradualWarmupScheduler
+
+from .base_scheduler import BaseScheduler
 
 
 class RampUp(BaseScheduler):

@@ -4,18 +4,18 @@ Time-domain filtering preprocessor (notch + optional high-pass/bandpass).
 
 from __future__ import annotations
 
-from collections import defaultdict
 import hashlib
 import json
-from pathlib import Path
 import tempfile
+from collections import defaultdict
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 from scipy import signal
 
-from .base_preprocessor import BasePreprocessor
 from . import register_preprocessor
+from .base_preprocessor import BasePreprocessor
 
 
 @register_preprocessor("time_domain_filter")
@@ -132,8 +132,7 @@ class TimeDomainFilterPreprocessor(BasePreprocessor):
             )
         if not isinstance(value, str):
             raise TypeError(
-                "filter_cache_dir must be a str when set, got "
-                f"{type(value).__name__}."
+                f"filter_cache_dir must be a str when set, got {type(value).__name__}."
             )
         normalized = value.strip()
         if not normalized:
@@ -337,7 +336,7 @@ class TimeDomainFilterPreprocessor(BasePreprocessor):
             filtered = self._filter_array(np.concatenate(chunks, axis=-1))
             split_points = np.cumsum(chunk_lengths[:-1], dtype=np.int64)
             for item, filtered_chunk in zip(
-                items, np.split(filtered, split_points, axis=-1)
+                items, np.split(filtered, split_points, axis=-1), strict=False
             ):
                 original_idx, sample, *_ = item
                 out = dict(sample)

@@ -4,11 +4,13 @@ BrainBERT encoder preprocessor for extracting temporal embeddings.
 
 from collections.abc import Iterable
 
-import torch
 import numpy as np
-from .base_preprocessor import BasePreprocessor
-from . import register_preprocessor
+import torch
+
 from imindbench.utils.logging_utils import log
+
+from . import register_preprocessor
+from .base_preprocessor import BasePreprocessor
 
 
 @register_preprocessor("brainbert_encoder")
@@ -215,8 +217,7 @@ class BrainBERTEncoderPreprocessor(BasePreprocessor):
     def _extract_sample_feature_shape(sample):
         if not isinstance(sample, dict):
             raise TypeError(
-                "brainbert_encoder expects sample dicts, got "
-                f"{type(sample).__name__}."
+                f"brainbert_encoder expects sample dicts, got {type(sample).__name__}."
             )
         if "x" not in sample:
             raise KeyError("brainbert_encoder requires sample['x'].")
@@ -274,8 +275,7 @@ class BrainBERTEncoderPreprocessor(BasePreprocessor):
 
         if not isinstance(state, dict):
             raise TypeError(
-                "brainbert_encoder state must be a dict, got "
-                f"{type(state).__name__}."
+                f"brainbert_encoder state must be a dict, got {type(state).__name__}."
             )
         feature_shape = state.get("feature_shape")
         if not isinstance(feature_shape, (list, tuple)) or len(feature_shape) != 2:
@@ -432,7 +432,7 @@ class BrainBERTEncoderPreprocessor(BasePreprocessor):
 
         out_samples = []
         offset = 0
-        for sample, n_channels in zip(sample_list, channel_counts):
+        for sample, n_channels in zip(sample_list, channel_counts, strict=False):
             next_offset = offset + n_channels
             out = dict(sample)
             out["x"] = np.asarray(encoded[offset:next_offset], dtype=np.float32)

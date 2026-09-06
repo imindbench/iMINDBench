@@ -5,10 +5,9 @@ from copy import deepcopy
 import numpy as np
 from omegaconf import DictConfig, ListConfig, OmegaConf
 
+from . import register_preprocessor
 from .base_preprocessor import BasePreprocessor
 from .stft_preprocessor import STFTPreprocessor, resolve_stft_overlap
-from . import register_preprocessor
-
 
 _STFT_DEFAULT_KEYS = {
     "boundary",
@@ -135,7 +134,9 @@ class MultiSTFTPreprocessor(BasePreprocessor):
         metadata_source = None
         expected_channels = None
         expected_time_bins = None
-        for label, preprocessor in zip(self.window_labels, self.window_preprocessors):
+        for label, preprocessor in zip(
+            self.window_labels, self.window_preprocessors, strict=False
+        ):
             transformed = preprocessor.transform_samples([sample])[0]
             x_window = np.asarray(transformed["x"], dtype=np.float32)
             if metadata_source is None:

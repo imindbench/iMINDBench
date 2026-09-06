@@ -34,15 +34,9 @@ SUBJECT_TRIALS=(
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-EXAMPLES_DIR="$(cd "${PROJECT_DIR}/.." && pwd)"
-REPO_ROOT="$(git -C "${PROJECT_DIR}" rev-parse --show-toplevel)"
-TMPDIR="${REPO_ROOT}/.tmp"
-mkdir -p "${TMPDIR}"
-export TMPDIR
+source "${SCRIPT_DIR}/runtime_paths.sh"
 
 FAILURES=0
-
-cd "${EXAMPLES_DIR}"
 
 resolve_result_json_path() {
   local run_dir="$1"
@@ -86,7 +80,7 @@ for MODEL in "${MODELS[@]}"; do
             exit "${DECODABLE_STATUS}"
           fi
         fi
-        RUN_DIR="${PROJECT_DIR}/outputs/${OUTPUT_GROUP}/${MODEL}_${PREPROCESSOR}/${REGIME}/${TASK}/sub${TEST_SUBJECT}_sess${TEST_SESSION}"
+        RUN_DIR="${IMINDBENCH_OUTPUT_ROOT}/${OUTPUT_GROUP}/${MODEL}_${PREPROCESSOR}/${REGIME}/${TASK}/sub${TEST_SUBJECT}_sess${TEST_SESSION}"
         RESULT_JSON="$(resolve_result_json_path "${RUN_DIR}" "${TASK}" "${TEST_SUBJECT}" "${TEST_SESSION}")"
 
         mkdir -p "${RUN_DIR}"
@@ -96,7 +90,7 @@ for MODEL in "${MODELS[@]}"; do
         fi
         echo "Running regime=${REGIME} model=${MODEL} preprocessor=${PREPROCESSOR} task=${TASK} subject=${TEST_SUBJECT} session=${TEST_SESSION} same_subject_only=${REGIME_TRAIN_SAME_SUBJECT_ONLY} train_fraction=${TRAIN_SAMPLE_FRACTION}"
 
-        if ! python -m imindbench.run_eval \
+        if ! python -m imindbench.run_eval "${CONFIG_ARGS[@]}" \
           paths="${PATHS_CFG}" \
           dataset="${DATASET_CFG}" \
           dataset.regime="${REGIME}" \
@@ -114,7 +108,7 @@ for MODEL in "${MODELS[@]}"; do
           wandb.enabled=false \
           runtime.overwrite=false \
           runtime.verbose=true \
-          hydra.run.dir="${RUN_DIR}"; then
+          hydra.run.dir="${RUN_DIR}" "$@"; then
           echo "Warning: failed for regime=${REGIME} model=${MODEL} preprocessor=${PREPROCESSOR} task=${TASK} subject=${TEST_SUBJECT} session=${TEST_SESSION}"
           FAILURES=$((FAILURES + 1))
         fi

@@ -52,11 +52,11 @@ alternate split/recording view over the artifacts produced by
 `brainsets prepare neuroprobe_2025`; there is no separate NeuroprobeV2 prepare
 command.
 
-Copy [`conf/paths/example.yaml`](conf/paths/example.yaml) to a machine-local
-`conf/paths/server_<name>.yaml`, set `dataset_root` to the processed root, and
-select it with `paths=server_<name>`. These `server_*.yaml` files are ignored by
-Git. Add only the checkpoint and cache paths required by the selected model and
-runtime.
+Create a machine-local configuration directory outside the installation, with
+`paths/local.yaml` copied from [`conf/paths/example.yaml`](conf/paths/example.yaml).
+Set its `dataset_root` and any required checkpoint/cache paths to absolute paths.
+Pass `--config-dir /path/to/config paths=local` to the CLI. This works with both
+source and wheel installs and keeps private settings out of the package.
 
 ## Run an evaluation
 
@@ -65,7 +65,8 @@ shape:
 
 ```bash
 imindbench \
-  paths=server_local \
+  --config-dir /path/to/config \
+  paths=local \
   dataset=neuroprobe2025 \
   dataset.regime=SS-SM \
   dataset.task=onset \
@@ -110,6 +111,9 @@ config rather than mixing groups blindly.
   bundled BaRISTA checkpoint.
 - A CPU smoke result does not substitute for the final GPU acceptance run for a
   GPU-targeted model.
+
+For larger grids, see the [launcher guide](../docs/EXPERIMENTS.md). Remote logging
+is disabled by default; enable it explicitly only when wanted.
 
 ## Paper-reference parity tools
 
@@ -167,6 +171,12 @@ references remain `NOT-COMPARABLE`—also a nonzero exit—when every checkable
 field matches but the exact historical checkpoint hash is unknown. See the
 [`parity reference README`](../artifacts/parity_reference/README.md) for the
 precise status contract.
+
+## Historical reproduction
+
+The [coverage summary](../docs/REPRODUCTION.md) separates verified selected cases
+from historical slicing/checkpoint limitations. Existing evidence is preserved;
+release cleanup does not require a full experiment rerun.
 
 ## Licensing
 

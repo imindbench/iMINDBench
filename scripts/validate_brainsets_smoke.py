@@ -6,11 +6,11 @@ from __future__ import annotations
 import argparse
 import base64
 import hashlib
-from importlib import metadata
 import json
-from pathlib import Path
 import re
 import subprocess
+from importlib import metadata
+from pathlib import Path
 from typing import Any
 
 import numpy as np

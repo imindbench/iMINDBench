@@ -6,6 +6,7 @@ From: https://buomsoo-kim.github.io/attention/2020/04/27/Attention-mechanism-21.
 """
 
 import copy
+
 import torch.nn as nn
 import torch.nn.functional as F
 

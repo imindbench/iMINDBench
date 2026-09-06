@@ -1,6 +1,6 @@
-import torch
 import numpy as np
 from omegaconf import DictConfig
+
 from . import register_model
 from .torch_base_model import TorchBaseModel
 

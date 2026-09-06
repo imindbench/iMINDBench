@@ -11,6 +11,27 @@ are source-relative URIs.
 
 ## Result
 
+### Table 1 follow-up (2026-09-06)
+
+The current Table 1 notebook SHA256 is
+`dd09cddd85794bfb1a5e1a4de3f9186faf7a6708550153c91a4c1783a233c11c`.
+The historical inventory hash remains unchanged: it describes the untracked
+snapshot consulted during the original audit. That snapshot's bytes were not
+recovered, so the hash change cannot be attributed exclusively to a BrainBERT
+table addition. BrainBERT's three input YAMLs were already in the inventory.
+
+Read-only recomputation reproduced all 15 saved table rows to their displayed
+six-decimal precision. Independent means matched the notebook calculations;
+Overall is the equal-weight mean of the three dataset means. All models across
+all three tracks share the same retained task/session/fold units per dataset:
+Neuroprobe 98, BYD 508, PIPPI 85. There were no duplicate units, all retained
+ROC-AUC values were finite and within [0, 1], and all rows were within-session.
+PIPPI consistently drops the same three missing-metric units. All 23 inventoried
+visualization YAML hashes still match. No experiments were rerun or notebooks
+saved during this check.
+
+### Original inventory
+
 All 14 scoped notebooks are mapped in `paper_figs_provenance.json`. They actively
 reference 23 `visualize_model` YAMLs plus direct config/data inputs. All 154 active
 YAML entries resolve to 102 unique result directories under the read-only

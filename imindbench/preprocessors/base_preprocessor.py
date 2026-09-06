@@ -3,10 +3,11 @@ Base preprocessor interface that all preprocessors must implement.
 """
 
 from abc import ABC
-from typing import Any, Iterable, Literal
+from collections.abc import Iterable
+from typing import Any, Literal
 
 
-class BasePreprocessor(ABC):
+class BasePreprocessor(ABC):  # noqa: B024 - optional hooks, no required abstract methods
     """Base class for preprocessors that transform sample-dict payloads.
 
     Concrete preprocessors usually implement only ``transform_samples(...)``.
@@ -30,7 +31,7 @@ class BasePreprocessor(ABC):
         # Default implementation is a no-op
         return
 
-    def reset_state(self):
+    def reset_state(self):  # noqa: B027 - optional stateless hook
         """
         Reset any stateful components (e.g., fitted scalers).
         Called before processing each fold to ensure clean state.

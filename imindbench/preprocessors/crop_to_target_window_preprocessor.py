@@ -6,8 +6,8 @@ import math
 
 import numpy as np
 
-from .base_preprocessor import BasePreprocessor
 from . import register_preprocessor
+from .base_preprocessor import BasePreprocessor
 
 
 @register_preprocessor("crop_to_target_window")
@@ -22,7 +22,7 @@ class CropToTargetWindowPreprocessor(BasePreprocessor):
         missing = [key for key in required if key not in sample]
         if missing:
             raise KeyError(
-                "crop_to_target_window requires context metadata keys: " f"{missing}."
+                f"crop_to_target_window requires context metadata keys: {missing}."
             )
         return (
             int(sample["target_start_sample_in_context"]),

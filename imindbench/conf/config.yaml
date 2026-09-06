@@ -23,7 +23,7 @@ runner:
 
 # Wandb (Weights & Biases) logging configuration
 wandb:
-  enabled: true  # Set to true to enable wandb logging
+  enabled: false  # Remote logging is opt-in.
   project: neuroprobe_eval  # Wandb project name
   entity: null  # Wandb entity/team (null for personal account)
   name: null  # Run name (null for auto-generated)

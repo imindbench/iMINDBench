@@ -390,3 +390,34 @@ corresponding change.
   verified coverage of all ten inventory family IDs. The 22 parity-tool tests
   and all 94 tests in the retained non-editable artifact environment pass.
 - Follow-up or user review needed: implement the scoped legacy-floor window option before treating BYD/PIPPI floor-era cases as clean-checkout runnable commands.
+
+### 2026-09-06 — Portable launchers, consistent style and submission source export
+
+- Classification: portability, style, documentation and packaging; no new experiment runs.
+- Files: retained shell launchers and shared `runtime_paths.sh`, config defaults,
+  runtime Python formatting/imports, Ruff/CI config, root README and `docs/`,
+  `scripts/build_submission.py`, its allowlist and release-interface tests.
+- Behavior: launchers require an external absolute `IMINDBENCH_OUTPUT_ROOT`,
+  accept `IMINDBENCH_CONFIG_DIR`, use caller/system temporary storage, and forward
+  Hydra arguments without requiring Git. Existing experiment loop selections and
+  hyperparameters are preserved. Remote logging now defaults to disabled.
+- Style: public TorchBrain Ruff rule families and formatting; explicit DIVER
+  imports replace star imports. Annotation modernization, explicit `zip(strict=False)`
+  and warning stack levels preserve numerical operations. Shape annotations and
+  upstream boolean comparisons retain narrow documented lint exceptions.
+- Packaging: explicit source allowlist, deterministic owner/time metadata, per-file
+  hashes, symlink/personal-path rejection and no-overwrite archives. Required
+  licenses remain included. Personal migration logs and local runtime state are
+  excluded; complete anonymity and TorchBrain artifact distribution still need
+  final submission review.
+- Validation: 89 tests passed, 7 optional-model checks skipped in `tb_buildathon`
+  with public TorchBrain imports, both from checkout and extracted source archive.
+  Ruff check/format and shell syntax passed. The source archive built into sdist
+  and wheel; installed-wheel help/import/resource checks passed.
+- Paper check: read-only Table 1 recomputation reproduced all 15 saved rows and
+  equal support across tracks. No notebooks or original results were modified.
+- Parity disposition: existing experiment evidence is accepted and preserved.
+  Unsupported legacy-floor CLI behavior and missing checkpoint provenance remain
+  explicit limitations, not reasons to rerun the full experiment matrix.
+- Review: completed simplification and bug-risk passes over launcher paths,
+  configuration forwarding, style diffs, and source-export boundaries.

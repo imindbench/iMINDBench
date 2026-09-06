@@ -1,14 +1,13 @@
 # Ported from BaRISTA: https://github.com/ShanechiLab/BaRISTA
 # USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
 
+
 import einops
-from omegaconf import DictConfig
 import torch
 import torch.nn as nn
-from typing import List, Union
+from omegaconf import DictConfig
 
 import imindbench.models.barista_components.spatial_encoder as spe
-
 from imindbench.models.barista_components.mlp import MLP
 from imindbench.models.barista_components.tokenized_batched_item import (
     TokenizedBatchedItem,
@@ -65,7 +64,7 @@ class Tokenizer(nn.Module):
 
     def _tokenize_for_batch_tensor(
         self,
-        x: Union[torch.Tensor, List],
+        x: torch.Tensor | list,
         subject_session: str,
         region_enum_ids: torch.Tensor,
         add_spatial_encoding_to_tokens: bool = True,
@@ -160,11 +159,11 @@ class Tokenizer(nn.Module):
     def forward(
         self,
         x: torch.Tensor,
-        subject_sessions: List,
+        subject_sessions: list,
         region_enum_ids: torch.Tensor,
         output_as_list: bool = False,
         add_spatial_encoding_to_tokens: bool = True,
-    ) -> Union[TokenizedBatchedItem, List[TokenizedBatchedItem]]:
+    ) -> TokenizedBatchedItem | list[TokenizedBatchedItem]:
         """
         Args:
             x: A list of tensors each of shape (B_i, N_i, D_i)

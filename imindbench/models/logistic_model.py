@@ -3,10 +3,11 @@ Logistic Regression model wrapper for sklearn.
 """
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression
 from omegaconf import DictConfig
-from .base_model import BaseModel
+from sklearn.linear_model import LogisticRegression
+
 from . import register_model
+from .base_model import BaseModel
 
 
 @register_model("logistic")

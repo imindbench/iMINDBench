@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 import gc
 import inspect
 import time
 import warnings
+from contextlib import contextmanager
 
 import numpy as np
 import torch
@@ -15,12 +15,12 @@ from torch.utils.data import DataLoader
 from imindbench.models import build_model
 from imindbench.torch_runner import TorchRunner
 from imindbench.utils.collate import variable_channel_collate
+from imindbench.utils.data_adapter import build_neuroprobe_torch_fold
 from imindbench.utils.logging_utils import (
     DEFAULT_RESULTS_TIME_BIN,
     log,
     log_fold_metrics,
 )
-from imindbench.utils.data_adapter import build_neuroprobe_torch_fold
 
 
 def _normalize_preprocess_torch_num_threads(value) -> int | None:
@@ -82,7 +82,7 @@ def _attach_dataset_cfg(model, dataset_cfg):
     """Attach dataset config to dataset-aware models without constraining fakes."""
     try:
         if getattr(model, "dataset_cfg", None) is None:
-            setattr(model, "dataset_cfg", dataset_cfg)
+            model.dataset_cfg = dataset_cfg
     except Exception:
         return model
     return model
@@ -208,7 +208,7 @@ def collect_class_counts_from_loader(loader) -> dict[int, int]:
                 raise TypeError("Class labels must be integers, got bool.")
             if not isinstance(value, (int, np.integer)):
                 raise TypeError(
-                    "Class labels must be integers, got " f"{type(value).__name__}."
+                    f"Class labels must be integers, got {type(value).__name__}."
                 )
             label = int(value)
             class_counts[label] = int(class_counts.get(label, 0) + 1)

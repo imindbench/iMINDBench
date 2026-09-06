@@ -57,7 +57,7 @@ class DataInfoAwareSequential(nn.Sequential):
 
 class CustomIdentity(nn.Module):
     def __init__(self):
-        super(CustomIdentity, self).__init__()
+        super().__init__()
 
     def forward(self, x, *args, **kwargs):
         return x

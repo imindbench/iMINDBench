@@ -1,4 +1,5 @@
 from torch import nn
+
 from .head_components import create_multi_heads_generic, getMultiMultiheadDict_fromDummy
 from .model_builders import CustomIdentity
 
@@ -17,8 +18,8 @@ class Header(nn.ModuleDict):
         if patch_size == 500:
             from .target_representation_functions import (
                 DEFAULT_FFT_AMPLITUDE_LOG1P_CONFIG_W01_CF200,
-                DEFAULT_TIME_DOMAIN_MSE_CONFIG,
                 DEFAULT_MULTISCALE_STFT_AMPLITUDE_LOG1P_CONFIG__200_100__50_25_CF200,
+                DEFAULT_TIME_DOMAIN_MSE_CONFIG,
             )
 
             patchwise_ssl_configs = {

@@ -80,7 +80,7 @@ def test_fit_split_and_transform_samples_match_encoder_outputs():
     transformed = pre.transform_samples(samples)
     assert len(transformed) == len(samples)
 
-    for sample_in, sample_out in zip(samples, transformed):
+    for sample_in, sample_out in zip(samples, transformed, strict=False):
         assert sample_out["x"].shape[0] == sample_in["x"].shape[0]
         expected = pre._encode_sequences(np.asarray(sample_in["x"], dtype=np.float32))
         np.testing.assert_allclose(sample_out["x"], expected, atol=1e-6)
@@ -101,5 +101,5 @@ def test_chunked_and_non_chunked_transform_samples_match():
     non_chunked.fit_split(iter(samples))
     non_chunked_out = non_chunked.transform_samples(samples)
 
-    for a, b in zip(chunked_out, non_chunked_out):
+    for a, b in zip(chunked_out, non_chunked_out, strict=False):
         np.testing.assert_allclose(a["x"], b["x"], atol=1e-6)

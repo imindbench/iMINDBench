@@ -1,6 +1,6 @@
 import torch
-from torch import nn
 from mup import MuReadout
+from torch import nn
 
 
 class MLPProjector(nn.Module):
@@ -81,7 +81,7 @@ class MLPProjector(nn.Module):
 
 def get_feature_and_target_shapes(params, task_info_dict):
     assert (
-        task_info_dict["consistent_channels"] == True
+        task_info_dict["consistent_channels"] == True  # noqa: E712 - preserve upstream boolean comparison
     ), "Currently only consistent channels supported"
 
     C, num_seconds, num_targets = (

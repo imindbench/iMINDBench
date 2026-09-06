@@ -2,9 +2,9 @@
 # USC research/non-profit license: LICENSES/BaRISTA-LICENSE.md
 
 import dataclasses
+
 import einops
 import torch
-from typing import List, Optional
 
 
 @dataclasses.dataclass
@@ -23,15 +23,15 @@ class TokenizedBatchedItem:
 
     tokens: torch.Tensor
     position_ids: torch.Tensor
-    seq_lens: List[int]
-    spatial_embeddings: Optional[torch.Tensor]
-    temporal_group_ids: Optional[torch.Tensor]
-    spatial_group_ids: Optional[torch.Tensor]
-    subject_sessions: List[str]
+    seq_lens: list[int]
+    spatial_embeddings: torch.Tensor | None
+    temporal_group_ids: torch.Tensor | None
+    spatial_group_ids: torch.Tensor | None
+    subject_sessions: list[str]
 
     @classmethod
     def get_as_one_sequence(
-        cls, tokenized_items_list: List["TokenizedBatchedItem"]
+        cls, tokenized_items_list: list["TokenizedBatchedItem"]
     ) -> "TokenizedBatchedItem":
         """
         Generate a long concatenated sequence from a list of TokenizedBatchedItem
@@ -103,7 +103,7 @@ class TokenizedBatchedItem:
             subject_sessions=subject_sessions_list,
         )
 
-    def get_as_list_items(self) -> List["TokenizedBatchedItem"]:
+    def get_as_list_items(self) -> list["TokenizedBatchedItem"]:
         """
         Note: this does not exactly reverse `get_as_one_sequence` because it does not batch items with the
         same seq length together

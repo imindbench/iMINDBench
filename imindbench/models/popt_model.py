@@ -7,21 +7,22 @@ with optional freezing of upstream encoder.
 
 import warnings
 
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 from omegaconf import DictConfig, OmegaConf
-from . import register_model
-from imindbench.utils.logging_utils import log
-from .torch_base_model import TorchBaseModel
 
 from imindbench.models.popt_components.transformer_input import (
     TransformerEncoderInput,
 )
 from imindbench.models.popt_components.transformer_layers import (
-    TransformerEncoderLayer,
     TransformerEncoder,
+    TransformerEncoderLayer,
 )
+from imindbench.utils.logging_utils import log
+
+from . import register_model
+from .torch_base_model import TorchBaseModel
 
 
 class PopTUpstreamTransformer(nn.Module):

@@ -53,18 +53,11 @@ SUBJECT_TRIALS=(
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-EXAMPLES_DIR="$(cd "${PROJECT_DIR}/.." && pwd)"
-REPO_ROOT="$(git -C "${PROJECT_DIR}" rev-parse --show-toplevel)"
-# Keep temp path short enough for AF_UNIX multiprocessing socket limits.
-TMPDIR="${REPO_ROOT}/.tmp"
-mkdir -p "${TMPDIR}"
-export TMPDIR
+source "${SCRIPT_DIR}/runtime_paths.sh"
 
-OUTPUT_ROOT="${PROJECT_DIR}/outputs/${OUTPUT_GROUP}"
+OUTPUT_ROOT="${IMINDBENCH_OUTPUT_ROOT}/${OUTPUT_GROUP}"
 
 FAILURES=0
-
-cd "${EXAMPLES_DIR}"
 
 format_sweep_value() {
   local value="$1"
@@ -109,7 +102,7 @@ for MODEL in "${MODELS[@]}"; do
                 MODEL_ARGS+=("model.device=${DEVICE}")
               fi
 
-              if ! python -m imindbench.run_eval \
+              if ! python -m imindbench.run_eval "${CONFIG_ARGS[@]}" \
                 paths="${PATHS_CFG}" \
                 dataset="${DATASET_CFG}" \
                 dataset.regime="${REGIME}" \
@@ -128,7 +121,7 @@ for MODEL in "${MODELS[@]}"; do
                 wandb.enabled=false \
                 runtime.overwrite=false \
                 runtime.verbose=true \
-                hydra.run.dir="${RUN_DIR}"; then
+                hydra.run.dir="${RUN_DIR}" "$@"; then
                 echo "Warning: failed for regime=${REGIME} model=${MODEL} preprocessor=${PREPROCESSOR} ${RUN_TAG} task=${TASK} subject=${TEST_SUBJECT} session=${TEST_SESSION}"
                 FAILURES=$((FAILURES + 1))
               fi
