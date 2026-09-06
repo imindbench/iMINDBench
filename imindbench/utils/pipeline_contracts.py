@@ -1003,14 +1003,10 @@ def validate_eval_config(cfg: DictConfig) -> None:
             f"'{preprocessed_split_cache_mode}'."
         )
 
-    # -- submitter --
-    submitter_cfg = _require_cfg_mapping(cfg, "submitter")
-    _require_non_empty_cfg_str(
-        submitter_cfg,
-        section="submitter",
-        key="author",
-    )
-    _require_non_empty_cfg_str(submitter_cfg, section="submitter", key="organization")
-    _require_non_empty_cfg_str(
-        submitter_cfg, section="submitter", key="organization_url"
-    )
+    # Attribution is optional; preserve legacy export keys without requiring identity.
+    if cfg.get("submitter") is not None:
+        submitter_cfg = _require_cfg_mapping(cfg, "submitter")
+        for key in ("author", "organization", "organization_url"):
+            value = submitter_cfg.get(key)
+            if value is not None and not isinstance(value, str):
+                raise TypeError(f"submitter.{key} must be a str or null.")

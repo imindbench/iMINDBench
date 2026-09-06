@@ -176,3 +176,35 @@ def test_main_finishes_wandb_when_processed_eval_raises(monkeypatch):
 
     assert fake_wandb.init_calls == 1
     assert fake_wandb.finish_calls == 1
+
+
+@pytest.mark.parametrize("submitter", [None, {"author": "A", "organization": "Lab"}])
+def test_saved_result_preserves_optional_attribution_keys(tmp_path, submitter):
+    import json
+
+    from imindbench.utils.logging_utils import format_and_save_results
+
+    cfg = _cfg(wandb_enabled=False)
+    if submitter is None:
+        del cfg["submitter"]
+    else:
+        cfg.submitter = submitter
+    output = tmp_path / "population_test.json"
+    result = format_and_save_results(
+        cfg=cfg,
+        dataset_provider="neuroprobev2",
+        model_name="logistic",
+        preprocess_type="raw",
+        subject_id=1,
+        trial_id=1,
+        eval_name="onset",
+        results_splits_type="within-session",
+        results_population={},
+        data_load_time=0.0,
+        regression_run_time=0.0,
+        file_save_path=str(output),
+    )
+    assert json.loads(output.read_text()) == result
+    for key in ("author", "organization", "organization_url"):
+        assert result[key] == (submitter or {}).get(key)
+    assert "using all electrodes" not in result["description"]

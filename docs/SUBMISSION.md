@@ -19,8 +19,8 @@ The exporter checks its package/source identity and the exact reviewed SHA256,
 scans textual wheel contents,
 bundles it under `vendor/`, and points the exported quickstart at the local wheel.
 The source-validation manifest retains its existing pin. This avoids requiring a Git
-installation step for TorchBrain. Normal environment dependencies may still
-require network access.
+installation step for TorchBrain. Normal dependencies still require network access unless already available;
+the optional warmup scheduler also retains a Git installation requirement.
 
 Extract into a fresh directory and follow the quickstart. TorchBrain is a
 separate required dependency; the documented immutable public commit remains
@@ -35,3 +35,9 @@ identifying links, scientific names and third-party metadata. A known-pattern
 scan cannot establish complete anonymity. Preserve upstream attribution and
 license notices. Checkpoints and dataset access requirements must be documented
 separately; neither is supplied by this source archive.
+
+The export drops the incidental migration commit from the launcher command
+fixture while preserving its command data; the original fixture is unchanged.
+The canonical root README is included as package metadata and rewritten to use
+the local TorchBrain wheel when bundled. No Git history or archived migration
+narratives are included.

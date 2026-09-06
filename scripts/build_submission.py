@@ -41,6 +41,11 @@ def build_submission(
         # These are local identity leaks, not third-party attribution notices.
         if re.search(r"/(?:home|Users)/[^\s/]+|git[@][\w.-]+:", text):
             raise ValueError(f"Personal path or identity in submission file: {name}")
+        if name == "tests/launcher_reference.json":
+            # Keep command evidence; omit incidental private migration identity.
+            reference = json.loads(payload)
+            reference.pop("source_commit", None)
+            payload = (json.dumps(reference, indent=2) + "\n").encode()
         contents[name] = payload
 
     if torch_brain_wheel is not None:
@@ -84,7 +89,7 @@ def build_submission(
             )
         wheel_name = f"vendor/{torch_brain_wheel.name}"
         contents[wheel_name] = wheel_bytes
-        readme_name = "imindbench/README.md"
+        readme_name = "README.md"
         readme, substitutions = re.subn(
             r'^python -m pip install "torch_brain @ git\+[^\n]+$',
             f"python -m pip install {wheel_name}",

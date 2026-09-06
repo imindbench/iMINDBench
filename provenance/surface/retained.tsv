@@ -1,11 +1,9 @@
 source_path	reason	reachability
 .github/workflows/checks.yml	release support file	retained in the public repository
 .gitignore	repository metadata	controls public source selection
-CHANGELOG_PARITY.md	release documentation	public repository documentation
 LICENSE.txt	license metadata	distributed with the release
 LICENSES/BaRISTA-LICENSE.md	license metadata	distributed with the release
 README.md	release documentation	public repository documentation
-RELEASE_MIGRATION_PLAN.md	release documentation	public repository documentation
 THIRD_PARTY.md	license metadata	distributed with the release
 artifacts/parity_reference/README.md	release documentation	public repository documentation
 artifacts/parity_reference/cases/byd_logistic_multistft_global_flow_sub41_sess1.json	canonical parity reference	consumed by scripts/parity_tools.py
@@ -21,12 +19,12 @@ artifacts/parity_reference/manifest.json	canonical parity reference	consumed by 
 config/brainsets_smoke_manifest.json	public validation configuration	consumed by validation tooling
 config/submission_files.json	public validation configuration	consumed by validation tooling
 docs/EXPERIMENTS.md	release documentation	public repository documentation
+docs/PAPER_COVERAGE.md	release scope	paper-focused cleanup and preserved evidence
 docs/REPRODUCTION.md	release documentation	public repository documentation
 docs/RESOURCES.md	release documentation	public repository documentation
 docs/SUBMISSION.md	release documentation	public repository documentation
 environment.yml	build and environment metadata	used for installation
 imindbench/.gitignore	repository metadata	controls public source selection
-imindbench/README.md	release documentation	public repository documentation
 imindbench/__init__.py	evaluation runtime	imported by the imindbench package
 imindbench/base_runner.py	evaluation runtime	imported by the imindbench package
 imindbench/conf/__init__.py	runtime configuration	composed by imindbench.run_eval
@@ -53,7 +51,6 @@ imindbench/conf/paths/example.yaml	runtime configuration	composed by imindbench.
 imindbench/conf/preprocessor/laplacian_multi_stft_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_multi_stft_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_stft_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
-imindbench/conf/preprocessor/laplacian_stft_1000Hz_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_stft_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_stft_brainbert_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_stft_brainbert_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
@@ -76,7 +73,6 @@ imindbench/conf/preprocessor/laplacian_wav_HPF_noSTD_2048Hz.yaml	runtime configu
 imindbench/conf/preprocessor/laplacian_wav_HPF_noSTD_long_context_15s_1000Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_wav_HPF_noSTD_long_context_15s_2048Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_wav_HPF_sample_per_channel_time_1000Hz.yaml	runtime configuration	composed by imindbench.run_eval
-imindbench/conf/preprocessor/laplacian_wav_HPF_sample_per_channel_time_1000Hz_1024Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_wav_HPF_sample_per_channel_time_2048Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_wav_diverstyle_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
 imindbench/conf/preprocessor/laplacian_wav_diverstyle_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz.yaml	runtime configuration	composed by imindbench.run_eval
@@ -161,6 +157,10 @@ imindbench/recipes/brainbert.yaml	evaluation runtime	imported by the imindbench 
 imindbench/recipes/datasets.yaml	evaluation runtime	imported by the imindbench package
 imindbench/recipes/hold_in.yaml	evaluation runtime	imported by the imindbench package
 imindbench/recipes/multisource.yaml	evaluation runtime	imported by the imindbench package
+imindbench/recipes/paper_brainbert_stft.yaml	release scope	paper-focused cleanup and preserved evidence
+imindbench/recipes/paper_diver.yaml	release scope	paper-focused cleanup and preserved evidence
+imindbench/recipes/paper_htnet500.yaml	release scope	paper-focused cleanup and preserved evidence
+imindbench/recipes/paper_multistft.yaml	release scope	paper-focused cleanup and preserved evidence
 imindbench/recipes/sample_efficiency.yaml	evaluation runtime	imported by the imindbench package
 imindbench/recipes/stft_sweep.yaml	evaluation runtime	imported by the imindbench package
 imindbench/run_eval.py	evaluation runtime	imported by the imindbench package
@@ -179,7 +179,13 @@ imindbench/utils/pipeline_contracts.py	evaluation runtime	imported by the imindb
 provenance/AUDIT.md	release documentation	public repository documentation
 provenance/PARITY_MATRIX.md	release documentation	public repository documentation
 provenance/consulted_artifacts.tsv	release provenance	audit and retained-surface evidence
+provenance/history/CHANGELOG_PARITY.md	maintainer history	archived original migration narrative
+provenance/history/RELEASE_MIGRATION_PLAN.md	maintainer history	archived original migration narrative
 provenance/paper_figs_provenance.json	release provenance	audit and retained-surface evidence
+provenance/recipe_sources.json	release scope	paper-focused cleanup and preserved evidence
+provenance/retired_configs/README.md	release scope	paper-focused cleanup and preserved evidence
+provenance/retired_configs/preprocessor/laplacian_stft_1000Hz_2048Hz.yaml	release scope	paper-focused cleanup and preserved evidence
+provenance/retired_configs/preprocessor/laplacian_wav_HPF_sample_per_channel_time_1000Hz_1024Hz.yaml	release scope	paper-focused cleanup and preserved evidence
 provenance/surface/generate_retained_manifest.py	release provenance	audit and retained-surface evidence
 provenance/surface/removed.tsv	release provenance	audit and retained-surface evidence
 provenance/surface/retained.tsv	release provenance	audit and retained-surface evidence
@@ -188,6 +194,7 @@ scripts/build_submission.py	release validation tooling	public validation entrypo
 scripts/parity_tools.py	parity validation tooling	public dry-run and comparison entrypoint
 scripts/validate_brainsets_smoke.py	release validation tooling	public validation entrypoint
 tests/launcher_reference.json	verification and source identity	exercised by the test suite
+tests/paper_recipe_reference.json	release scope	paper-focused cleanup and preserved evidence
 tests/source_manifest.json	verification and source identity	exercised by the test suite
 tests/test_brainsets_public_contract.py	verification and source identity	exercised by the test suite
 tests/test_imindbench_pipelines/test_barista.py	verification and source identity	exercised by the test suite
@@ -200,5 +207,6 @@ tests/test_imindbench_pipelines/test_region_intersection_pool_preprocessor.py	ve
 tests/test_imindbench_pipelines/test_torch_brain_dataset_imports.py	verification and source identity	exercised by the test suite
 tests/test_launcher.py	verification and source identity	exercised by the test suite
 tests/test_neuroprobe_shared_artifacts.py	verification and source identity	exercised by the test suite
+tests/test_optional_dependencies.py	release scope	paper-focused cleanup and preserved evidence
 tests/test_parity_tools.py	verification and source identity	exercised by the test suite
 tests/test_release_packaging.py	verification and source identity	exercised by the test suite

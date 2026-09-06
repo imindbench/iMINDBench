@@ -1,8 +1,8 @@
-# Main configuration file for neuroprobe evaluation
+# Main configuration for benchmark evaluation
 defaults:
   - _self_
   - paths: ???
-  - dataset: neuroprobe2025
+  - dataset: neuroprobev2
   - model: ???
   - preprocessor: ???
   - submitter: default

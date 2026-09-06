@@ -121,3 +121,20 @@ def test_resolve_train_source_configs_inherit_top_level_coordinate_profile():
         "diver_mni",
         "diver_mni",
     ]
+
+
+@pytest.mark.parametrize("submitter", [None, {}, {"author": None}, {"author": "A"}])
+def test_validate_eval_config_accepts_optional_attribution(submitter):
+    cfg = _cfg({"name": "region_intersection_pool"})
+    cfg.submitter = submitter
+    validate_eval_config(cfg)
+    del cfg["submitter"]
+    validate_eval_config(cfg)
+
+
+@pytest.mark.parametrize("submitter", [42, {"author": 42}, {"organization": []}])
+def test_validate_eval_config_rejects_invalid_attribution(submitter):
+    cfg = _cfg({"name": "region_intersection_pool"})
+    cfg.submitter = submitter
+    with pytest.raises((TypeError, ValueError), match="submitter"):
+        validate_eval_config(cfg)

@@ -1,0 +1,79 @@
+description: Representative paper settings recovered from saved configs; see docs/PAPER_COVERAGE.md.
+target_set: all
+datasets:
+  neuroprobev2:
+    dataset: neuroprobev2
+    output_group: paper_brainbert_stft_neuroprobev2
+    preprocessor: laplacian_stft_2048Hz
+    models:
+      logistic:
+        overrides:
+          model.tol: 0.001
+      mlp:
+        overrides:
+          model.tol: 1.0e-08
+      cnn:
+        overrides:
+          model.tol: 0.0001
+    regimes:
+    - within-session
+    overrides:
+      dataset.subset_tier: lite
+      dataset.brain_area_key: localization_DesikanKilliany
+  kelesbyd2024:
+    dataset: kelesbyd2024
+    output_group: paper_brainbert_stft_kelesbyd2024
+    preprocessor: laplacian_stft_1000Hz
+    models:
+      logistic:
+        overrides:
+          model.tol: 0.001
+      mlp:
+        overrides:
+          model.tol: 1.0e-08
+      cnn:
+        overrides:
+          model.tol: 0.0001
+    regimes:
+    - within-session
+    overrides:
+      preprocessor.chain.2.poverlap: 0.75
+      dataset.subset_tier: full
+      dataset.brain_area_key: byd_region_code
+  berezutskayapippi2022:
+    dataset: berezutskayapippi2022
+    output_group: paper_brainbert_stft_berezutskayapippi2022
+    preprocessor: laplacian_stft_2048Hz
+    models:
+      logistic:
+        overrides:
+          model.tol: 0.001
+      mlp:
+        overrides:
+          model.tol: 1.0e-08
+      cnn:
+        overrides:
+          model.tol: 0.0001
+    regimes:
+    - within-session
+    overrides:
+      dataset.subset_tier: high-cov
+      dataset.brain_area_key: null
+overrides:
+  ++preprocessor.chain.2.freq_channel_cutoff: 40
+  dataset.label_mode: binary
+  dataset.coordinate_profile: popt_lip
+  dataset.train_same_subject_only: false
+  dataset.train_sample_fraction: 1.0
+  dataset.max_train_samples_per_subject: auto
+  dataset.train_decodable_subject_sessions_only: false
+  dataset.uniquify_channel_ids_with_subject: true
+  dataset.uniquify_channel_ids_with_session: true
+  dataset.merge_val_into_test: false
+  runner.num_workers: 0
+  runner.pin_memory: false
+  runner.persistent_workers: false
+  runner.prefetch_factor: 2
+  runner.coord_index_policy: legacy_truncation
+  runtime.seed: 42
+  runtime.preprocess_torch_num_threads: 4

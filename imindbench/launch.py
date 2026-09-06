@@ -19,6 +19,7 @@ IDENTITY_KEYS = {
     "paths",
     "dataset",
     "model",
+    "model.name",
     "preprocessor",
     "dataset.provider",
     "dataset.regime",
@@ -114,8 +115,18 @@ def load_recipe(recipe_name, dataset):
     models = _mapping(selected.get("models"), "models")
     _names(list(models), "models")
     for model, settings in models.items():
-        if set(_mapping(settings, model)) - {"preprocessor"}:
-            raise ValueError(f"{model} only supports a preprocessor override")
+        if set(_mapping(settings, model)) - {"preprocessor", "overrides"}:
+            raise ValueError(f"{model} supports preprocessor and model overrides only")
+        for key, value in _mapping(settings.get("overrides", {}), model).items():
+            # Model-specific tuning must not replace grid identity or routing.
+            if (
+                not isinstance(key, str)
+                or not re.fullmatch(r"(?:\+\+)?(?:model|dataset)\.[\w.]+", key)
+                or key.lstrip("+") in IDENTITY_KEYS | {"dataset.subset_tier"}
+                or (value is not None and type(value) not in (str, bool, int, float))
+            ):
+                raise ValueError(f"Invalid model-specific override: {key}")
+            _value(value)
         if "preprocessor" in settings:
             _slug(settings["preprocessor"], "model preprocessor")
     shared = OmegaConf.to_container(
@@ -269,6 +280,7 @@ def build_commands(args):
             "model": model,
             "preprocessor": preprocessor,
             **recipe["overrides"],
+            **recipe["models"][model].get("overrides", {}),
             **dict(zip(sweep, values, strict=True)),
             "wandb.enabled": False,
             "runtime.overwrite": False,

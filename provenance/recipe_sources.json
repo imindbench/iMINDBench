@@ -1,0 +1,489 @@
+[
+  {
+    "recipe": "paper_multistft",
+    "dataset": "neuroprobev2",
+    "model": "logistic",
+    "source_config_sha256": "f3faa299044dd97451d0973070b1b28ba8091f71011fdc0b4ea9f1f667c049af",
+    "source_uri": "original-results://09_neurips/neuroprobev2/logistic_laplacian_multi_stft_2048Hz/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/neuroprobev2_flagship_stft_only.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-04-27/neuroprobev2_multi_stft_multiregime_logistic_only.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/neuroprobev2_preprocessor_baselines.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_flagship_stft_only.yaml",
+        "Logistic"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_sample_efficiency.yaml",
+        "Logistic multi-STFT (full)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "neuroprobev2",
+    "model": "mlp",
+    "source_config_sha256": "51c27684c64436ce287bee3a3864af4f331edf5acefc25d4768f45a89c5381d6",
+    "source_uri": "original-results://09_neurips/neuroprobev2/mlp_laplacian_multi_stft_2048Hz/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/neuroprobev2_flagship_stft_only.yaml",
+        "MLP (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/neuroprobev2_preprocessor_baselines.yaml",
+        "MLP (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_flagship_stft_only.yaml",
+        "MLP"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_sample_efficiency.yaml",
+        "MLP multi-STFT (full)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "neuroprobev2",
+    "model": "cnn",
+    "source_config_sha256": "fc010e83e07f6c526f8599329ad3d3ae42619ef73c2feb5cdbd6c32b02d9b0a9",
+    "source_uri": "original-results://09_neurips/neuroprobev2/cnn_laplacian_multi_stft_2048Hz/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/neuroprobev2_flagship_stft_only.yaml",
+        "CNN (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/neuroprobev2_preprocessor_baselines.yaml",
+        "CNN (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_flagship_stft_only.yaml",
+        "CNN"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_sample_efficiency.yaml",
+        "CNN multi-STFT (full)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "neuroprobev2",
+    "model": "popt",
+    "source_config_sha256": "2b55b4739ae59ff0fc63ebd4d4bafa20b4666c7c6a43d30797190f1d17a8f5a1",
+    "source_uri": "original-results://09_neurips/neuroprobev2/popt_laplacian_multi_stft_2048Hz/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/neuroprobev2_flagship_stft_only.yaml",
+        "PopT (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-07-31_rebuttal_holdin_multisource/hold-in_vs_multisource.yaml",
+        "PopT NeuroprobeV2 multi-STFT (within-session)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_flagship_stft_only.yaml",
+        "PopT-v2"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_sample_efficiency.yaml",
+        "PopT-v2 multi-STFT (full)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "kelesbyd2024",
+    "model": "logistic",
+    "source_config_sha256": "c6b53f9e527ea6ca616fabb440c250f6067040517b166989fe41dae7b20bed88",
+    "source_uri": "original-results://09_neurips/kelesbyd2024_tercile/logistic_laplacian_multi_stft_1000Hz/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/byd_flagship_stft_only.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-04-27/byd_multi_stft_multiregime_logistic_only.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/byd_preprocessor_baselines.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/byd_flagship_stft_only.yaml",
+        "Logistic"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "kelesbyd2024",
+    "model": "mlp",
+    "source_config_sha256": "4101fda1f7133414bdca63dacd65e033e99b5b8b9b3e612799aeaf01a152182a",
+    "source_uri": "original-results://09_neurips/kelesbyd2024_tercile/mlp_laplacian_multi_stft_1000Hz/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/byd_flagship_stft_only.yaml",
+        "MLP (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/byd_preprocessor_baselines.yaml",
+        "MLP (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/byd_flagship_stft_only.yaml",
+        "MLP"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "kelesbyd2024",
+    "model": "cnn",
+    "source_config_sha256": "923db948d44592b373771b5d935c2eaf2b5051831c4d3ed71d30f8c2a151991b",
+    "source_uri": "original-results://09_neurips/kelesbyd2024_tercile/cnn_laplacian_multi_stft_1000Hz/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/byd_flagship_stft_only.yaml",
+        "CNN (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/byd_preprocessor_baselines.yaml",
+        "CNN (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/byd_flagship_stft_only.yaml",
+        "CNN"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "kelesbyd2024",
+    "model": "popt",
+    "source_config_sha256": "c81408c513edc46cba5fc360244c05a37e4716af0682c17e81e4cfeb8544f311",
+    "source_uri": "original-results://09_neurips/kelesbyd2024_tercile/popt_laplacian_multi_stft_1000Hz/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/byd_flagship_stft_only.yaml",
+        "PopT (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-07-31_rebuttal_holdin_multisource/hold-in_vs_multisource.yaml",
+        "PopT BYD multi-STFT (within-session)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/byd_flagship_stft_only.yaml",
+        "PopT-v2"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "berezutskayapippi2022",
+    "model": "logistic",
+    "source_config_sha256": "a7dbd411394a2b37b3206dc5a7cd9d8633d9d92d62ca452501505f57e976082e",
+    "source_uri": "original-results://09_neurips/berezutskayapippi2022_tercile/high-cov/logistic_laplacian_multi_stft_2048Hz/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/pippi_flagship_stft_only.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-04-27/pippi_multi_stft_multiregime_logistic_only.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/pippi_preprocessor_baselines.yaml",
+        "Logistic (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/pippi_flagship_stft_only.yaml",
+        "Logistic"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "berezutskayapippi2022",
+    "model": "mlp",
+    "source_config_sha256": "9537e84fcc784a84e2f5a14de7efcd310b7d5960c093cec5d05f3510383a0304",
+    "source_uri": "original-results://09_neurips/berezutskayapippi2022_tercile/high-cov/mlp_laplacian_multi_stft_2048Hz/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/pippi_flagship_stft_only.yaml",
+        "MLP (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/pippi_preprocessor_baselines.yaml",
+        "MLP (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/pippi_flagship_stft_only.yaml",
+        "MLP"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "berezutskayapippi2022",
+    "model": "cnn",
+    "source_config_sha256": "42f3e55fccf6ebc2518088764b5b0aba4317fbdddd516866acb57671c0da21cf",
+    "source_uri": "original-results://09_neurips/berezutskayapippi2022_tercile/high-cov/cnn_laplacian_multi_stft_2048Hz/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/pippi_flagship_stft_only.yaml",
+        "CNN (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/pippi_preprocessor_baselines.yaml",
+        "CNN (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/pippi_flagship_stft_only.yaml",
+        "CNN"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_multistft",
+    "dataset": "berezutskayapippi2022",
+    "model": "popt",
+    "source_config_sha256": "bda7232fab2d21df0d3626389a179d42b28c5608a4e4830573ddc394f276b222",
+    "source_uri": "original-results://09_neurips/berezutskayapippi2022_tercile/high-cov/popt_laplacian_multi_stft_2048Hz/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-04-27/pippi_flagship_stft_only.yaml",
+        "PopT (multi-STFT)"
+      ],
+      [
+        "visualize-model://2026-07-31_rebuttal_holdin_multisource/hold-in_vs_multisource.yaml",
+        "PopT Pippi multi-STFT (within-session)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/pippi_flagship_stft_only.yaml",
+        "PopT-v2"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "neuroprobev2",
+    "model": "logistic",
+    "source_config_sha256": "69b737194fb2c8c1be5f70aabbc7004fa1169d851c9e4377a28e8355f5cd26e1",
+    "source_uri": "original-results://09_neurips/neuroprobev2_stft_2048Hz/logistic_laplacian_stft_2048Hz/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/neuroprobev2_brainbert_stft_baselines.yaml",
+        "Logistic (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "neuroprobev2",
+    "model": "mlp",
+    "source_config_sha256": "336edea20c4cda8e7882ae65927a8cc3b8eb9978986d26800dcff7f5767b0467",
+    "source_uri": "original-results://09_neurips/neuroprobev2_stft_2048Hz/mlp_laplacian_stft_2048Hz/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/neuroprobev2_brainbert_stft_baselines.yaml",
+        "MLP (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "neuroprobev2",
+    "model": "cnn",
+    "source_config_sha256": "bdc257021513618e56ebb184207db2021fa3b36b014d415006de5f92bfd39ae2",
+    "source_uri": "original-results://09_neurips/neuroprobev2_stft_2048Hz/cnn_laplacian_stft_2048Hz/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/neuroprobev2_brainbert_stft_baselines.yaml",
+        "CNN (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "kelesbyd2024",
+    "model": "logistic",
+    "source_config_sha256": "f2dc5bd2071fb62101442839b5f979df895589bb1fb73d67cf5ff51e358a3b32",
+    "source_uri": "original-results://09_neurips/kelesbyd2024_tercile_stft_1000Hz/logistic_laplacian_stft_1000Hz/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/byd_brainbert_stft_baselines.yaml",
+        "Logistic (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "kelesbyd2024",
+    "model": "mlp",
+    "source_config_sha256": "50288442755db08bdfef715958ca1d3b9d7529c72066f9fcad7ea94675f259a1",
+    "source_uri": "original-results://09_neurips/kelesbyd2024_tercile_stft_1000Hz/mlp_laplacian_stft_1000Hz/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/byd_brainbert_stft_baselines.yaml",
+        "MLP (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "kelesbyd2024",
+    "model": "cnn",
+    "source_config_sha256": "c2b4494237aa5c196093b266834419d95da4e24f140549b9b6ff48bb1e75abf5",
+    "source_uri": "original-results://09_neurips/kelesbyd2024_tercile_stft_1000Hz/cnn_laplacian_stft_1000Hz/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/byd_brainbert_stft_baselines.yaml",
+        "CNN (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "berezutskayapippi2022",
+    "model": "logistic",
+    "source_config_sha256": "5872eab99a848b76458e66d9026c908f190f58e28adac8187977c3ae1a895c5e",
+    "source_uri": "original-results://09_neurips/berezutskayapippi2022_tercile_stft_2048Hz/high-cov/logistic_laplacian_stft_2048Hz/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/pippi_brainbert_stft_baselines.yaml",
+        "Logistic (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "berezutskayapippi2022",
+    "model": "mlp",
+    "source_config_sha256": "a1ca786af799f883053a981c6ea7c29c62a76be472d0a556c316e4283fcde92c",
+    "source_uri": "original-results://09_neurips/berezutskayapippi2022_tercile_stft_2048Hz/high-cov/mlp_laplacian_stft_2048Hz/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/pippi_brainbert_stft_baselines.yaml",
+        "MLP (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_brainbert_stft",
+    "dataset": "berezutskayapippi2022",
+    "model": "cnn",
+    "source_config_sha256": "10b1c90d4f09a46a4338ee7492b736be47c9e6e394b6378e1c07fd4d6b950a34",
+    "source_uri": "original-results://09_neurips/berezutskayapippi2022_tercile_stft_2048Hz/high-cov/cnn_laplacian_stft_2048Hz/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-27_brainbert_stft_baselines/pippi_brainbert_stft_baselines.yaml",
+        "CNN (BrainBERT STFT)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_htnet500",
+    "dataset": "neuroprobev2",
+    "model": "htnet_500Hz",
+    "source_config_sha256": "7018005f4c37883e220faaae7942ffef2967b68c255f1b131e4d92f18b90cbb3",
+    "source_uri": "original-results://09_neurips/rebuttal_preprocessor_baselines/neuroprobev2_original/htnet_500Hz_laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/neuroprobev2_preprocessor_baselines.yaml",
+        "HTNet (HPF global robust scalar)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_htnet500",
+    "dataset": "kelesbyd2024",
+    "model": "htnet_500Hz",
+    "source_config_sha256": "33475eaf2f79978bd430b0aaa3cc511c77c51e8a952cd96ef8b343ef4d82c872",
+    "source_uri": "original-results://09_neurips/rebuttal_preprocessor_baselines/kelesbyd2024_tercile_original/htnet_500Hz_laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/byd_preprocessor_baselines.yaml",
+        "HTNet (HPF global robust scalar)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_htnet500",
+    "dataset": "berezutskayapippi2022",
+    "model": "htnet_500Hz",
+    "source_config_sha256": "678f0c825346258ce2c2e8ef5aeb076816c194069cb51f82b4394d040e5a088b",
+    "source_uri": "original-results://09_neurips/rebuttal_preprocessor_baselines/berezutskayapippi2022_tercile_original/high-cov/htnet_500Hz_laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-08-22_rebuttal_preprocessor/pippi_preprocessor_baselines.yaml",
+        "HTNet (HPF global robust scalar)"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_diver",
+    "dataset": "neuroprobev2",
+    "model": "diver",
+    "source_config_sha256": "0f947774834f57a5cb7f2a44c4faf2621cc9541c3c87062e9c2ce2d16ead60b9",
+    "source_uri": "original-results://09_neurips/diver_outputs_longcontext/neuroprobev2/diver_laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_2048to500/within-session/delta_volume/sub10_sess0/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-16_new_wav_baselines/neuroprobev2_new_wav_baselines.yaml",
+        "DIVER (long context 15s)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/neuroprobev2_flagship_wav_only.yaml",
+        "DIVER-1"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_diver",
+    "dataset": "kelesbyd2024",
+    "model": "diver",
+    "source_config_sha256": "8a2217b59c5ff11989031d1bc7a7b54801ef4a21cdcd376de7c302ebfd039d6c",
+    "source_uri": "original-results://09_neurips/diver_outputs_longcontext/kelesbyd2024/diver_laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_1000to500/within-session/delta_volume/sub41_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-16_new_wav_baselines/byd_new_wav_baselines.yaml",
+        "DIVER (long context 15s)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/byd_flagship_wav_only.yaml",
+        "DIVER-1"
+      ]
+    ]
+  },
+  {
+    "recipe": "paper_diver",
+    "dataset": "berezutskayapippi2022",
+    "model": "diver",
+    "source_config_sha256": "091808b3e2e4c0ae7d47cd9623c8a4b76b90529eaa64298a5cb1a4bbe5ce00bf",
+    "source_uri": "original-results://09_neurips/diver_outputs_longcontext/berezutskayapippi2022/diver_laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_2048to500/within-session/delta_volume/sub1_sess1/.hydra/config.yaml",
+    "plot_references": [
+      [
+        "visualize-model://2026-07-16_new_wav_baselines/pippi_new_wav_baselines.yaml",
+        "DIVER (long context 15s)"
+      ],
+      [
+        "visualize-model://2026-08-23_recolor/pippi_flagship_wav_only.yaml",
+        "DIVER-1"
+      ]
+    ]
+  }
+]

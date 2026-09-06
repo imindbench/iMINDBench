@@ -83,3 +83,5 @@ imindbench/scripts/run_pippi_decodable_subjects_multisource.sh	consolidated laun
 imindbench/scripts/run_pippi_decodable_subjects_multisource_stft_or_htnet_500hz_val_mean0p60.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
 imindbench/scripts/run_pippi_stft_sweep.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
 imindbench/scripts/runtime_paths.sh	consolidated launcher	replaced by imindbench-grid and packaged recipes; original commands captured in tests/launcher_reference.json
+imindbench/conf/preprocessor/laplacian_stft_1000Hz_2048Hz.yaml	archived non-paper preset	no name or exact-chain matches in 90526 saved configs; retained in provenance/retired_configs/preprocessor
+imindbench/conf/preprocessor/laplacian_wav_HPF_sample_per_channel_time_1000Hz_1024Hz.yaml	archived non-paper preset	no name or exact-chain matches in 90526 saved configs; retained in provenance/retired_configs/preprocessor

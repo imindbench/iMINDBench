@@ -11,8 +11,8 @@ def _load_ramp_up():
             raise
         raise ModuleNotFoundError(
             "The ramp_up scheduler requires warmup_scheduler. Install the "
-            "imindbench environment from examples/imindbench/"
-            "environment.yml before using scheduler.name=ramp_up."
+            "warmup extra with pip install 'imindbench[warmup]' before "
+            "using scheduler.name=ramp_up."
         ) from exc
     return RampUp
 

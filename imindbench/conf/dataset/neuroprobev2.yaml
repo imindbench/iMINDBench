@@ -1,5 +1,4 @@
-# Private processed-mode dataset configuration.
-# Keeps the same config surface as neuroprobe2025 while selecting NeuroprobeV2.
+# NeuroprobeV2 evaluation view over prepared Neuroprobe2025 recordings.
 root: ${paths.dataset_root}
 dirname: ${paths.dataset_dirname}
 provider: neuroprobev2

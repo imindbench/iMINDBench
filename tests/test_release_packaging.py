@@ -52,11 +52,11 @@ def test_submission_bundles_only_the_reviewed_dependency(tmp_path):
     (source / "imindbench").mkdir()
     commit = "abcdef0" + "1" * 33
     config_name = "config/brainsets_smoke_manifest.json"
-    (source / "imindbench/README.md").write_text(
+    (source / "README.md").write_text(
         'python -m pip install "torch_brain @ git+https://example.org/upstream@commit"\n'
     )
     (source / "config/submission_files.json").write_text(
-        json.dumps([config_name, "imindbench/README.md"])
+        json.dumps([config_name, "README.md"])
     )
     wheel = tmp_path / "torch_brain-0.2.1+gabcdef0-py3-none-any.whl"
     with zipfile.ZipFile(wheel, "w") as archive:
@@ -87,7 +87,7 @@ def test_submission_bundles_only_the_reviewed_dependency(tmp_path):
         )
         assert (
             b"pip install vendor/torch_brain"
-            in archive.extractfile("imindbench/imindbench/README.md").read()
+            in archive.extractfile("imindbench/README.md").read()
         )
     assert (source / config_name).read_text() == original
     with zipfile.ZipFile(wheel, "a") as archive:
@@ -100,3 +100,27 @@ def test_submission_bundles_only_the_reviewed_dependency(tmp_path):
         )
     with pytest.raises(ValueError, match="reviewed clean source commit"):
         module.build_submission(source, tmp_path / "wrong.tar.gz", wheel)
+
+
+def test_submission_omits_migration_identity_but_preserves_commands(tmp_path):
+    spec = importlib.util.spec_from_file_location(
+        "build_submission", ROOT / "scripts/build_submission.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    source = tmp_path / "source"
+    (source / "config").mkdir(parents=True)
+    (source / "tests").mkdir()
+    fixture_name = "tests/launcher_reference.json"
+    reference = {
+        "source_commit": "private-commit",
+        "scripts": {"old.sh": ["python", "-m", "imindbench.run_eval"]},
+    }
+    (source / fixture_name).write_text(json.dumps(reference))
+    (source / "config/submission_files.json").write_text(json.dumps([fixture_name]))
+    output = tmp_path / "archive.tar.gz"
+    module.build_submission(source, output)
+    with tarfile.open(output) as archive:
+        exported = json.load(archive.extractfile("imindbench/" + fixture_name))
+    assert exported == {"scripts": reference["scripts"]}
+    assert json.loads((source / fixture_name).read_text()) == reference

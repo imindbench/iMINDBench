@@ -117,6 +117,10 @@ def test_commands_match_bounded_original_shell_capture(script):
             "hold_in",
             "multisource",
             "sample_efficiency",
+            "paper_multistft",
+            "paper_brainbert_stft",
+            "paper_htnet500",
+            "paper_diver",
         ]
         for dataset in ["neuroprobev2", "kelesbyd2024", "berezutskayapippi2022"]
         if family != "sample_efficiency" or dataset == "neuroprobev2"
@@ -241,3 +245,63 @@ def test_execution_resume_and_existing_run_preflight(tmp_path):
     result.write_text("partial result")
     with pytest.raises(ValueError, match="Unverified or changed result"):
         launch.execute_commands([job], tmp_path, resume=True)
+
+
+PAPER_REFERENCE = json.loads(
+    (Path(__file__).parent / "paper_recipe_reference.json").read_text()
+)["cases"]
+
+
+@pytest.mark.parametrize(
+    "reference",
+    PAPER_REFERENCE,
+    ids=lambda r: f"{r['recipe']}-{r['dataset']}-{r['model']}",
+)
+def test_paper_recipes_recover_saved_scientific_settings(reference):
+    from omegaconf import OmegaConf
+
+    jobs = launch.build_commands(
+        _args(
+            reference["recipe"],
+            reference["dataset"],
+            "--model",
+            reference["model"],
+            "--limit",
+            "1",
+        )
+    )
+    with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
+        cfg = compose(config_name="config", overrides=jobs[0]["command"][3:])
+        validate_eval_config(cfg)
+        # Resolve both sides against the composed environment; historical configs
+        # contain scientific interpolations such as ${model.total_steps}.
+        expected_cfg = OmegaConf.merge(cfg, reference["expected"])
+        expected = OmegaConf.to_container(expected_cfg, resolve=True)
+        actual = OmegaConf.to_container(cfg, resolve=True)
+
+    def check_fields(recorded, old, new):
+        if isinstance(recorded, dict):
+            for key, value in recorded.items():
+                check_fields(value, old[key], new[key])
+        elif isinstance(recorded, list):
+            assert len(new) == len(old)
+            for item, a, b in zip(recorded, old, new, strict=True):
+                check_fields(item, a, b)
+        else:
+            assert new == old
+
+    check_fields(reference["expected"], expected, actual)
+
+
+@pytest.mark.parametrize(
+    "key", ["dataset.provider", "dataset.subset_tier", "model.name", "model.device"]
+)
+def test_model_overrides_cannot_change_grid_identity(tmp_path, key):
+    from omegaconf import OmegaConf
+
+    recipe = OmegaConf.load(launch.RECIPE_DIR / "paper_multistft.yaml")
+    recipe.datasets.neuroprobev2.models.logistic.overrides[key] = "changed"
+    path = tmp_path / "recipe.yaml"
+    OmegaConf.save(recipe, path)
+    with pytest.raises(ValueError, match="Invalid model-specific override"):
+        launch.load_recipe(str(path), "neuroprobev2")

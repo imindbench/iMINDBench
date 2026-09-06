@@ -35,10 +35,12 @@ def build_model(cfg: DictConfig, dataset_cfg: DictConfig | None = None):
     if model_name not in MODEL_REGISTRY:
         missing = UNAVAILABLE_MODEL_MODULES.get(f"{model_name}_model")
         if missing is not None:
+            extra = {"barista": "barista,warmup", "diver": "diver"}.get(model_name)
+            install = f"imindbench[{extra}]" if extra else missing
             raise ImportError(
                 f"Model {model_name} needs {missing}, which is not installed. "
-                f"Install {missing} using the repository-root environment.yml "
-                "and public installation guidance, or choose another model."
+                f"Install it with pip install '{install}'; see README.md for "
+                "the reviewed environment and checkpoint requirements."
             )
         raise ValueError(
             f"Model {model_name} not found in registry. Available: {list(MODEL_REGISTRY.keys())}"

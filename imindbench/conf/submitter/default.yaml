@@ -1,4 +1,4 @@
-# Leaderboard submission identity (can be overridden via submitter=<name>)
-author: "Your Name"
-organization: "Your Organization"
-organization_url: "https://your-url.com"
+# Optional attribution; null values are retained in the result JSON.
+author: null
+organization: null
+organization_url: null

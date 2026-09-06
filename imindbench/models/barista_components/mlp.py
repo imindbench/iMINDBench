@@ -4,14 +4,7 @@
 
 import torch.nn as nn
 
-
-def get_activation_function(activation_str):
-    if activation_str.lower() == "relu":
-        return nn.ReLU()
-    elif activation_str.lower() == "linear":
-        return lambda x: x
-    elif activation_str.lower() == "gelu":
-        return nn.GELU()
+from .utils import get_activation_function
 
 
 class MLP(nn.Module):

@@ -56,12 +56,13 @@ missing historical `barista_jun9` checkpoint identity.
 | `hold_in` | PopT hold-in-session with packaged decodable population | Figure 3 / Appendix 5 family |
 | `multisource` | PopT with three-provider training, within-session evaluation | Figure 3 / Appendix 5 family |
 
-All existing model and preprocessor configs remain available. These recipes
-consolidate the retained scripts; they do not claim full executable coverage of
-every paper family. HTNet 500 Hz waveform ablations, DIVER and additional
-preprocessing/BrainBERT-STFT baselines still require the model-specific settings
-in the historical resolved configs. Historical parity status is in
-[REPRODUCTION.md](REPRODUCTION.md).
+Four additional `paper_*` recipes recover representative multi-STFT,
+BrainBERT-STFT classifier, HTNet 500 Hz and DIVER settings from saved configs.
+See [PAPER_COVERAGE.md](PAPER_COVERAGE.md) for exact scope and evidence. Use
+`baselines` for an introductory run and a paper recipe when those recovered
+settings are intended. All paper model families remain available; two unused rate-conversion presets
+have been archived as described in the coverage guide. Not every paper variant
+has a complete grid.
 
 Use repeated `--model`, `--task`, `--regime`, and `--target` flags to select a
 subset already present in a recipe. `--count` prints the count after filtering;
@@ -76,7 +77,9 @@ Recipes live in `imindbench/recipes/`; `datasets.yaml` supplies shared tasks and
 named target lists. Copy a recipe to a caller-owned YAML file and pass its path
 with `--recipe` to change model selections, preprocessors or sweep dimensions.
 Dataset-specific fields override recipe-wide `overrides`. Model entries may
-select a different preprocessor. Sweep values are numeric Hydra scalar strings;
+select a different preprocessor and override scalar model/dataset settings
+without changing identity or subset. Per-model settings override dataset-level
+settings, and caller `--set` tuning takes precedence. Sweep values are numeric Hydra scalar strings;
 labels form distinct output subdirectories.
 
 Use `--set KEY=VALUE` for ordinary Hydra settings such as checkpoint paths,
@@ -108,8 +111,8 @@ identity, so keep inputs immutable and retain their hashes separately.
 
 ## Changes from the old shell scripts
 
-The 26 shell files were removed; their source remains in cleanup commit
-`81330f8`. The bounded command captures in `tests/launcher_reference.json` verify
+The 26 shell files were consolidated. The bounded command captures in
+`tests/launcher_reference.json` verify
 the retained settings independently of the new generator.
 
 - Baseline and BrainBERT recipes default to within-session. Their old

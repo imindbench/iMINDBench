@@ -127,10 +127,11 @@ class DIVERModel(TorchBaseModel):
                 flatten_mlp_finetune,
             )
         except ModuleNotFoundError as exc:
+            if (exc.name or "").split(".")[0] not in {"mup", "jaxtyping"}:
+                raise
             raise ModuleNotFoundError(
-                "The DIVER model requires optional DIVER dependencies. Install "
-                "dependencies from the repository-root environment.yml and the "
-                "pinned public torch_brain package before using model=diver."
+                "DIVER requires its optional dependencies. Install them with "
+                "pip install 'imindbench[diver]'; see README.md for resources."
             ) from exc
 
         if self.ft_head_style == "flatten_linear":

@@ -208,32 +208,6 @@ def log_fold_split_sample_counts(
     )
 
 
-def format_results(
-    internal_result,
-    author,
-    organization,
-    organization_url,
-):
-    """
-    Format BTB-style leaderboard JSON from internal evaluation results.
-
-    Args:
-        internal_result: Generic internal evaluation result payload.
-        author: Author name for submission metadata.
-        organization: Organization name for submission metadata.
-        organization_url: Organization URL for submission metadata.
-
-    Returns:
-        BTB-compatible exported results dictionary.
-    """
-    return build_public_export_result(
-        internal_result=internal_result,
-        author=author,
-        organization=organization,
-        organization_url=organization_url,
-    )
-
-
 def build_public_export_result(
     *,
     internal_result,
@@ -255,7 +229,7 @@ def build_public_export_result(
     return {
         "model_name": model_name,
         "author": author,
-        "description": f"Simple {model_name} using all electrodes ({preprocess_type if preprocess_type != 'none' else 'voltage'}).",
+        "description": f"{model_name} evaluation with {preprocess_type} preprocessing.",
         "organization": organization,
         "organization_url": organization_url,
         "timestamp": float(internal_result["timestamp"]),
@@ -407,7 +381,7 @@ def format_and_save_results(
 ):
     """Build internal/export result payloads and save them to disk."""
     runtime_cfg = cfg.runtime
-    submitter_cfg = cfg.submitter
+    submitter_cfg = cfg.get("submitter") or {}
     preprocess_parameters = OmegaConf.to_container(cfg.preprocessor, resolve=True)
     internal_result = build_internal_eval_result(
         provider=dataset_provider,
@@ -423,11 +397,11 @@ def format_and_save_results(
         subject_load_time=data_load_time,
         regression_run_time=regression_run_time,
     )
-    results = format_results(
+    results = build_public_export_result(
         internal_result=internal_result,
-        author=submitter_cfg.author,
-        organization=submitter_cfg.organization,
-        organization_url=submitter_cfg.organization_url,
+        author=submitter_cfg.get("author"),
+        organization=submitter_cfg.get("organization"),
+        organization_url=submitter_cfg.get("organization_url"),
     )
     save_results(results, file_save_path)
     log("Evaluation complete!", priority=0)
