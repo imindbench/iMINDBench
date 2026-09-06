@@ -45,7 +45,7 @@
   "imindbench/conf/model/mlp.yaml",
   "imindbench/conf/model/popt.yaml",
   "imindbench/conf/paths/example.yaml",
-  "imindbench/conf/population/catalog.yaml",
+  "imindbench/conf/units/catalog.yaml",
   "imindbench/conf/preprocessor/laplacian_multi_stft_1000Hz.yaml",
   "imindbench/conf/preprocessor/laplacian_multi_stft_2048Hz.yaml",
   "imindbench/conf/preprocessor/laplacian_stft_1000Hz.yaml",

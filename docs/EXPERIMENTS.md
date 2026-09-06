@@ -127,8 +127,8 @@ Use `--task` and `--target` to narrow the grid before counting or execution.
 | Family | Selections |
 | --- | --- |
 | `baselines` | Neuroprobe Logistic/MLP/CNN/PopT; BYD/PIPPI PopT and native-rate HTNet |
-| `brainbert` | BrainBERT encoder + linear readout |
-| `barista` | Three tasks × two targets per dataset |
+| `brainbert` | BrainBERT encoder + linear readout; all 15 tasks and 5 / 29 / 5 subject/session pairs |
+| `barista` | All 15 tasks; 5 NeuroprobeV2, 29 BYD or 5 PIPPI subject/session pairs |
 | `stft_sweep` | Logistic; 3 windows × 3 overlaps × 4 frequency ceilings |
 | `sample_efficiency` | Neuroprobe Logistic/MLP/CNN/PopT, fractions 1 through 1/16 |
 | `hold_in` | PopT hold-in-session with the decodable population |
@@ -139,7 +139,8 @@ Use `--task` and `--target` to narrow the grid before counting or execution.
 | `paper_diver` | Frozen DIVER encoder with 15-second waveform context at 500 Hz |
 
 [Paper coverage](PAPER_COVERAGE.md) maps these families to paper experiments.
-Shared tasks and target sets live in `conf/population/catalog.yaml`. Hold-in and
+Shared tasks and target sets live in `conf/units/catalog.yaml`; `--unit-set`
+selects a named set. Hold-in and
 multisource use `stft_or_htnet_500hz_val_mean0p60` for eligible targets and training;
 `--decodable-dir` selects a custom manifest directory instead. Tasks with no
 eligible targets are skipped. Dataset splits belong to the TorchBrain provider.

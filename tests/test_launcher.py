@@ -125,7 +125,7 @@ def test_population_filter_matches_manifest_and_dry_run_is_read_only(tmp_path):
         "decodable",
         "--regime",
         "hold-in-session",
-        "--population",
+        "--unit-set",
         "scaling",
         "--decodable-rule",
         "stft_or_htnet_500hz_val_mean0p60",

@@ -12,10 +12,10 @@ population, task and preprocessing matter as much as model selection.
 | --- | --- | --- | --- |
 | Multi-STFT baselines: Table 1, Appendix 2 | `paper_multistft` | Three datasets; Logistic/MLP/CNN/PopT; within-session; 1000 Hz BYD, 2048 Hz others; PIPPI high-cov | Explicit model tolerances, PopT learning rates, training caps and worker settings. See temporal window limits below. |
 | BrainBERT-STFT baseline classifiers: Table 1 | `paper_brainbert_stft` | Three datasets; Logistic/MLP/CNN; single STFT with 40-bin cutoff; BYD overlap 0.75 | No encoder checkpoint required for these classifiers. |
-| BrainBERT encoder + linear readout | `brainbert` | Three datasets; within-session; encoder resource required | Distinct from standalone STFT classifiers; full historical launch mapping remains incomplete. |
+| BrainBERT encoder + linear readout | `brainbert` | Three datasets; within-session; encoder resource required | Full task/target catalog; distinct from standalone STFT classifiers. Historical training filters vary per unit. |
 | HTNet 500 Hz waveform: Table 1, Appendix 1/2 | `paper_htnet500` | Three datasets; 15-second context, high-pass filtering, crop, Laplacian, downsample, global robust scaling | Includes the rebuttal baseline deterministic setting. Other HTNet populations/profiles must be matched separately. |
 | DIVER waveform: Table 1, Appendix 2 | `paper_diver` | Three datasets; DIVER filter, 15-second context, 500 Hz; frozen encoder; PIPPI full | Requires an external checkpoint and writable model directory; see resource requirements below. |
-| Other waveform baselines / BaRISTA | `barista`; model-specific retained waveform presets | Small BaRISTA example population; session filtering/scaling and model-specific metadata | The full set of waveform experiments is not yet covered by the launch scripts. |
+| Other waveform baselines / BaRISTA | `barista`; model-specific retained waveform presets | BaRISTA: 15 tasks × 5 NeuroprobeV2 / 29 BYD / 5 PIPPI pairs; session filtering/scaling and model-specific metadata | BaRISTA covers the full launch catalog; match the panel filters before aggregation. Other waveform variants are not all covered. |
 | STFT sweep: Figure 4 and STFT appendices | `stft_sweep` | Three datasets; Logistic; 3 windows × 3 overlaps × 4 frequency ceilings | Temporal slicing and runtime profile depend on the historical result family. |
 | Logistic STFT variants / preprocessing baselines | Retained single/multi-STFT and waveform presets; custom shell scripts | High-frequency, z-score, sample/session normalization are separate scientific variations | Partial mapping; some variants require overrides. Output names alone do not establish equivalent settings. |
 | Sample efficiency: Figure 3 / Appendix 4 | `sample_efficiency` | NeuroprobeV2; Logistic/MLP/CNN/PopT; fractions 1, 1/2, 1/4, 1/8, 1/16 | Fraction workflow; exact historical launches and older hold-in variants are not all covered. |
@@ -31,12 +31,19 @@ The script selects preprocessing and models; native Hydra configs in
 See [EXPERIMENTS.md](EXPERIMENTS.md#experiment-families) for usage and
 [data and checkpoints](EXPERIMENTS.md#data-and-checkpoints) for resources.
 
-The grids use the task/target catalog in `conf/population/catalog.yaml`. They do
+The grids use the task/target catalog in `conf/units/catalog.yaml`. They do
 not reconstruct every historical per-task setting, exact paper population or
 checkpoint. Match the panel's tasks and population before aggregating results.
-Historical training settings are explicit in the experiment configs and shell
-commands. Caller `--set` tuning takes precedence; use a fresh output root when
-changing settings.
+Training settings are explicit in the experiment configs and shell commands.
+Caller `--set` tuning takes precedence; use a fresh output root when changing settings.
+
+BaRISTA fixes scheduler warmup at 500 optimizer updates and decay intervals at
+95 updates. Historical saved configs specify a fractional warmup instead;
+confirm the effective schedule used by the original runner before claiming an
+exact rerun. BrainBERT saved runs also mix per-unit decodable-training flags.
+Worker/thread profiles differ for the BrainBERT and sample-efficiency workflows.
+These workflows provide runnable configurations, not every historical per-run
+runtime setting.
 
 ## Configuration scope
 

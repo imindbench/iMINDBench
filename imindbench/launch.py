@@ -83,7 +83,7 @@ def build_commands(args):
         "model",
         "preprocessor",
         "paths",
-        "population",
+        "unit_set",
         "output_group",
     ):
         _validate_name(getattr(args, name), name)
@@ -158,11 +158,11 @@ def build_commands(args):
     provider = cfg.dataset.provider
     _validate_name(provider, "dataset.provider")
     catalog = OmegaConf.to_container(
-        OmegaConf.load(CONF_DIR / "population/catalog.yaml"), resolve=True
+        OmegaConf.load(CONF_DIR / "units/catalog.yaml"), resolve=True
     )
     _validate_names(catalog["tasks"], "tasks")
     tasks = _select(catalog["tasks"], args.task, "task")
-    pairs = catalog["datasets"][provider]["targets"][args.population]
+    pairs = catalog["datasets"][provider]["targets"][args.unit_set]
     if (
         not isinstance(pairs, list)
         or not pairs
@@ -349,7 +349,7 @@ def parser():
         ],
     )
     result.add_argument(
-        "--population", default="all", help="Named task/target catalog population"
+        "--unit-set", default="all", help="Named set of evaluation units"
     )
     result.add_argument("--subset", help="Dataset subset tier")
     result.add_argument(

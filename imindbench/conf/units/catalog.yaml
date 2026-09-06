@@ -9,10 +9,6 @@ datasets:
         - [4, 0]
         - [10, 0]
         - [7, 0]
-      brainbert: *neuroprobev2_all
-      barista: &neuroprobev2_barista
-        - [1, 1]
-        - [3, 0]
       scaling: &neuroprobev2_scaling
         - [1, 1]
         - [3, 0]
@@ -51,16 +47,6 @@ datasets:
         - [60, 1]
         - [62, 1]
         - [62, 2]
-      brainbert: &kelesbyd2024_brainbert
-        - [42, 1]
-        - [42, 2]
-        - [54, 1]
-        - [54, 2]
-        - [62, 1]
-        - [62, 2]
-      barista: &kelesbyd2024_barista
-        - [54, 1]
-        - [54, 2]
       scaling: *kelesbyd2024_all
   berezutskayapippi2022:
     targets:
@@ -70,8 +56,4 @@ datasets:
         - [21, 1]
         - [23, 1]
         - [42, 1]
-      brainbert: *berezutskayapippi2022_all
-      barista: &berezutskayapippi2022_barista
-        - [1, 1]
-        - [9, 2]
       scaling: *berezutskayapippi2022_all

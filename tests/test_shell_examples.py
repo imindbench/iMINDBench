@@ -120,3 +120,55 @@ def test_family_script_filters_models_and_replaces_task_selection(tmp_path):
     )
     assert invalid.returncode == 2
     assert "Model must be one of: diver" in invalid.stderr
+
+
+@pytest.mark.parametrize(
+    "dataset,pair_count",
+    [
+        ("neuroprobev2", 5),
+        ("kelesbyd2024", 29),
+        ("berezutskayapippi2022", 5),
+    ],
+)
+@pytest.mark.parametrize("family", ["barista", "brainbert"])
+def test_pretrained_families_cover_all_tasks_and_targets(
+    tmp_path, dataset, pair_count, family
+):
+    output = tmp_path / "runs"
+    result = subprocess.run(
+        [
+            "bash",
+            str(ROOT / "scripts/run_experiments.sh"),
+            family,
+            dataset,
+            "--paths",
+            "example",
+            "--output-root",
+            str(output),
+        ],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    units = set()
+    for line in result.stdout.splitlines():
+        fields = dict(
+            token.split("=", 1) for token in shlex.split(line) if "=" in token
+        )
+        units.add(
+            (
+                fields["dataset.task"],
+                fields["dataset.test_subject"],
+                fields["dataset.test_session"],
+            )
+        )
+    catalog = OmegaConf.load(ROOT / "imindbench/conf/units/catalog.yaml")
+    expected = {
+        (task, str(subject), str(session))
+        for task in catalog.tasks
+        for subject, session in catalog.datasets[dataset].targets.all
+    }
+    assert units == expected
+    assert len(result.stdout.splitlines()) == len(units) == 15 * pair_count
+    assert not output.exists()

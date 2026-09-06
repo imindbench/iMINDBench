@@ -7,7 +7,7 @@ set -euo pipefail
 exec python -m imindbench.launch \
   --dataset neuroprobev2 --experiment barista \
   --preprocessor laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore \
-  --set dataset.brain_area_key=localization_Destrieux --population barista \
+  --set dataset.brain_area_key=localization_Destrieux \
   --model barista --task onset --target sub1_sess1 \
   --device cuda:0 --paths local \
   "$@"

@@ -45,7 +45,7 @@ case "$family" in
     models=(linear_baseline)
     experiment=within_session
     preprocessor="laplacian_stft_brainbert_${rate}Hz"
-    options=(--population brainbert --set '++preprocessor.chain.4.device=${model.device}') ;;
+    options=(--unit-set all --set '++preprocessor.chain.4.device=${model.device}') ;;
   barista)
     models=(barista)
     experiment=barista
@@ -60,11 +60,11 @@ case "$family" in
         options=(--set dataset.brain_area_key=label_destrieux)
       fi
     fi
-    options+=(--population barista --task onset word_index volume) ;;
+    options+=(--unit-set all) ;;
   hold_in|multisource)
     models=(popt)
     experiment=decodable
-    options=(--population scaling --decodable-rule stft_or_htnet_500hz_val_mean0p60)
+    options=(--unit-set scaling --decodable-rule stft_or_htnet_500hz_val_mean0p60)
     if [[ $family == hold_in ]]; then
       options+=(--regime hold-in-session)
     fi ;;
