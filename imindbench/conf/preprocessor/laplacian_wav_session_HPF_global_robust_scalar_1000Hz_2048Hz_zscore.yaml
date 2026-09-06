@@ -1,4 +1,4 @@
-# BaRISTA waveform recipe for 1000 Hz BYD recordings, resampled to 2048 Hz.
+# BaRISTA waveform preprocessing for 1000 Hz BYD recordings, resampled to 2048 Hz.
 name: laplacian_wav
 chain:
   - name: time_domain_filter

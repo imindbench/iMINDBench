@@ -1,0 +1,17 @@
+# @package _global_
+dataset:
+  label_mode: binary
+  train_same_subject_only: false
+  train_sample_fraction: 1.0
+model:
+  max_iter: 100
+  patience: 15
+  scheduler:
+    warmup_steps: 500
+    step_size_updates: 95
+  upstream_lr: 0.001
+  head_lr: 0.001
+runner:
+  num_workers: 4
+  pin_memory: true
+  persistent_workers: true

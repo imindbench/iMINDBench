@@ -1,9 +1,11 @@
-# Experiment recipes
+# Running experiments
 
-`imindbench-grid` is the single grid entrypoint. It expands a named YAML recipe
-into ordinary `imindbench.run_eval` commands. By default it only prints commands;
-add `--execute` to run them serially. No Git checkout or writable installation is
-required. `python -m imindbench.launch` exposes the same interface.
+The Bash scripts select experiments and call a shared Python launcher for
+preview, execution and resume. Model, dataset, preprocessing and named
+experiment settings use ordinary Hydra configs under `imindbench/conf/`.
+`imindbench-grid` and `python -m imindbench.launch` expose the same execution
+interface for custom scripts and wheel installations. No Git checkout or
+writable installation is required.
 
 Choose the canonical dataset name: `neuroprobev2`, `kelesbyd2024`, or
 `berezutskayapippi2022`. Machine settings live in an external `paths/local.yaml`
@@ -36,17 +38,13 @@ forward arguments to the grid launcher. For example, append `--device cuda:1`
 to select another GPU or `--set model.max_iter=5` for a shorter trial. Use a new
 output root when changing settings.
 
-Model/task/target flags select lists, so repeating them adds selections. To
-replace these selections, edit a caller-owned copy of the example or use
-`imindbench-grid` directly with the recipe and selections you want. Shell scripts
-are source examples; wheel installations provide `imindbench-grid` directly.
-You can also copy the scripts elsewhere and invoke them by absolute path.
+Use `--task onset speech` or `--target sub1_sess1 sub3_sess0` to replace the
+example's task or target selection. The last occurrence of either flag wins.
+Shell scripts are source examples; wheel installations provide `imindbench-grid`
+directly. You can copy the scripts elsewhere and invoke them by absolute path.
 
 For BaRISTA, set `paths.barista_checkpoint` in your external paths file or append
 `--set paths.barista_checkpoint=/path/to/barista.ckpt`.
-
-The BaRISTA recipe uses a small target/task subset and sets explicit
-learning rates, worker settings and scheduler overrides.
 
 ## Optional models
 
@@ -111,51 +109,81 @@ Use the checkpoint required by your experiment and record its SHA256;
 substituting weights from the same model family can change the results.
 Start with Logistic, MLP, CNN or HTNet if the required checkpoint is unavailable.
 
-## Recipe catalog
+## Experiment families
 
-| Recipe | What it selects |
+Use one script for larger grids:
+
+```bash
+bash scripts/run_experiments.sh paper_multistft neuroprobev2 mlp \
+  --config-dir /path/to/config --output-root /path/to/runs/paper_mlp
+```
+
+Arguments are `FAMILY DATASET [MODEL|all]`, followed by launcher options. Omit the
+model, or use `all`, to select every model listed by that family. Models run
+serially, and the script stops if a model fails. Add `--count` to print one count
+per model, or `--limit N` to preview/run at most N evaluations **per model**.
+Use `--task` and `--target` to narrow the grid before counting or execution.
+
+| Family | Selections |
 | --- | --- |
-| `baselines` | Within-session; Neuroprobe Logistic/MLP/CNN/PopT; BYD/PIPPI PopT and native-rate HTNet |
-| `brainbert` | Within-session BrainBERT encoder + linear readout |
+| `baselines` | Neuroprobe Logistic/MLP/CNN/PopT; BYD/PIPPI PopT and native-rate HTNet |
+| `brainbert` | BrainBERT encoder + linear readout |
 | `barista` | Three tasks × two targets per dataset |
 | `stft_sweep` | Logistic; 3 windows × 3 overlaps × 4 frequency ceilings |
 | `sample_efficiency` | Neuroprobe Logistic/MLP/CNN/PopT, fractions 1 through 1/16 |
-| `hold_in` | PopT hold-in-session with packaged decodable population |
-| `multisource` | PopT with three-provider training, within-session evaluation |
+| `hold_in` | PopT hold-in-session with the decodable population |
+| `multisource` | PopT with three-provider training and within-session evaluation |
 | `paper_multistft` | Multi-STFT Logistic/MLP/CNN/PopT on three datasets |
 | `paper_brainbert_stft` | Single-STFT Logistic/MLP/CNN on three datasets; no encoder checkpoint |
-| `paper_htnet500` | HTNet with 15-second waveform context at 500 Hz on three datasets |
-| `paper_diver` | Frozen DIVER encoder with 15-second waveform context at 500 Hz on three datasets |
+| `paper_htnet500` | HTNet with 15-second waveform context at 500 Hz |
+| `paper_diver` | Frozen DIVER encoder with 15-second waveform context at 500 Hz |
 
-Use `baselines` for an introductory run. See
-[PAPER_COVERAGE.md](PAPER_COVERAGE.md) for the relationship between these recipes
-and paper experiments, including population and reproduction limits.
+[Paper coverage](PAPER_COVERAGE.md) maps these families to paper experiments.
+Shared tasks and target sets live in `conf/population/catalog.yaml`. Hold-in and
+multisource use `stft_or_htnet_500hz_val_mean0p60` for eligible targets and training;
+`--decodable-dir` selects a custom manifest directory instead. Tasks with no
+eligible targets are skipped. Dataset splits belong to the TorchBrain provider.
 
-Use repeated `--model`, `--task`, `--regime`, and `--target` flags to select a
-subset already present in a recipe. `--count` prints the count after filtering;
-`--limit N` selects the first N jobs in deterministic recipe order. Hold-in and
-multisource use the packaged `stft_or_htnet_500hz_val_mean0p60` population for
-both eligible targets and training; `--decodable-dir` selects a custom manifest
-directory. Dataset splits remain owned by the selected TorchBrain provider.
+## Custom experiments
 
-## Configuration variations
+Edit a caller-owned copy of a shell script to change model/preprocessor
+selections or sweep values. Training settings live in `conf/experiment/`, as
+native Hydra overrides of `model`, `dataset`, `runner` and `runtime`. For example,
+`paper_multistft/mlp.yaml` includes shared settings and specifies the MLP tolerance.
+These configs also work with the single-evaluation CLI as
+`experiment=paper_multistft/mlp`, alongside dataset/model/preprocessor selections.
 
-Recipes live in `imindbench/recipes/`; `datasets.yaml` supplies shared tasks and
-named target lists. Copy a recipe to a caller-owned YAML file and pass its path
-with `--recipe` to change model selections, preprocessors or sweep dimensions.
-Dataset-specific fields override recipe-wide `overrides`. Model entries may
-select a different preprocessor and override scalar model/dataset settings
-without changing identity or subset. Per-model settings override dataset-level
-settings, and caller `--set` tuning takes precedence. Sweep values are numeric Hydra scalar strings;
-labels form distinct output subdirectories.
+To define a new experiment, put a YAML file in your external config directory:
 
-Use `--set KEY=VALUE` for ordinary Hydra settings such as checkpoint paths,
-learning rates or logging. The launcher rejects overrides of identity fields,
-output directories and sweep dimensions, since those determine target filtering
-and output naming. Change those through recipe fields and selection flags.
-A custom recipe using an incompatible model/preprocessor combination will still
-fail the evaluation's runtime validation; previewing commands does not read data
-or establish scientific compatibility.
+```yaml
+# <config-dir>/experiment/my_trial.yaml
+# @package _global_
+model:
+  max_iter: 20
+  learning_rate: 0.001
+```
+
+A custom grid can select it directly:
+
+```bash
+imindbench-grid --dataset neuroprobev2 --model mlp \
+  --preprocessor laplacian_multi_stft_2048Hz --experiment my_trial \
+  --task onset --target sub1_sess1 --device cuda:0 \
+  --config-dir /path/to/config --paths local --output-root /path/to/runs/my_trial
+```
+
+Use `--set KEY=VALUE` for tuning. These values override the experiment config;
+when a key is repeated, the last value wins. Identity fields such as model,
+dataset, task, subset and output routing use explicit selection flags. For
+parameter grids, add `--sweep model.learning_rate=0.001,0.0001`; repeated `--sweep`
+flags form a Cartesian product. Sweep keys must be distinct from `--set` keys,
+and sweep values must be numeric scalars. Change the built-in sweep dimensions
+in a script copy rather than adding a second sweep for the same key.
+
+The family script fixes dataset/model/preprocessor/experiment selection through
+its positional arguments. For different combinations, use a custom script or
+the shared launcher directly. Configuration composition does not load data or
+establish scientific compatibility; runtime validation still applies.
 
 ## Outputs and resume
 
@@ -174,3 +202,8 @@ Completed results must match their completion hash to be skipped. Failed jobs
 without results can be retried; changed/unverified result files are rejected.
 Results without a completion record cannot be resumed; use a fresh root. Changing inputs in place is not detected by command
 identity, so keep inputs immutable and retain their hashes separately.
+
+The family scripts group outputs by family/dataset, model/preprocessor, subset,
+sweep settings, regime, task and target. Use a fresh output root when changing
+experiment settings or switching from the former recipe-based commands: their
+saved command records differ, so they cannot be resumed with these commands.

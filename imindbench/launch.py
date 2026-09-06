@@ -1,4 +1,4 @@
-"""Plan or execute recipe grids through the installed evaluation entrypoint."""
+"""Preview or execute an evaluation grid using ordinary Hydra configurations."""
 
 import argparse
 import fcntl
@@ -11,14 +11,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+from hydra import compose, initialize_config_dir
+from hydra.errors import HydraException
 from omegaconf import OmegaConf
 
-RECIPE_DIR = Path(__file__).resolve().parent / "recipes"
+CONF_DIR = Path(__file__).resolve().parent / "conf"
 POPULATION_DIR = Path(__file__).resolve().parent / "decodable_subject_sessions"
 IDENTITY_KEYS = {
     "paths",
     "dataset",
     "model",
+    "experiment",
     "model.name",
     "preprocessor",
     "dataset.provider",
@@ -34,232 +37,173 @@ IDENTITY_KEYS = {
 }
 
 
-def _mapping(value, name):
-    if not isinstance(value, dict):
-        raise ValueError(f"{name} must be a mapping")
-    return value
+def _validate_name(value, name):
+    if not isinstance(value, str) or not re.fullmatch(r"[\w-]+", value):
+        raise ValueError(f"{name} must be a simple name")
 
 
-def _names(value, name):
+def _validate_names(value, name, allow_empty=False):
     if (
         not isinstance(value, list)
-        or not value
-        or not all(
-            isinstance(item, str) and re.fullmatch(r"[\w-]+", item) for item in value
-        )
+        or (not value and not allow_empty)
+        or any(not isinstance(v, str) or not re.fullmatch(r"[\w-]+", v) for v in value)
         or len(value) != len(set(value))
     ):
-        raise ValueError(f"{name} must be a nonempty list of unique names")
-    return value
-
-
-def _slug(value, name):
-    if not isinstance(value, str) or not re.fullmatch(r"[\w-]+", value):
-        raise ValueError(f"{name} must be a simple name, not a path")
-    return value
+        raise ValueError(f"{name} must contain unique names")
 
 
 def _select(available, requested, name):
     if requested is None:
         return available
-    if len(requested) != len(set(requested)) or set(requested) - set(available):
-        raise ValueError(f"{name} must select unique entries from {available}")
-    return [item for item in available if item in requested]
+    _validate_names(requested, name)
+    if set(requested) - set(available):
+        raise ValueError(f"{name} must select entries from {available}")
+    return requested
 
 
 def _value(value):
-    # Preserve historical sweep spellings (e.g. 0.50) as Hydra scalar literals.
     if isinstance(value, str) and re.fullmatch(r"[\w./:+-]+", value):
         return value
     return json.dumps(value, allow_nan=False)
 
 
-def load_recipe(recipe_name, dataset):
-    """Load and validate one dataset's recipe at the configuration boundary."""
-    path = Path(recipe_name)
-    if path.suffix != ".yaml":
-        path = RECIPE_DIR / f"{_slug(recipe_name, 'recipe')}.yaml"
-    recipe = _mapping(
-        OmegaConf.to_container(OmegaConf.load(path), resolve=True), "recipe"
-    )
-    allowed = {
-        "description",
-        "target_set",
-        "overrides",
-        "datasets",
-        "tasks",
-        "decodable_rule",
-        "device_overrides",
-    }
-    if set(recipe) - allowed:
-        raise ValueError(f"Unknown recipe fields: {set(recipe) - allowed}")
-    datasets = _mapping(recipe.get("datasets"), "datasets")
-    if dataset not in datasets:
-        raise ValueError(f"Recipe supports datasets: {list(datasets)}")
-    selected = _mapping(datasets[dataset], "dataset recipe")
-    allowed = {
-        "dataset",
-        "output_group",
-        "preprocessor",
-        "models",
-        "regimes",
-        "overrides",
-        "output_subset",
-        "sweep",
-    }
-    if set(selected) - allowed:
-        raise ValueError(f"Unknown dataset recipe fields: {set(selected) - allowed}")
-    for key in ("dataset", "output_group", "preprocessor"):
-        _slug(selected.get(key), key)
-    _names(selected.get("regimes"), "regimes")
-    models = _mapping(selected.get("models"), "models")
-    _names(list(models), "models")
-    for model, settings in models.items():
-        if set(_mapping(settings, model)) - {"preprocessor", "overrides"}:
-            raise ValueError(f"{model} supports preprocessor and model overrides only")
-        for key, value in _mapping(settings.get("overrides", {}), model).items():
-            # Model-specific tuning must not replace grid identity or routing.
-            if (
-                not isinstance(key, str)
-                or not re.fullmatch(r"(?:\+\+)?(?:model|dataset)\.[\w.]+", key)
-                or key.lstrip("+") in IDENTITY_KEYS | {"dataset.subset_tier"}
-                or (value is not None and type(value) not in (str, bool, int, float))
-            ):
-                raise ValueError(f"Invalid model-specific override: {key}")
-            _value(value)
-        if "preprocessor" in settings:
-            _slug(settings["preprocessor"], "model preprocessor")
-    shared = OmegaConf.to_container(
-        OmegaConf.load(RECIPE_DIR / "datasets.yaml"), resolve=True
-    )
-    target_set = _slug(recipe.get("target_set"), "target_set")
-    targets = shared["datasets"][dataset]["targets"][target_set]
-    if (
-        not isinstance(targets, list)
-        or not targets
-        or not all(
-            isinstance(pair, list)
-            and len(pair) == 2
-            and all(type(v) is int and v >= 0 for v in pair)
-            for pair in targets
-        )
-    ):
-        raise ValueError("Targets must be nonnegative integer [subject, session] pairs")
-    if len(targets) != len({tuple(pair) for pair in targets}):
-        raise ValueError("Duplicate target pairs")
-    tasks = _names(recipe.get("tasks", shared["tasks"]), "tasks")
-    overrides = {
-        **_mapping(recipe.get("overrides", {}), "overrides"),
-        **_mapping(selected.get("overrides", {}), "dataset overrides"),
-    }
-    for key, value in overrides.items():
-        if not isinstance(key, str) or not re.fullmatch(r"\+{0,2}[\w.]+", key):
-            raise ValueError(f"Invalid override key: {key}")
-        if key.lstrip("+") in IDENTITY_KEYS - {"dataset.subset_tier"}:
-            raise ValueError(f"Recipe overrides cannot replace launcher field {key}")
-        if value is not None and type(value) not in (str, bool, int, float):
-            raise ValueError(f"Override {key} must be a scalar")
-        _value(value)
-    output_subset = selected.get("output_subset", False)
-    if not isinstance(output_subset, bool):
-        raise ValueError("output_subset must be boolean")
-    if output_subset:
-        _slug(overrides.get("dataset.subset_tier"), "dataset.subset_tier")
-    sweep = _mapping(selected.get("sweep", {}), "sweep")
-    for key, dimension in sweep.items():
-        if (
-            not isinstance(key, str)
-            or not re.fullmatch(r"[\w.]+", key)
-            or key in IDENTITY_KEYS
-            or key in overrides
-        ):
-            raise ValueError(f"Sweep key collides with identity/overrides: {key}")
-        dimension = _mapping(dimension, "sweep dimension")
-        if set(dimension) != {"label", "values"}:
-            raise ValueError("Sweep dimensions require label and values")
-        _slug(dimension["label"], "sweep label")
-        values = dimension["values"]
-        if (
-            not isinstance(values, list)
-            or not values
-            or not all(
-                isinstance(v, str) and re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", v)
-                for v in values
-            )
-            or len(set(values)) != len(values)
-        ):
-            raise ValueError("Sweep values must be unique numeric Hydra scalar strings")
-    device_overrides = recipe.get("device_overrides", [])
-    if not isinstance(device_overrides, list) or any(
-        not isinstance(key, str)
-        or not re.fullmatch(r"\+{0,2}preprocessor\.[\w.]+\.device", key)
-        for key in device_overrides
-    ):
-        raise ValueError("device_overrides must name preprocessor device fields")
-    rule = recipe.get("decodable_rule")
-    if rule is not None:
-        _slug(rule, "decodable_rule")
-    return {
-        **selected,
-        "tasks": tasks,
-        "targets": targets,
-        "overrides": overrides,
-        "sweep": sweep,
-        "device_overrides": device_overrides,
-        "decodable_rule": rule,
-    }
+def _key_value(override):
+    key, separator, value = override.partition("=")
+    if not separator or not re.fullmatch(r"\+{0,2}[\w.]+", key):
+        raise ValueError("Overrides must be Hydra key=value assignments")
+    if key.lstrip("+") in IDENTITY_KEYS or key.lstrip("+").startswith("hydra."):
+        raise ValueError(f"Use selection flags or experiment configs to change {key}")
+    return key, value
 
 
 def build_commands(args):
-    """Expand the selected grid without creating output directories or running jobs."""
-    recipe = load_recipe(args.recipe, args.dataset)
-    output = args.output_root.expanduser().resolve()
-    models = _select(list(recipe["models"]), args.model, "model")
-    regimes = _select(recipe["regimes"], args.regime, "regime")
-    tasks = _select(recipe["tasks"], args.task, "task")
-    targets = {f"sub{s}_sess{t}": (s, t) for s, t in recipe["targets"]}
-    selected_targets = _select(list(targets), args.target, "target")
-    config_args = []
-    if args.config_dir is not None:
-        if not args.config_dir.is_dir():
-            raise ValueError("config-dir must be an existing directory")
-        config_args = ["--config-dir", str(args.config_dir.resolve())]
-    _slug(args.paths, "paths")
+    """Expand one model's task/target/sweep grid without creating any outputs."""
+    for name in (
+        "dataset",
+        "model",
+        "preprocessor",
+        "paths",
+        "population",
+        "output_group",
+    ):
+        _validate_name(getattr(args, name), name)
+    if args.experiment is not None:
+        if not re.fullmatch(r"[\w-]+(?:/[\w-]+)*", args.experiment):
+            raise ValueError("experiment must name a Hydra config group entry")
     if not re.fullmatch(r"cpu|cuda(?::[0-9]+)?", args.device):
         raise ValueError("device must be cpu, cuda or cuda:<index>")
+    if args.limit is not None and args.limit < 1:
+        raise ValueError("limit must be positive")
+    config_args = []
+    searchpath = []
+    if args.config_dir is not None:
+        config_dir = args.config_dir.expanduser().resolve()
+        if not config_dir.is_dir():
+            raise ValueError("config-dir must be an existing directory")
+        config_args = ["--config-dir", str(config_dir)]
+        searchpath = [f"hydra.searchpath={json.dumps(['file://' + str(config_dir)])}"]
+    base = {
+        "paths": args.paths,
+        "dataset": args.dataset,
+        "model": args.model,
+        "preprocessor": args.preprocessor,
+        "dataset.regime": args.regime,
+        "wandb.enabled": False,
+        "runtime.overwrite": False,
+        "runtime.verbose": True,
+    }
+    if args.experiment is not None:
+        base["experiment"] = args.experiment
+    if args.subset is not None:
+        _validate_name(args.subset, "subset")
+        base["dataset.subset_tier"] = args.subset
+    if args.model != "logistic":
+        base["model.device"] = args.device
+    if args.regime not in {"hold-in-session", "hold-out-session"}:
+        base["dataset.train_same_subject_only"] = False
+    decodable_dir = args.decodable_dir
+    if decodable_dir is None and args.decodable_rule is not None:
+        _validate_name(args.decodable_rule, "decodable-rule")
+        decodable_dir = POPULATION_DIR / args.decodable_rule
+    if decodable_dir is not None:
+        decodable_dir = decodable_dir.expanduser().resolve()
+        base["paths.decodable_subject_sessions_dir"] = str(decodable_dir)
+    # CLI tuning comes after the experiment config; repeated --set uses the last value.
     extra = {}
-    controlled = IDENTITY_KEYS | set(recipe["sweep"]) | set(recipe["device_overrides"])
     for override in args.overrides:
-        key, separator, value = override.partition("=")
-        if not separator or not re.fullmatch(r"\+{0,2}[\w.]+", key):
-            raise ValueError("--set expects a Hydra key=value override")
-        plain = key.lstrip("+")
-        if plain in {k.lstrip("+") for k in controlled} or plain.startswith("hydra."):
-            raise ValueError(f"Use recipe fields/selection flags to change {key}")
-        if plain in extra:
-            raise ValueError(f"Duplicate --set override: {key}")
-        extra[plain] = (key, value)
-    population = None
-    decodable_dir = None
-    if recipe["decodable_rule"] is not None:
-        decodable_dir = (
-            args.decodable_dir or POPULATION_DIR / recipe["decodable_rule"]
-        ).resolve()
-        population = json.loads((decodable_dir / f"{args.dataset}.json").read_text())
-        population = _mapping(population.get("tasks"), "population tasks")
-        for task in tasks:
-            task_population = _mapping(population.get(task), f"population task {task}")
-            _names(
-                task_population.get("subject_sessions"), "population subject_sessions"
+        key, value = _key_value(override)
+        extra[key.lstrip("+")] = (key, value)
+    sweeps = {}
+    for dimension in args.sweep:
+        key, value = _key_value(dimension)
+        values = value.split(",")
+        if (
+            key.lstrip("+") in extra
+            or key in sweeps
+            or not re.fullmatch(r"[\w.]+", key)
+            or not all(re.fullmatch(r"[0-9]+(?:\.[0-9]+)?", v) for v in values)
+            or len(values) != len(set(values))
+        ):
+            raise ValueError(
+                "Sweep keys must be unique and separate from --set; values must be unique numeric scalars"
             )
-    elif args.decodable_dir is not None:
-        raise ValueError("decodable-dir requires a recipe with decodable_rule")
-    sweep = recipe["sweep"]
-    combinations = list(itertools.product(*(dim["values"] for dim in sweep.values())))
+        sweeps[key] = values
+    tokens = [
+        f"{key}={_value(value)}" for key, value in base.items() if key not in extra
+    ]
+    tokens += [f"{key}={value}" for key, value in extra.values()]
+    # Ask Hydra for provider identity instead of inferring it from a config filename.
+    with initialize_config_dir(config_dir=str(CONF_DIR), version_base="1.1"):
+        cfg = compose(config_name="config", overrides=[*tokens, *searchpath])
+    provider = cfg.dataset.provider
+    _validate_name(provider, "dataset.provider")
+    catalog = OmegaConf.to_container(
+        OmegaConf.load(CONF_DIR / "population/catalog.yaml"), resolve=True
+    )
+    _validate_names(catalog["tasks"], "tasks")
+    tasks = _select(catalog["tasks"], args.task, "task")
+    pairs = catalog["datasets"][provider]["targets"][args.population]
+    if (
+        not isinstance(pairs, list)
+        or not pairs
+        or any(
+            not isinstance(pair, list)
+            or len(pair) != 2
+            or any(type(v) is not int or v < 0 for v in pair)
+            for pair in pairs
+        )
+        or len({tuple(pair) for pair in pairs}) != len(pairs)
+    ):
+        raise ValueError(
+            "Population targets must be unique nonnegative [subject, session] pairs"
+        )
+    targets = {f"sub{s}_sess{t}": (s, t) for s, t in pairs}
+    selected_targets = _select(list(targets), args.target, "target")
+    population = None
+    if decodable_dir is not None:
+        population = json.loads((decodable_dir / f"{provider}.json").read_text())[
+            "tasks"
+        ]
+        if not isinstance(population, dict):
+            raise ValueError("Decodable population tasks must be a mapping")
+        for task in tasks:
+            if (
+                not isinstance(population.get(task), dict)
+                or "subject_sessions" not in population[task]
+            ):
+                raise ValueError(
+                    f"Decodable population must list subject_sessions for {task}"
+                )
+            # A task with no decodable recordings contributes zero jobs.
+            _validate_names(
+                population[task]["subject_sessions"],
+                "decodable targets",
+                allow_empty=True,
+            )
     commands = []
-    run_paths = set()
-    for model, regime, values, task, target in itertools.product(
-        models, regimes, combinations, tasks, selected_targets
+    output = args.output_root.expanduser().resolve()
+    for values, task, target in itertools.product(
+        itertools.product(*sweeps.values()), tasks, selected_targets
     ):
         if (
             population is not None
@@ -267,73 +211,41 @@ def build_commands(args):
         ):
             continue
         subject, session = targets[target]
-        preprocessor = recipe["models"][model].get(
-            "preprocessor", recipe["preprocessor"]
-        )
-        overrides = {
-            "paths": args.paths,
-            "dataset": recipe["dataset"],
-            "dataset.regime": regime,
-            "dataset.task": task,
-            "dataset.test_subject": subject,
-            "dataset.test_session": session,
-            "model": model,
-            "preprocessor": preprocessor,
-            **recipe["overrides"],
-            **recipe["models"][model].get("overrides", {}),
-            **dict(zip(sweep, values, strict=True)),
-            "wandb.enabled": False,
-            "runtime.overwrite": False,
-            "runtime.verbose": True,
-        }
-        if model != "logistic":
-            overrides["model.device"] = args.device
-        for key in recipe["device_overrides"]:
-            overrides[key] = args.device
-        if decodable_dir is not None:
-            overrides["paths.decodable_subject_sessions_dir"] = str(decodable_dir)
-        # Session-only policy does not apply to within-session/subject holdout.
-        if regime not in {"hold-in-session", "hold-out-session"}:
-            overrides["dataset.train_same_subject_only"] = False
-        run_dir = output / recipe["output_group"]
-        if recipe.get("output_subset", False):
-            run_dir /= overrides["dataset.subset_tier"]
-        run_dir /= f"{model}_{preprocessor}"
-        if sweep:
+        run_dir = output / args.output_group / f"{args.model}_{args.preprocessor}"
+        if args.subset is not None:
+            run_dir /= args.subset
+        if sweeps:
             run_dir /= "_".join(
-                dim["label"] + value.replace(".", "p")
-                for dim, value in zip(sweep.values(), values, strict=True)
+                key.replace(".", "-") + "=" + value
+                for key, value in zip(sweeps, values, strict=True)
             )
-        run_dir = run_dir / regime / task / target
-        if run_dir in run_paths:
-            raise ValueError(f"Duplicate output directory: {run_dir}")
-        run_paths.add(run_dir)
-        overrides["hydra.run.dir"] = str(run_dir)
-        tokens = [
-            f"{key}={_value(value)}"
-            for key, value in overrides.items()
-            if key.lstrip("+") not in extra
+        run_dir = run_dir / args.regime / task / target
+        job_tokens = [
+            *tokens,
+            *(f"{key}={value}" for key, value in zip(sweeps, values, strict=True)),
+            f"dataset.task={task}",
+            f"dataset.test_subject={subject}",
+            f"dataset.test_session={session}",
+            f"hydra.run.dir={_value(str(run_dir))}",
         ]
-        tokens.extend(f"{key}={value}" for key, value in extra.values())
-        command = [sys.executable, "-m", "imindbench.run_eval", *config_args, *tokens]
         commands.append(
             {
-                "command": command,
+                "command": [
+                    sys.executable,
+                    "-m",
+                    "imindbench.run_eval",
+                    *config_args,
+                    *job_tokens,
+                ],
                 "run_dir": str(run_dir),
                 "result": str(
                     run_dir / f"population_btbank{subject}_{session}_{task}.json"
                 ),
             }
         )
-    if args.limit is not None:
-        if args.limit < 1:
-            raise ValueError("limit must be positive")
-        commands = commands[: args.limit]
     if not commands:
-        raise ValueError(
-            "No evaluations remain after recipe selections/population filtering"
-        )
-    return commands
+        raise ValueError("No evaluations remain after selections/population filtering")
+    return commands[: args.limit] if args.limit is not None else commands
 
 
 def _completion_matches(job):
@@ -413,30 +325,57 @@ def execute_commands(commands, output_root, resume=False):
 
 
 def parser():
-    """Return the public launcher argument parser."""
+    """Return the shared grid execution interface used by the shell scripts."""
     result = argparse.ArgumentParser(description=__doc__)
+    result.add_argument("--dataset", required=True, help="Hydra dataset config")
+    result.add_argument("--model", required=True, help="Hydra model config")
     result.add_argument(
-        "--recipe", required=True, help="Packaged recipe name or custom .yaml file"
+        "--preprocessor", required=True, help="Hydra preprocessor config"
     )
-    result.add_argument(
-        "--dataset", required=True, help="Canonical dataset/provider name"
-    )
+    result.add_argument("--experiment", help="Optional Hydra experiment config")
     result.add_argument("--output-root", type=Path, required=True)
-    result.add_argument("--paths", default="example", help="Hydra paths group")
+    result.add_argument("--output-group", default="evaluations")
+    result.add_argument("--paths", default="example")
     result.add_argument("--config-dir", type=Path)
     result.add_argument("--device", default="cuda:0")
-    result.add_argument("--model", action="append")
-    result.add_argument("--regime", action="append")
-    result.add_argument("--task", action="append")
-    result.add_argument("--target", action="append", help="Select sub<S>_sess<T>")
-    result.add_argument("--decodable-dir", type=Path)
+    result.add_argument(
+        "--regime",
+        default="within-session",
+        choices=[
+            "within-session",
+            "hold-in-session",
+            "hold-out-session",
+            "hold-out-subject",
+        ],
+    )
+    result.add_argument(
+        "--population", default="all", help="Named task/target catalog population"
+    )
+    result.add_argument("--subset", help="Dataset subset tier")
+    result.add_argument(
+        "--task",
+        nargs="+",
+        help="Select tasks; the last --task replaces earlier selections",
+    )
+    result.add_argument(
+        "--target",
+        nargs="+",
+        help="Select sub<S>_sess<T>; the last --target replaces earlier selections",
+    )
+    result.add_argument(
+        "--decodable-dir",
+        type=Path,
+        help="Custom population directory; takes precedence over --decodable-rule",
+    )
+    result.add_argument(
+        "--decodable-rule", help="Packaged decodable population directory"
+    )
+    result.add_argument("--sweep", action="append", default=[], metavar="KEY=V1,V2")
     result.add_argument(
         "--set", dest="overrides", action="append", default=[], metavar="KEY=VALUE"
     )
     result.add_argument("--limit", type=int)
-    result.add_argument(
-        "--count", action="store_true", help="Print only the planned evaluation count"
-    )
+    result.add_argument("--count", action="store_true")
     result.add_argument(
         "--execute", action="store_true", help="Execute; default only prints commands"
     )
@@ -467,7 +406,7 @@ def main():
                 f"{len(commands)} evaluations; dry run (nothing executed)",
                 file=sys.stderr,
             )
-    except (ValueError, KeyError, OSError) as exc:
+    except (ValueError, KeyError, OSError, HydraException) as exc:
         print(f"Grid error: {exc}", file=sys.stderr)
         return 2
     return 0

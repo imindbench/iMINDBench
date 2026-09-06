@@ -116,3 +116,6 @@ def test_release_allowlist_excludes_private_verification_material(tmp_path):
     assert not any("parity" in name or "reference.json" in name for name in names)
     assert "config/torch_brain_dependency.json" in names
     assert "scripts/build_submission.py" in names
+    assert "scripts/run_experiments.sh" in names
+    assert "imindbench/conf/experiment/paper_multistft/mlp.yaml" in names
+    assert not any(name.startswith("imindbench/recipes/") for name in names)

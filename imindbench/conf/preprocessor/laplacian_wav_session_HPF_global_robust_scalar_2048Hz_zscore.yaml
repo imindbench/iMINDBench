@@ -1,4 +1,4 @@
-# BaRISTA waveform recipe: filter each recording's windows together, then apply
+# BaRISTA waveform preprocessing: filter each recording's windows together, then apply
 # robust global scaling and per-window channel/time z-scoring.
 name: laplacian_wav
 chain:

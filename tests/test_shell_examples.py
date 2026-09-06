@@ -78,3 +78,45 @@ def test_shell_example_previews_one_composable_evaluation(
     )
     assert invalid.returncode == 2
     assert "--resume requires --execute" in invalid.stderr
+
+
+def test_family_script_filters_models_and_replaces_task_selection(tmp_path):
+    result = subprocess.run(
+        [
+            "bash",
+            str(ROOT / "scripts/run_experiments.sh"),
+            "barista",
+            "neuroprobev2",
+            "barista",
+            "--paths",
+            "example",
+            "--task",
+            "speech",
+            "--target",
+            "sub1_sess1",
+            "--output-root",
+            str(tmp_path / "runs"),
+        ],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    assert len(result.stdout.splitlines()) == 1
+    assert "dataset.task=speech" in shlex.split(result.stdout.strip())
+    invalid = subprocess.run(
+        [
+            "bash",
+            str(ROOT / "scripts/run_experiments.sh"),
+            "paper_diver",
+            "neuroprobev2",
+            "mlp",
+            "--output-root",
+            str(tmp_path / "runs"),
+        ],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+    )
+    assert invalid.returncode == 2
+    assert "Model must be one of: diver" in invalid.stderr

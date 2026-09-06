@@ -12,7 +12,8 @@ Files are named by provider:
 - `berezutskayapippi2022.json`
 - `neuroprobev2.json`
 
-The `hold_in` and `multisource` recipes select this directory explicitly.
+The `hold_in` and `multisource` cases in `scripts/run_experiments.sh` select this
+directory explicitly.
 `imindbench-grid` filters evaluation targets before creating run directories and
 passes the same directory to training through
 `paths.decodable_subject_sessions_dir`. With

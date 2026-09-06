@@ -1,6 +1,7 @@
-"""Check recipe composition, grid selection and execution behavior."""
+"""Check native experiment configs, shell selections and shared grid execution."""
 
 import json
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -11,16 +12,21 @@ from hydra import compose, initialize_config_dir
 from imindbench import launch
 from imindbench.utils.pipeline_contracts import validate_eval_config
 
-CONF = Path(launch.__file__).parent / "conf"
+CONF = launch.CONF_DIR
+ROOT = Path(__file__).resolve().parents[1]
 
 
-def _args(recipe, dataset, *extra):
+def _args(*extra):
     return launch.parser().parse_args(
         [
-            "--recipe",
-            recipe,
             "--dataset",
-            dataset,
+            "neuroprobev2",
+            "--model",
+            "logistic",
+            "--preprocessor",
+            "laplacian_multi_stft_2048Hz",
+            "--experiment",
+            "baseline",
             "--output-root",
             "/runs",
             "--paths",
@@ -61,14 +67,33 @@ def _overrides(command):
         if family != "sample_efficiency" or dataset == "neuroprobev2"
     ],
 )
-def test_recipe_configs_compose_and_pass_runtime_contract(family, dataset):
-    jobs = launch.build_commands(_args(family, dataset, "--task", "onset"))
-    # Exercise every distinct model/preprocessor/sweep combination; target/fold
-    # population membership is checked separately without loading recordings.
+def test_family_shell_configs_compose_and_pass_runtime_contract(
+    tmp_path, family, dataset
+):
+    result = subprocess.run(
+        [
+            "bash",
+            str(ROOT / "scripts/run_experiments.sh"),
+            family,
+            dataset,
+            "--paths",
+            "example",
+            "--device",
+            "cpu",
+            "--task",
+            "onset",
+            "--output-root",
+            str(tmp_path / "runs"),
+        ],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
     seen = set()
     with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
-        for job in jobs:
-            overrides = job["command"][3:]
+        for line in result.stdout.splitlines():
+            overrides = shlex.split(line)[3:]
             signature = tuple(
                 v
                 for v in overrides
@@ -89,10 +114,22 @@ def test_recipe_configs_compose_and_pass_runtime_contract(family, dataset):
             if cfg.model.name == "htnet":
                 assert "wav" in _overrides(overrides)["preprocessor"]
     assert seen
+    assert not (tmp_path / "runs").exists()
 
 
 def test_population_filter_matches_manifest_and_dry_run_is_read_only(tmp_path):
-    args = _args("hold_in", "neuroprobev2")
+    args = _args(
+        "--model",
+        "popt",
+        "--experiment",
+        "decodable",
+        "--regime",
+        "hold-in-session",
+        "--population",
+        "scaling",
+        "--decodable-rule",
+        "stft_or_htnet_500hz_val_mean0p60",
+    )
     args.output_root = tmp_path / "runs"
     jobs = launch.build_commands(args)
     population = json.loads(
@@ -113,21 +150,52 @@ def test_population_filter_matches_manifest_and_dry_run_is_read_only(tmp_path):
     assert not args.output_root.exists()
 
 
+def test_empty_decodable_tasks_are_skipped(tmp_path):
+    (tmp_path / "neuroprobev2.json").write_text(
+        json.dumps(
+            {
+                "tasks": {
+                    "onset": {"subject_sessions": []},
+                    "speech": {"subject_sessions": ["sub1_sess1"]},
+                }
+            }
+        )
+    )
+    args = _args(
+        "--decodable-rule",
+        "stft_or_htnet_500hz_val_mean0p60",
+        "--decodable-dir",
+        str(tmp_path),
+        "--task",
+        "onset",
+        "speech",
+    )
+    jobs = launch.build_commands(args)
+    assert len(jobs) == 1
+    assert _overrides(jobs[0]["command"])["dataset.task"] == "speech"
+    args.task = ["onset"]
+    with pytest.raises(ValueError, match="No evaluations remain"):
+        launch.build_commands(args)
+
+
 def test_external_config_cli_composes_without_running_experiments(tmp_path):
     config = tmp_path / "config"
     (config / "paths").mkdir(parents=True)
+    (config / "experiment").mkdir()
     (config / "paths/local.yaml").write_text((CONF / "paths/example.yaml").read_text())
+    (config / "experiment/custom.yaml").write_text(
+        "# @package _global_\nmodel:\n  max_iter: 17\n"
+    )
     args = _args(
-        "baselines",
-        "neuroprobev2",
-        "--model",
-        "logistic",
         "--limit",
         "1",
         "--config-dir",
         str(config),
+        "--paths",
+        "local",
+        "--experiment",
+        "custom",
     )
-    args.paths = "local"
     args.output_root = tmp_path / "runs"
     job = launch.build_commands(args)[0]
     result = subprocess.run(
@@ -136,9 +204,10 @@ def test_external_config_cli_composes_without_running_experiments(tmp_path):
         capture_output=True,
         text=True,
         timeout=60,
+        check=True,
     )
-    assert result.returncode == 0, result.stderr
     assert "dataset_root: /path/to/brainsets/processed" in result.stdout
+    assert "max_iter: 17" in result.stdout
     assert not args.output_root.exists()
 
 
@@ -149,11 +218,48 @@ def test_external_config_cli_composes_without_running_experiments(tmp_path):
         "dataset.task=speech",
         "hydra.run.dir=/elsewhere",
         "runtime.overwrite=true",
+        "model.name=other",
+        "dataset.provider=other",
+        "dataset.subset_tier=full",
+        "model.device=cuda:1",
     ],
 )
 def test_identity_overrides_rejected(override):
     with pytest.raises(ValueError, match="selection flags"):
-        launch.build_commands(_args("baselines", "neuroprobev2", "--set", override))
+        launch.build_commands(_args("--set", override))
+
+
+def test_cli_tuning_overrides_native_experiment_settings():
+    args = _args(
+        "--model",
+        "mlp",
+        "--experiment",
+        "paper_multistft/mlp",
+        "--limit",
+        "1",
+        "--set",
+        "model.tol=0.02",
+        "--set",
+        "model.tol=0.03",
+    )
+    job = launch.build_commands(args)[0]
+    with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
+        cfg = compose(config_name="config", overrides=job["command"][3:])
+    assert cfg.model.tol == 0.03
+    assert cfg.runner.num_workers == 4
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        ["--sweep", "model.tol=0.1,0.1"],
+        ["--sweep", "model.tol=0.1,0.2", "--set", "model.tol=0.3"],
+        ["--limit", "0"],
+    ],
+)
+def test_ambiguous_or_invalid_grids_are_rejected(options):
+    with pytest.raises(ValueError):
+        launch.build_commands(_args(*options))
 
 
 def test_execution_resume_and_existing_run_preflight(tmp_path):
@@ -180,41 +286,3 @@ def test_execution_resume_and_existing_run_preflight(tmp_path):
     result.write_text("partial result")
     with pytest.raises(ValueError, match="Unverified or changed result"):
         launch.execute_commands([job], tmp_path, resume=True)
-
-
-@pytest.mark.parametrize(
-    "key", ["dataset.provider", "dataset.subset_tier", "model.name", "model.device"]
-)
-def test_model_overrides_cannot_change_grid_identity(tmp_path, key):
-    from omegaconf import OmegaConf
-
-    recipe = OmegaConf.load(launch.RECIPE_DIR / "paper_multistft.yaml")
-    recipe.datasets.neuroprobev2.models.logistic.overrides[key] = "changed"
-    path = tmp_path / "recipe.yaml"
-    OmegaConf.save(recipe, path)
-    with pytest.raises(ValueError, match="Invalid model-specific override"):
-        launch.load_recipe(str(path), "neuroprobev2")
-
-
-def test_model_settings_are_scoped_and_caller_tuning_takes_precedence(tmp_path):
-    from omegaconf import OmegaConf
-
-    recipe = OmegaConf.load(launch.RECIPE_DIR / "baselines.yaml")
-    recipe.datasets.neuroprobev2.models.mlp.overrides = {
-        "model.learning_rate": 0.02,
-        "dataset.max_train_samples_per_subject": 12,
-    }
-    path = tmp_path / "recipe.yaml"
-    OmegaConf.save(recipe, path)
-    args = _args(str(path), "neuroprobev2", "--model", "mlp", "--limit", "1")
-    first = _overrides(launch.build_commands(args)[0]["command"])
-    assert first["model.learning_rate"] == "0.02"
-    assert first["dataset.max_train_samples_per_subject"] == "12"
-    args.overrides = ["model.learning_rate=0.03"]
-    tuned = _overrides(launch.build_commands(args)[0]["command"])
-    assert tuned["model.learning_rate"] == "0.03"
-    args.model = ["logistic"]
-    args.overrides = []
-    other = _overrides(launch.build_commands(args)[0]["command"])
-    assert "model.learning_rate" not in other
-    assert other["dataset.max_train_samples_per_subject"] == "auto"

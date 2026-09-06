@@ -43,7 +43,6 @@ imindbench = [
     "conf/**/*.yaml",
     "decodable_subject_sessions/**/*.json",
     "decodable_subject_sessions/**/README.md",
-    "recipes/*.yaml",
 ]
 
 [tool.ruff]

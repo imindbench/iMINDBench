@@ -71,9 +71,19 @@ one NeuroprobeV2 onset evaluation; see [Experiments](docs/EXPERIMENTS.md) for
 customization and larger grids. The same scripts are exercised by the test suite
 in dry-run mode, without downloading data or training models.
 
+For a paper experiment grid, select its family, dataset and model:
+
+```bash
+bash scripts/run_experiments.sh paper_multistft neuroprobev2 mlp \
+  --config-dir /path/to/config --output-root /path/to/runs/paper_mlp
+```
+
+Omit the model to include all models in that family. This also previews by
+default; add `--execute` when ready.
+
 ## Experiments and reproduction
 
-- [Experiments](docs/EXPERIMENTS.md): three examples, checkpoints, recipes and launcher options.
+- [Experiments](docs/EXPERIMENTS.md): shell examples, checkpoints and experiment settings.
 - [Paper coverage](docs/PAPER_COVERAGE.md): experiment mapping and reproduction limits.
 
 All eight model families are retained: Logistic, Linear/BrainBERT, MLP, CNN,
