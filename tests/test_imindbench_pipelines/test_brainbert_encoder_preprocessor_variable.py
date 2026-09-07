@@ -103,3 +103,42 @@ def test_chunked_and_non_chunked_transform_samples_match():
 
     for a, b in zip(chunked_out, non_chunked_out, strict=False):
         np.testing.assert_allclose(a["x"], b["x"], atol=1e-6)
+
+
+@pytest.mark.parametrize("rate", [1000, 2048])
+@pytest.mark.parametrize("pool", ["", "region_pool_"])
+@pytest.mark.parametrize(
+    "device,cuda_available,expected",
+    [
+        ("cpu", True, "cpu"),
+        ("cuda:1", True, "cuda:1"),
+        ("auto", False, "cpu"),
+        ("auto", True, "cuda"),
+    ],
+)
+def test_encoder_inherits_model_device(
+    rate, pool, device, cuda_available, expected, monkeypatch
+):
+    from pathlib import Path
+
+    from hydra import compose, initialize_config_dir
+
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: cuda_available)
+    conf = Path(__file__).resolve().parents[2] / "imindbench/conf"
+    with initialize_config_dir(config_dir=str(conf), version_base="1.1"):
+        cfg = compose(
+            config_name="config",
+            overrides=[
+                "paths=example",
+                "model=linear_baseline",
+                f"model.device={device}",
+                f"preprocessor=laplacian_stft_brainbert_{pool}{rate}Hz",
+                "paths.brainbert_checkpoint=/tmp/brainbert.pth",
+            ],
+        )
+    encoder = BrainBERTEncoderPreprocessor(cfg.preprocessor.chain[4])
+    assert encoder.device == expected
+    assert encoder.upstream_ckpt == "/tmp/brainbert.pth"
+    assert (
+        encoder.model is None
+    )  # Device selection does not load weights or allocate a GPU.

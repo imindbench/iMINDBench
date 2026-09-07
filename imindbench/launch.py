@@ -2,7 +2,6 @@
 
 import argparse
 import fcntl
-import hashlib
 import itertools
 import json
 import re
@@ -155,6 +154,12 @@ def build_commands(args):
     # Ask Hydra for provider identity instead of inferring it from a config filename.
     with initialize_config_dir(config_dir=str(CONF_DIR), version_base="1.1"):
         cfg = compose(config_name="config", overrides=[*tokens, *searchpath])
+    # Transfer presets share their training manifest with target selection.
+    # Explicit --decodable-dir/--decodable-rule still take precedence above.
+    if decodable_dir is None and cfg.dataset.get(
+        "train_decodable_subject_sessions_only", False
+    ):
+        decodable_dir = Path(cfg.paths.decodable_subject_sessions_dir)
     provider = cfg.dataset.provider
     _validate_name(provider, "dataset.provider")
     catalog = OmegaConf.to_container(
@@ -248,57 +253,23 @@ def build_commands(args):
     return commands[: args.limit] if args.limit is not None else commands
 
 
-def _completion_matches(job):
-    result = Path(job["result"])
-    marker = Path(job["run_dir"]) / "completed.sha256"
-    return (
-        result.is_file()
-        and marker.is_file()
-        and (
-            hashlib.sha256(result.read_bytes()).hexdigest()
-            == marker.read_text().strip()
-        )
-    )
-
-
-def execute_commands(commands, output_root, resume=False):
-    """Run serially, with exclusive ownership and explicit same-command resume."""
+def execute_commands(commands, output_root):
+    """Run serially, skipping evaluations whose output JSON already exists."""
     output_root.mkdir(parents=True, exist_ok=True)
     with (output_root / ".grid.lock").open("a") as lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
             raise ValueError("Another grid is active in this output root") from exc
-        # Check every destination before launching anything. Existing results from
-        # older shell scripts must use a fresh root, not provenance-free resume.
-        for job in commands:
-            directory = Path(job["run_dir"])
-            if directory.exists() and any(directory.iterdir()):
-                record = directory / "launch.json"
-                if (
-                    not resume
-                    or not record.is_file()
-                    or json.loads(record.read_text()) != job["command"]
-                ):
-                    raise ValueError(
-                        f"Existing run requires --resume and the same launch.json: {directory}"
-                    )
-            if Path(job["result"]).exists() and not _completion_matches(job):
-                raise ValueError(
-                    f"Unverified or changed result; inspect it and use a fresh output root: {directory}"
-                )
         failures = 0
         for job in commands:
             directory = Path(job["run_dir"])
-            if resume and _completion_matches(job):
-                print(f"Skipping completed run: {directory}")
+            if Path(job["result"]).is_file():
+                print(f"Skipping existing result: {job['result']}")
                 continue
             directory.mkdir(parents=True, exist_ok=True)
             record = directory / "launch.json"
-            if not record.exists():
-                with record.open("x") as stream:
-                    json.dump(job["command"], stream, indent=2)
-                    stream.write("\n")
+            record.write_text(json.dumps(job["command"], indent=2) + "\n")
             print(shlex.join(job["command"]), flush=True)
             with (directory / "launcher.log").open("a") as log:
                 result = subprocess.run(
@@ -318,9 +289,6 @@ def execute_commands(commands, output_root, resume=False):
                     failures += 1
                     print(f"Invalid result JSON: {job['result']}", file=sys.stderr)
                     continue
-                marker = directory / "completed.sha256.tmp"
-                marker.write_text(hashlib.sha256(payload).hexdigest() + "\n")
-                marker.replace(directory / "completed.sha256")
         return failures
 
 
@@ -375,37 +343,33 @@ def parser():
         "--set", dest="overrides", action="append", default=[], metavar="KEY=VALUE"
     )
     result.add_argument("--limit", type=int)
-    result.add_argument("--count", action="store_true")
-    result.add_argument(
-        "--execute", action="store_true", help="Execute; default only prints commands"
+    preview = result.add_mutually_exclusive_group()
+    preview.add_argument("--count", action="store_true")
+    preview.add_argument(
+        "--dry-run", action="store_true", help="Print commands without executing"
     )
-    result.add_argument("--resume", action="store_true")
     return result
 
 
 def main():
     args = parser().parse_args()
     try:
-        if args.count and args.execute:
-            raise ValueError("--count cannot be combined with --execute")
-        if args.resume and not args.execute:
-            raise ValueError("--resume requires --execute")
         commands = build_commands(args)
         if args.count:
             print(len(commands))
-        elif args.execute:
-            failures = execute_commands(
-                commands, args.output_root.expanduser().resolve(), args.resume
-            )
-            print(f"{len(commands)} planned evaluations; {failures} failed")
-            return int(failures > 0)
-        else:
+        elif args.dry_run:
             for job in commands:
                 print(shlex.join(job["command"]))
             print(
                 f"{len(commands)} evaluations; dry run (nothing executed)",
                 file=sys.stderr,
             )
+        else:
+            failures = execute_commands(
+                commands, args.output_root.expanduser().resolve()
+            )
+            print(f"{len(commands)} planned evaluations; {failures} failed")
+            return int(failures > 0)
     except (ValueError, KeyError, OSError, HydraException) as exc:
         print(f"Grid error: {exc}", file=sys.stderr)
         return 2

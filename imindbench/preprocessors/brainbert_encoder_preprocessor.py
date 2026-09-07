@@ -23,6 +23,8 @@ class BrainBERTEncoderPreprocessor(BasePreprocessor):
         super().__init__(cfg)
         self.upstream_ckpt = cfg.upstream_ckpt
         self.device = cfg.get("device", "cpu")
+        if self.device == "auto":
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.clip_emb_k = cfg.get("clip_emb_k", 5)
         # Pooling mode for encoder outputs: mean, max, or raw.
         self.pool = cfg.get("pool", "mean")

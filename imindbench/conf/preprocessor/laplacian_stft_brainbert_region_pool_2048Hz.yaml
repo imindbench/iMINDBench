@@ -24,7 +24,7 @@ chain:
 
   - name: brainbert_encoder
     upstream_ckpt: ${paths.brainbert_checkpoint}
-    device: cuda:0
+    device: ${model.device}
     clip_emb_k: 5
     pool: mean
     max_memory_fraction: 0.5

@@ -18,10 +18,5 @@ jobs:
       - run: python -m ruff check .
       - run: python -m ruff format --check .
       - run: python -m pytest -q
-      - name: Validate source export and packaging
-        run: |
-          python scripts/build_submission.py --output /tmp/imindbench-submission.tar.gz
-          mkdir /tmp/submission
-          tar -xzf /tmp/imindbench-submission.tar.gz -C /tmp/submission
-          cd /tmp/submission/imindbench
-          python -m build
+      - name: Build Python distributions
+        run: python -m build

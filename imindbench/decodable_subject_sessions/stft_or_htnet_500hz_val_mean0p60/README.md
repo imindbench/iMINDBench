@@ -1,4 +1,4 @@
-# Decodable subject/session population
+# Decodable subject/session units
 
 These provider manifests use the `stft_or_htnet_500hz_val_mean0p60` rule:
 a subject/session is eligible when the maximum of its best STFT validation
@@ -12,8 +12,8 @@ Files are named by provider:
 - `berezutskayapippi2022.json`
 - `neuroprobev2.json`
 
-The `hold_in` and `multisource` cases in `scripts/run_experiments.sh` select this
-directory explicitly.
+The `within-dataset` and `multi-dataset` cases in `scripts/run_experiments.sh` (relative
+to the project root) select this named rule.
 `imindbench-grid` filters evaluation targets before creating run directories and
 passes the same directory to training through
 `paths.decodable_subject_sessions_dir`. With

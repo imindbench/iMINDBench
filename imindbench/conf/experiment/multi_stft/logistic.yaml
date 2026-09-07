@@ -1,6 +1,6 @@
 # @package _global_
 defaults:
-- /experiment/paper_multistft/common
+- /experiment/multi_stft/common
 - _self_
 model:
   tol: 0.001

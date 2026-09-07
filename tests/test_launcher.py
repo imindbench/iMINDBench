@@ -51,49 +51,45 @@ def _overrides(command):
     [
         (family, dataset)
         for family in [
-            "baselines",
-            "brainbert",
-            "barista",
-            "stft_sweep",
-            "hold_in",
-            "multisource",
+            "within_session",
+            "within_dataset",
+            "multi_dataset",
             "sample_efficiency",
-            "paper_multistft",
-            "paper_brainbert_stft",
-            "paper_htnet500",
-            "paper_diver",
         ]
         for dataset in ["neuroprobev2", "kelesbyd2024", "berezutskayapippi2022"]
         if family != "sample_efficiency" or dataset == "neuroprobev2"
     ],
 )
 def test_family_shell_configs_compose_and_pass_runtime_contract(
-    tmp_path, family, dataset
+    tmp_path, dataset_script, dataset_pairings, family, dataset
 ):
-    result = subprocess.run(
-        [
-            "bash",
-            str(ROOT / "scripts/run_experiments.sh"),
-            family,
-            dataset,
-            "--paths",
-            "example",
-            "--device",
-            "cpu",
-            "--task",
-            "onset",
-            "--output-root",
-            str(tmp_path / "runs"),
-        ],
-        cwd=tmp_path,
-        text=True,
-        capture_output=True,
-        check=True,
-    )
+    if family == "within_session":
+        settings = dataset_pairings(dataset)
+    elif family in {"within_dataset", "multi_dataset"}:
+        settings = [{"MODEL": "popt"}]
+    else:
+        settings = [{}]
+    lines = []
+    for selection in settings:
+        script = dataset_script(
+            family=family,
+            dataset=dataset,
+            TASKS=["onset"],
+            **selection,
+        )
+        result = subprocess.run(
+            ["bash", script], cwd=tmp_path, text=True, capture_output=True, check=True
+        )
+        lines.extend(result.stdout.splitlines())
     seen = set()
     with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
-        for line in result.stdout.splitlines():
-            overrides = shlex.split(line)[3:]
+        for line in lines:
+            command = shlex.split(line)
+            assert command[3] == "--config-dir"
+            overrides = command[5:]
+            # Compose API takes config search paths as overrides, unlike the CLI.
+            search_path = json.dumps("file://" + command[4])
+            overrides.append(f"hydra.searchpath=[{search_path}]")
             signature = tuple(
                 v
                 for v in overrides
@@ -111,6 +107,28 @@ def test_family_shell_configs_compose_and_pass_runtime_contract(
             seen.add(signature)
             cfg = compose(config_name="config", overrides=overrides)
             validate_eval_config(cfg)
+            expected_cap = (
+                "auto" if family in {"within_dataset", "multi_dataset"} else None
+            )
+            assert cfg.dataset.max_train_samples_per_subject == expected_cap
+            assert cfg.dataset.train_decodable_subject_sessions_only == (
+                family in {"within_dataset", "multi_dataset"}
+            )
+            if cfg.model.name == "linear_baseline":
+                assert cfg.preprocessor.chain[4].device == cfg.model.device == "cpu"
+                assert (
+                    cfg.preprocessor.chain[4].upstream_ckpt
+                    == "/path/to/stft_large_pretrained.pth"
+                )
+            if cfg.model.name == "diver":
+                assert cfg.model.upstream_ckpt == "/path/to/ieeg_checkpoint.pt"
+                assert cfg.model.model_dir == "/path/to/diver_shapes"
+            if cfg.model.name == "barista":
+                assert cfg.dataset.brain_area_key == (
+                    "localization_Destrieux"
+                    if dataset == "neuroprobev2"
+                    else "label_destrieux"
+                )
             if cfg.model.name == "htnet":
                 assert "wav" in _overrides(overrides)["preprocessor"]
     assert seen
@@ -125,10 +143,6 @@ def test_population_filter_matches_manifest_and_dry_run_is_read_only(tmp_path):
         "decodable",
         "--regime",
         "hold-in-session",
-        "--unit-set",
-        "scaling",
-        "--decodable-rule",
-        "stft_or_htnet_500hz_val_mean0p60",
     )
     args.output_root = tmp_path / "runs"
     jobs = launch.build_commands(args)
@@ -150,6 +164,38 @@ def test_population_filter_matches_manifest_and_dry_run_is_read_only(tmp_path):
     assert not args.output_root.exists()
 
 
+def test_baseline_preset_does_not_cap_training_samples():
+    with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
+        cfg = compose(
+            config_name="config",
+            overrides=[
+                "paths=example",
+                "model=logistic",
+                "preprocessor=laplacian_multi_stft_2048Hz",
+                "experiment=baseline",
+            ],
+        )
+    assert cfg.dataset.max_train_samples_per_subject is None
+
+
+def test_transfer_preset_composes_with_packaged_manifest():
+    with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
+        cfg = compose(
+            config_name="config",
+            overrides=[
+                "paths=example",
+                "model=popt",
+                "preprocessor=laplacian_multi_stft_2048Hz",
+                "experiment=decodable",
+                "dataset.regime=hold-in-session",
+            ],
+        )
+    validate_eval_config(cfg)
+    assert Path(cfg.paths.decodable_subject_sessions_dir) == (
+        launch.POPULATION_DIR / "stft_or_htnet_500hz_val_mean0p60"
+    )
+
+
 def test_empty_decodable_tasks_are_skipped(tmp_path):
     (tmp_path / "neuroprobev2.json").write_text(
         json.dumps(
@@ -162,6 +208,10 @@ def test_empty_decodable_tasks_are_skipped(tmp_path):
         )
     )
     args = _args(
+        "--model",
+        "popt",
+        "--experiment",
+        "decodable",
         "--decodable-rule",
         "stft_or_htnet_500hz_val_mean0p60",
         "--decodable-dir",
@@ -234,7 +284,7 @@ def test_cli_tuning_overrides_native_experiment_settings():
         "--model",
         "mlp",
         "--experiment",
-        "paper_multistft/mlp",
+        "multi_stft/mlp",
         "--limit",
         "1",
         "--set",
@@ -262,7 +312,7 @@ def test_ambiguous_or_invalid_grids_are_rejected(options):
         launch.build_commands(_args(*options))
 
 
-def test_execution_resume_and_existing_run_preflight(tmp_path):
+def test_execution_skips_existing_results_and_retries_missing_results(tmp_path):
     result = tmp_path / "job" / "population.json"
     command = [
         sys.executable,
@@ -273,16 +323,59 @@ def test_execution_resume_and_existing_run_preflight(tmp_path):
     assert launch.execute_commands([job], tmp_path) == 0
     assert result.is_file()
     before = result.stat().st_mtime_ns
-    assert launch.execute_commands([job], tmp_path, resume=True) == 0
+    assert launch.execute_commands([job], tmp_path) == 0
     assert result.stat().st_mtime_ns == before
-    with pytest.raises(ValueError, match="Existing run"):
-        launch.execute_commands([job], tmp_path)
     different = {
         **job,
         "command": [sys.executable, "-c", "raise AssertionError('must not run')"],
     }
-    with pytest.raises(ValueError, match="same launch.json"):
-        launch.execute_commands([different], tmp_path, resume=True)
-    result.write_text("partial result")
-    with pytest.raises(ValueError, match="Unverified or changed result"):
-        launch.execute_commands([job], tmp_path, resume=True)
+    # Existing JSONs from older scripts need neither launch metadata nor checksums.
+    (result.parent / "launch.json").unlink()
+    assert launch.execute_commands([different], tmp_path) == 0
+    assert result.stat().st_mtime_ns == before
+    assert not (result.parent / "completed.sha256").exists()
+
+    # An interrupted evaluation with logs but no result is run from the beginning.
+    result.unlink()
+    assert launch.execute_commands([job], tmp_path) == 0
+    assert result.read_text() == "{}"
+    assert json.loads((result.parent / "launch.json").read_text()) == command
+
+
+@pytest.mark.parametrize("mode", [None, "--dry-run", "--count"])
+def test_cli_executes_by_default_with_explicit_preview_modes(
+    tmp_path, monkeypatch, mode
+):
+    result = tmp_path / "job" / "population.json"
+    job = {
+        "command": [
+            sys.executable,
+            "-c",
+            f"from pathlib import Path; Path({str(result)!r}).write_text('{{}}')",
+        ],
+        "run_dir": str(result.parent),
+        "result": str(result),
+    }
+    argv = [
+        "imindbench-grid",
+        "--dataset",
+        "neuroprobev2",
+        "--model",
+        "logistic",
+        "--preprocessor",
+        "laplacian_multi_stft_2048Hz",
+        "--output-root",
+        str(tmp_path),
+    ]
+    if mode:
+        argv.append(mode)
+    monkeypatch.setattr(sys, "argv", argv)
+    monkeypatch.setattr(launch, "build_commands", lambda args: [job])
+    assert launch.main() == 0
+    assert result.exists() == (mode is None)
+    if mode is None:
+        before = result.stat().st_mtime_ns
+        assert launch.main() == 0
+        assert result.stat().st_mtime_ns == before
+    else:
+        assert not result.parent.exists()

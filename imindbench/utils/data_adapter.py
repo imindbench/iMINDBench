@@ -127,7 +127,7 @@ LEGACY_COORDS_TYPE_TO_FRAME: dict[str, str] = {
 
 # Audited (profile, declared frame, provider frame) exceptions. DIVER's published
 # Brain TreeBank results used raw LIP coordinates despite the nonexistent btb_xyz
-# declaration, so this no-transform exception preserves them. See docs/DECISIONS.md.
+# declaration, so this no-transform exception preserves them.
 LEGACY_FRAME_PASSTHROUGH: frozenset[tuple[str, str, str]] = frozenset(
     {
         ("diver_mni", "btb_xyz", "btb_lip"),

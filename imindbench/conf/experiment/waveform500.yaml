@@ -4,7 +4,7 @@ dataset:
   coordinate_profile: popt_lip
   train_same_subject_only: false
   train_sample_fraction: 1.0
-  max_train_samples_per_subject: auto
+  max_train_samples_per_subject: null
   train_decodable_subject_sessions_only: false
   uniquify_channel_ids_with_subject: true
   uniquify_channel_ids_with_session: true

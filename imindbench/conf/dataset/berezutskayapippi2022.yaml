@@ -2,7 +2,7 @@
 root: ${paths.dataset_root}
 dirname: berezutskaya_pippi_2022
 provider: berezutskayapippi2022
-subset_tier: full  # full|high-cov|low-cov
+subset_tier: high-cov  # full|high-cov|low-cov
 label_mode: binary  # binary|multiclass
 task: speech
 test_subject: 1

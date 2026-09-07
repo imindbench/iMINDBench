@@ -26,10 +26,8 @@ class FineTuneModel(nn.Module):
             if params.mup_weights:
 
                 def _backbone_builder(w: int, d: int):
-                    self.backbone = DIVER(
-                        d_model=w, e_layer=d, mup=True, patch_size=patch_size
-                    )
-                    return self.backbone
+                    # Shape probes must not replace the backbone being initialized.
+                    return DIVER(d_model=w, e_layer=d, mup=True, patch_size=patch_size)
 
                 identifier = "DIVER_iEEG_FINAL_model"
                 if patch_size == 50:

@@ -1,7 +1,6 @@
 """Exercise the user-facing Bash examples without data or training."""
 
 import shlex
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -14,161 +13,167 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.mark.parametrize(
-    "script,model,device",
-    [
-        ("run_logistic.sh", "logistic", "cpu"),
-        ("run_mlp.sh", "mlp", "cuda:0"),
-        ("run_barista.sh", "barista", "cuda:0"),
-    ],
+    "dataset", ["neuroprobev2", "kelesbyd2024", "berezutskayapippi2022"]
 )
-def test_shell_example_previews_one_composable_evaluation(
-    tmp_path, script, model, device
+def test_dataset_default_covers_all_tasks_targets_and_pairings(
+    tmp_path, dataset_script, dataset
 ):
-    # Copy outside the checkout to exercise quoting and independence from Git/cwd.
-    example = tmp_path / f"copied {script}"
-    shutil.copyfile(ROOT / "scripts" / script, example)
-    outside = tmp_path / "outside"
-    outside.mkdir()
-    config = tmp_path / "local config"
-    (config / "paths").mkdir(parents=True)
-    shutil.copyfile(
-        ROOT / "imindbench/conf/paths/example.yaml", config / "paths/local.yaml"
-    )
-    output = tmp_path / "run outputs"
-    args = [
-        "bash",
-        str(example),
-        "--config-dir",
-        str(config),
-        "--output-root",
-        str(output),
-        "--set",
-        "model.max_iter=5",
-    ]
-    preview = subprocess.run(
-        args, cwd=outside, text=True, capture_output=True, check=True
-    )
-    assert "1 evaluations; dry run" in preview.stderr
-    assert len(preview.stdout.splitlines()) == 1
-    command = shlex.split(preview.stdout.strip())
-    # Compose the exact emitted command through the real CLI without reading data.
-    composed = subprocess.run(
-        [*command, "--cfg", "job", "--resolve"],
-        cwd=outside,
-        text=True,
-        capture_output=True,
-        check=True,
-    )
-    cfg = OmegaConf.create(composed.stdout)
-    validate_eval_config(cfg)
-    assert cfg.dataset.task == "onset"
-    assert cfg.dataset.test_subject == 1
-    assert cfg.dataset.test_session == 1
-    assert cfg.model.name == model
-    assert cfg.model.max_iter == 5
-    assert cfg.model.device == device
-    assert not output.exists()
-
-    count = subprocess.run(
-        [*args, "--count"], cwd=outside, text=True, capture_output=True, check=True
-    )
-    assert count.stdout.strip() == "1"
-    invalid = subprocess.run(
-        [*args, "--resume"], cwd=outside, text=True, capture_output=True
-    )
-    assert invalid.returncode == 2
-    assert "--resume requires --execute" in invalid.stderr
-
-
-def test_family_script_filters_models_and_replaces_task_selection(tmp_path):
+    script = dataset_script(dataset=dataset)
     result = subprocess.run(
-        [
-            "bash",
-            str(ROOT / "scripts/run_experiments.sh"),
-            "barista",
-            "neuroprobev2",
-            "barista",
-            "--paths",
-            "example",
-            "--task",
-            "speech",
-            "--target",
-            "sub1_sess1",
-            "--output-root",
-            str(tmp_path / "runs"),
-        ],
-        cwd=tmp_path,
-        text=True,
-        capture_output=True,
-        check=True,
+        ["bash", script], cwd=tmp_path, text=True, capture_output=True, check=True
     )
-    assert len(result.stdout.splitlines()) == 1
-    assert "dataset.task=speech" in shlex.split(result.stdout.strip())
-    invalid = subprocess.run(
-        [
-            "bash",
-            str(ROOT / "scripts/run_experiments.sh"),
-            "paper_diver",
-            "neuroprobev2",
-            "mlp",
-            "--output-root",
-            str(tmp_path / "runs"),
-        ],
-        cwd=tmp_path,
-        text=True,
-        capture_output=True,
-    )
-    assert invalid.returncode == 2
-    assert "Model must be one of: diver" in invalid.stderr
-
-
-@pytest.mark.parametrize(
-    "dataset,pair_count",
-    [
-        ("neuroprobev2", 5),
-        ("kelesbyd2024", 29),
-        ("berezutskayapippi2022", 5),
-    ],
-)
-@pytest.mark.parametrize("family", ["barista", "brainbert"])
-def test_pretrained_families_cover_all_tasks_and_targets(
-    tmp_path, dataset, pair_count, family
-):
-    output = tmp_path / "runs"
-    result = subprocess.run(
-        [
-            "bash",
-            str(ROOT / "scripts/run_experiments.sh"),
-            family,
-            dataset,
-            "--paths",
-            "example",
-            "--output-root",
-            str(output),
-        ],
-        cwd=tmp_path,
-        text=True,
-        capture_output=True,
-        check=True,
-    )
-    units = set()
-    for line in result.stdout.splitlines():
-        fields = dict(
-            token.split("=", 1) for token in shlex.split(line) if "=" in token
-        )
-        units.add(
-            (
-                fields["dataset.task"],
-                fields["dataset.test_subject"],
-                fields["dataset.test_session"],
-            )
-        )
     catalog = OmegaConf.load(ROOT / "imindbench/conf/units/catalog.yaml")
-    expected = {
+    expected_units = {
         (task, str(subject), str(session))
         for task in catalog.tasks
         for subject, session in catalog.datasets[dataset].targets.all
     }
-    assert units == expected
-    assert len(result.stdout.splitlines()) == len(units) == 15 * pair_count
-    assert not output.exists()
+    rate = 1000 if dataset == "kelesbyd2024" else 2048
+    spectral = f"laplacian_multi_stft_{rate}Hz"
+    expected_pairings = {("logistic", spectral)}
+    actual = set()
+    for line in result.stdout.splitlines():
+        fields = dict(
+            token.split("=", 1) for token in shlex.split(line) if "=" in token
+        )
+        assert fields["dataset"] == dataset
+        assert fields["dataset.regime"] == "within-session"
+        actual.add(
+            (
+                (fields["model"], fields["preprocessor"]),
+                (
+                    fields["dataset.task"],
+                    fields["dataset.test_subject"],
+                    fields["dataset.test_session"],
+                ),
+            )
+        )
+    assert actual == {
+        (pairing, unit) for pairing in expected_pairings for unit in expected_units
+    }
+    assert len(result.stdout.splitlines()) == len(actual)
+    assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("family", ["within_dataset", "multi_dataset"])
+@pytest.mark.parametrize(
+    "dataset", ["neuroprobev2", "kelesbyd2024", "berezutskayapippi2022"]
+)
+def test_optional_transfer_uses_main_cohort(tmp_path, dataset_script, family, dataset):
+    import json
+
+    script = dataset_script(dataset=dataset, family=family, MODEL="popt")
+    result = subprocess.run(
+        ["bash", script], text=True, capture_output=True, check=True
+    )
+    manifest = json.loads(
+        (
+            ROOT
+            / "imindbench/decodable_subject_sessions/stft_or_htnet_500hz_val_mean0p60"
+            / f"{dataset}.json"
+        ).read_text()
+    )
+    expected = {
+        (task, target)
+        for task, values in manifest["tasks"].items()
+        for target in values["subject_sessions"]
+    }
+    actual = set()
+    for line in result.stdout.splitlines():
+        fields = dict(
+            token.split("=", 1) for token in shlex.split(line) if "=" in token
+        )
+        actual.add(
+            (
+                fields["dataset.task"],
+                f"sub{fields['dataset.test_subject']}_sess{fields['dataset.test_session']}",
+            )
+        )
+        assert fields["dataset"] == (
+            dataset if family == "within_dataset" else f"{dataset}_multi_dataset_train"
+        )
+        assert fields["dataset.regime"] == (
+            "hold-in-session" if family == "within_dataset" else "within-session"
+        )
+    assert actual == expected
+    assert len(result.stdout.splitlines()) == len(expected)
+    assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("model", ["logistic", "mlp", "cnn", "popt"])
+def test_neuroprobe_sample_efficiency_covers_models_units_and_fractions(
+    tmp_path, dataset_script, model
+):
+    script = dataset_script(
+        family="sample_efficiency", MODEL=model, EXPERIMENT=f"multi_stft/{model}"
+    )
+    result = subprocess.run(
+        ["bash", script], text=True, capture_output=True, check=True
+    )
+    catalog = OmegaConf.load(ROOT / "imindbench/conf/units/catalog.yaml")
+    expected = {
+        (model, fraction, task, str(subject), str(session))
+        for fraction in ["1.0", "0.5", "0.25", "0.125", "0.0625"]
+        for task in catalog.tasks
+        for subject, session in catalog.datasets.neuroprobev2.targets.all
+    }
+    actual = set()
+    paths = set()
+    for line in result.stdout.splitlines():
+        fields = dict(
+            token.split("=", 1) for token in shlex.split(line) if "=" in token
+        )
+        actual.add(
+            tuple(
+                fields[key]
+                for key in [
+                    "model",
+                    "dataset.train_sample_fraction",
+                    "dataset.task",
+                    "dataset.test_subject",
+                    "dataset.test_session",
+                ]
+            )
+        )
+        paths.add(fields["hydra.run.dir"])
+    assert actual == expected
+    assert len(paths) == len(expected) == len(result.stdout.splitlines())
+    assert not (tmp_path / "runs").exists()
+
+
+@pytest.mark.parametrize("model_name", ["logistic", "mlp", "cnn", "htnet_500Hz"])
+def test_waveform_baselines_accept_500hz_inputs(model_name):
+    import numpy as np
+    from hydra import compose, initialize_config_dir
+
+    from imindbench.models import build_model
+
+    with initialize_config_dir(
+        config_dir=str(ROOT / "imindbench/conf"), version_base="1.1"
+    ):
+        cfg = compose(
+            config_name="config",
+            overrides=[
+                "paths=example",
+                "dataset=neuroprobev2",
+                f"model={model_name}",
+                "preprocessor=laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz",
+                "experiment=waveform500",
+                "model.device=cpu",
+            ],
+        )
+    validate_eval_config(cfg)
+    model = build_model(cfg.model)
+    # One-second windows at 500 Hz, after waveform preprocessing.
+    x = np.random.default_rng(42).normal(size=(8, 3, 500)).astype(np.float32)
+    y = np.array([0, 1] * 4)
+    if model_name == "logistic":
+        batch = model.prepare_batch({"x": x, "y": y})
+        model.fit(batch["x"], batch["y"])
+        probabilities = model.predict_proba(batch["x"])
+    else:
+        model.build_model(x.shape[1:], 2, device="cpu")
+        probabilities = model.predict_proba(x)
+    assert probabilities.shape == (8, 2)
+    assert np.isfinite(probabilities).all()
+    np.testing.assert_allclose(probabilities.sum(axis=1), 1, atol=1e-6)

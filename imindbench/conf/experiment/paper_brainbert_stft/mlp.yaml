@@ -1,6 +1,0 @@
-# @package _global_
-defaults:
-- /experiment/paper_brainbert_stft/common
-- _self_
-model:
-  tol: 1.0e-08

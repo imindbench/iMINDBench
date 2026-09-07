@@ -1,5 +1,12 @@
 # @package _global_
+# Prepared Destrieux metadata uses different field names across providers.
+barista_brain_area_keys:
+  neuroprobe2025: localization_Destrieux
+  neuroprobev2: localization_Destrieux
+  kelesbyd2024: label_destrieux
+  berezutskayapippi2022: label_destrieux
 dataset:
+  brain_area_key: ${barista_brain_area_keys.${dataset.provider}}
   label_mode: binary
   train_same_subject_only: false
   train_sample_fraction: 1.0

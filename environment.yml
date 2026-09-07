@@ -8,5 +8,5 @@ dependencies:
   - setuptools>=80
 
 # Install the reviewed TorchBrain dependency, then this package as documented
-# in README.md. Use `python -m pip install '.[paper]'` for the full model stack.
+# in README.md. Use `python -m pip install -e '.[models]'` for the full model stack.
 # pyproject.toml is the single source of Python runtime dependency constraints.
