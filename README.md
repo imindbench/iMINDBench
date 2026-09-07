@@ -18,10 +18,10 @@ python -m pip install -e '.[models]'
 python -m pip check
 ```
 
-This installs the software dependencies for the included models. Keep this
-editable checkout to change code or configs without reinstalling. Installation
-requires internet access and Git; GPU models need a compatible CUDA runtime.
-Pretrained weights are downloaded separately using the table below.
+- Includes the software dependencies for all bundled models.
+- The editable installation lets you change code or configs without reinstalling.
+- Requires internet access and Git; GPU models also need a compatible CUDA runtime.
+- Obtain pretrained weights separately; see [Pretrained weights](#pretrained-weights).
 
 ### 2. Prepare data
 
@@ -31,9 +31,9 @@ The first pipeline step is **`brainsets prepare <dataset>`**:
 brainsets prepare neuroprobe_2025 --raw-dir /path/to/raw --processed-dir /path/to/processed
 ```
 
-Replace `/path/to/...` with your own absolute paths outside the checkout.
-Preparation downloads recordings and builds a separate environment for each
-pipeline's dependencies. Allow sufficient storage and follow the dataset's terms.
+- Replace `/path/to/...` with absolute paths outside the checkout.
+- Preparation downloads recordings and creates an environment for each pipeline.
+- Allow sufficient storage and follow the dataset's terms.
 
 | Dataset | `brainsets prepare` name | Evaluation name | Benchmark subject/session pairs |
 | --- | --- | --- | ---: |
@@ -77,16 +77,19 @@ Remote logging is disabled by default. For full experiments, edit a dataset scri
 
 ## Evaluate the complete benchmark
 
-Open the script for your dataset and choose `MODEL`, `PREPROCESSOR` and
-`EXPERIMENT` from its commented compatibility table. The default is Logistic
-with multi-STFT inputs. Edit `CONFIG_DIR`, `OUTPUT_ROOT`, `TASKS` and `TARGETS`;
-each file lists all benchmark subject/session pairs and all 15 tasks.
-Configure pretrained checkpoints and model settings in YAML before launching.
-Set `popt_checkpoint`, `brainbert_checkpoint`, or `barista_checkpoint` in
-`paths/local.yaml`. Edit model settings in `imindbench/conf/model/<MODEL>.yaml`
-and training overrides in the selected `imindbench/conf/experiment/<EXPERIMENT>.yaml`;
-experiment values take precedence over model values. BrainBERT automatically
-uses the model device.
+Open the script for your dataset. Each file lists all benchmark subject/session
+pairs and all 15 tasks; the default model is Logistic with multi-STFT inputs.
+
+| Setting | Where to edit it |
+| --- | --- |
+| Model and inputs | `MODEL`, `PREPROCESSOR` and `EXPERIMENT` in the script; use its compatibility table |
+| Paths and evaluation selection | `CONFIG_DIR`, `OUTPUT_ROOT`, `TASKS` and `TARGETS` in the script |
+| Pretrained checkpoints | `popt_checkpoint`, `brainbert_checkpoint` or `barista_checkpoint` in `paths/local.yaml` |
+| Model settings | `imindbench/conf/model/<MODEL>.yaml` |
+| Training overrides | `imindbench/conf/experiment/<EXPERIMENT>.yaml`; these take precedence over model settings |
+
+BrainBERT automatically uses the model device. After configuring the selected
+model, run the dataset script:
 
 ```bash
 bash scripts/run_neuroprobev2.sh
@@ -113,15 +116,12 @@ the table in the script. Supported inputs are:
 | BaRISTA | Session waveforms with its normalization |
 | DIVER-1 | Filtered 500 Hz waveforms with 15-second context |
 
-Each experiment command includes the shared constants directly; there is no
-`launch` wrapper. The within-session command runs below the settings. Within-dataset
-and multi-dataset commands are commented out below it. Uncomment a whole command
-to include it, and comment out the within-session command to run only another
-family. Every block uses `MODEL` and `PREPROCESSOR`. For within-dataset or
-multi-dataset, select `MODEL=popt` and its matching multi-STFT preprocessor;
-these blocks use `TRANSFER_EXPERIMENT=decodable` for the Main cohort and sample
-cap. Within-session and sample efficiency use `EXPERIMENT`. NeuroprobeV2 also
-includes a commented sample-efficiency command.
+- **Within-session is enabled by default.** The other experiment commands are commented out.
+- Uncomment a whole command to include it; comment out within-session to run only another family.
+- Every block uses `MODEL` and `PREPROCESSOR` directly.
+- For transfer, select `MODEL=popt` and its matching multi-STFT input.
+  Transfer blocks use `TRANSFER_EXPERIMENT=decodable`; within-session and sample
+  efficiency use `EXPERIMENT`.
 
 | Family block | Scope |
 | --- | --- |
@@ -130,68 +130,84 @@ includes a commented sample-efficiency command.
 | `multi_dataset` | PopT-v2; training across all three datasets, Main cohort |
 | `sample_efficiency` | NeuroprobeV2 only; selected Logistic, MLP, CNN or PopT-v2 on multi-STFT, training fractions 1, 1/2, 1/4, 1/8, 1/16 |
 
-Within-session covers 15 tasks × 39 benchmark subject/session pairs across the
-three scripts: **585 evaluations per model/input pairing**, before folds.
-This is the benchmark selection, not every recording in the original datasets.
-No decodable-target filter is applied. Coverage tests compare the scripts' lists
-with [units/catalog.yaml](imindbench/conf/units/catalog.yaml).
+**Complete within-session coverage: 15 tasks × 39 subject/session pairs = 585
+evaluations per model/input pairing**, before folds.
+
+- Covers the benchmark selection, not every recording in the original datasets.
+- Applies no decodable-target filter.
+- Coverage tests compare the scripts with [units/catalog.yaml](imindbench/conf/units/catalog.yaml).
 
 <details>
 <summary>Smaller runs and cohort details</summary>
 
-For a smoke test, leave only the desired entries in `TASKS` and `TARGETS`.
-The scripts execute directly and skip evaluations whose output JSON exists.
-Keep at least one task and subject/session pair. Edit training settings such as
-`max_iter` in the selected model or experiment YAML. Keep checkpoint paths in
-`paths/local.yaml`, except DIVER's `upstream_ckpt` and `model_dir`, which belong
-in `imindbench/conf/model/diver.yaml`.
+**Smaller runs and settings**
 
-Waveform baselines use 15-second context for filtering, then crop to the target
-window, apply Laplacian referencing, downsample to 500 Hz and fit robust scaling
-on training data. Multi-STFT uses each dataset's native sampling rate.
+- For a smoke test, keep only the desired entries in `TASKS` and `TARGETS`.
+  Keep at least one task and subject/session pair.
+- Set training options such as `max_iter` in the model or experiment YAML.
+- Store checkpoint paths in `paths/local.yaml`. DIVER instead uses `upstream_ckpt`
+  and `model_dir` in `imindbench/conf/model/diver.yaml`.
+- Scripts run each enabled block serially and skip existing output JSONs.
+  If a block reports failures, the script stops before the next block.
+- Use a new output root after changing settings.
 
-The scripts inherit dataset defaults: NeuroprobeV2 `lite`, BYD `full`, and PIPPI
-`high-cov`, including DIVER. Subset tiers select eligible recordings and prepared
-splits; the task/target lists select the evaluation grid. For the listed PIPPI
-within-session targets, `high-cov` and `full` use identical splits and channels.
-Within-dataset and multi-dataset retain the validation-selected Main
-cohort for both targets and training. Dataset YAMLs default `train_decodable_subject_sessions_only` to `false`.
-The transfer blocks select the `decodable` preset, which sets it to `true`,
-supplies the standard manifest, and filters the script's target list per task. To use a
-custom cohort, add `--decodable-rule NAME` or `--decodable-dir /path/to/manifests`
-to that command. Within-dataset and multi-dataset also default to
-`dataset.max_train_samples_per_subject=auto`: each training subject/session is
-capped at the target session's training-sample count. Within-session and
-sample-efficiency presets leave this cap disabled; it is not a PopT-v2
-requirement. The loader calls within-dataset training `hold-in-session`.
+**Preprocessing**
 
-The scripts use the selected constants and the existing Python grid launcher
-for task/target expansion, execution and resume. Each enabled block runs serially;
-if it reports failures, the script stops before starting the next block. Use a new output root after changing settings.
+| Input | Processing |
+| --- | --- |
+| Multi-STFT | Uses the dataset's native sampling rate |
+| 500 Hz waveform baselines | Filter with 15-second context, crop to the target window, apply Laplacian referencing, downsample, and fit robust scaling on training data |
+
+**Dataset subsets**
+
+| Dataset | Default subset |
+| --- | --- |
+| NeuroprobeV2 | `lite` |
+| BYD | `full` |
+| PIPPI, including DIVER | `high-cov` |
+
+Subset tiers select eligible recordings and prepared splits; `TASKS` and `TARGETS`
+select the evaluation grid. For the listed PIPPI within-session targets,
+`high-cov` and `full` use identical splits and channels.
+
+**Transfer cohorts and sample caps**
+
+| Setting | Within-session / sample efficiency | Within-dataset / multi-dataset |
+| --- | --- | --- |
+| Training cohort filter | Disabled | Validation-selected Main cohort |
+| Evaluation targets | Listed targets | Listed targets filtered per task by the standard manifest |
+| Per-subject/session training cap | Disabled | `auto`: capped at the target session's training-sample count |
+
+The `decodable` transfer preset supplies the manifest, sets
+`train_decodable_subject_sessions_only=true`, and enables the sample cap.
+The cap is an experiment setting, not a PopT-v2 requirement.
+
+- To use a custom cohort, add `--decodable-rule NAME` or
+  `--decodable-dir /path/to/manifests` to the transfer command.
+- The loader calls within-dataset training `hold-in-session`.
 
 </details>
 
 ## Pretrained weights
 
-Download weights outside the checkout and configure their absolute paths.
-The install step above already includes the model dependencies.
+Store model weights outside the checkout and configure their absolute paths.
+Model dependencies are included in the installation above.
 
 | Model | Weights | Configuration |
 | --- | --- | --- |
-| PopT-v2 | Public multi-STFT checkpoint link pending verification. The [original PopT release](https://huggingface.co/PopulationTransformer/popt_brainbert_stft) uses BrainBERT features and is **not a verified substitute**. | `paths.popt_checkpoint` |
+| PopT-v2 | Model weights will be shared upon request. | `paths.popt_checkpoint` |
 | BrainBERT | [Official weights ZIP](https://drive.google.com/file/d/14ZBOafR7RJ4A6TsurOXjFVMXiVH6Kd_Q/view?usp=sharing), linked by the [upstream project](https://github.com/czlwang/BrainBERT#using-brainbert-embeddings); extract `stft_large_pretrained.pth` | `paths.brainbert_checkpoint` |
-| BaRISTA | [Official checkpoints](https://huggingface.co/ShanechiLab/BaRISTA/tree/main/pretrained_models); select `parcels_chans.ckpt` for the included Destrieux configuration | `paths.barista_checkpoint` |
+| BaRISTA | Model weights will be shared upon request. | `paths.barista_checkpoint` |
 | DIVER-1 | [Official iEEG checkpoint](https://drive.google.com/file/d/1svTMyxABZ-9kvk-BiiZ6-2sNyZ5io8mg/view), linked by the [upstream project](https://github.com/DIVER-Project/DIVER-1#weights) | `model.upstream_ckpt` and writable `model.model_dir` |
 
 <details>
 <summary>Checkpoint compatibility and DIVER configuration</summary>
 
-The PopT-v2 download remains a release gap; use your compatible multi-STFT
-checkpoint until that link is available. PopT accepts `model_cfg`/`model` or
-`config`/`model_state` checkpoint dictionaries. BrainBERT expects the upstream
-`model_cfg`/`model` format. BaRISTA uses parcel embeddings and requires the
-prepared Destrieux metadata. The `barista` experiment preset automatically selects
-`localization_Destrieux` for NeuroprobeV2 or `label_destrieux` for BYD/PIPPI.
+| Model | Compatibility notes |
+| --- | --- |
+| PopT-v2 | Use the multi-STFT weights shared upon request. Accepts `model_cfg`/`model` or `config`/`model_state` checkpoint dictionaries. |
+| BrainBERT | Expects the upstream `model_cfg`/`model` format. |
+| BaRISTA | Use the weights shared upon request and prepared Destrieux metadata. The `barista` preset selects `localization_Destrieux` for NeuroprobeV2 or `label_destrieux` for BYD/PIPPI. |
 
 For DIVER, select its table entry and edit these fields in
 `imindbench/conf/model/diver.yaml`:
@@ -201,12 +217,12 @@ upstream_ckpt: /path/to/ieeg_checkpoint.pt
 model_dir: /path/to/diver_shapes
 ```
 
-The linked DIVER iEEG checkpoint matches the defaults: width 256, depth 12,
-patch size 50 and DeepSpeed `module` format. It was checked with strict weight
-loading and a synthetic CPU forward pass using fresh and existing shape caches.
-For other checkpoints, match their architecture and set
-`model.deepspeed_pth_format=false` if they use `model_state_dict` format.
-Record the checkpoint hash with your results.
+- **Default architecture:** width 256, depth 12, patch size 50; DeepSpeed `module` format.
+- **Other checkpoints:** match their architecture. Set `model.deepspeed_pth_format=false`
+  for `model_state_dict` format.
+- **Validation:** the linked checkpoint passed strict weight loading and a synthetic
+  CPU forward pass with fresh and existing shape caches.
+- Record the checkpoint hash with your results.
 
 </details>
 
@@ -263,32 +279,34 @@ selection fixed. This runs Logistic on all NeuroprobeV2 units/tasks:
 imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor laplacian_stft_2048Hz --experiment baseline --unit-set all --device cpu --config-dir /path/to/config --paths local --output-root /path/to/runs/single_stft
 ```
 
-Repeat with `--preprocessor laplacian_multi_stft_2048Hz` and a different output
-root. Select the 1000 Hz config for
-BYD and the 2048 Hz config for NeuroprobeV2/PIPPI. To create a custom chain, copy
-a compatible YAML to `/path/to/config/preprocessor/my_chain.yaml`, edit its
-`chain` entries and select `--preprocessor my_chain`.
+- Repeat with `--preprocessor laplacian_multi_stft_2048Hz` and a different output root.
+- Use the 1000 Hz config for BYD and the 2048 Hz config for NeuroprobeV2/PIPPI.
+- For a custom chain, copy a compatible YAML to
+  `/path/to/config/preprocessor/my_chain.yaml`, edit `chain`, and select
+  `--preprocessor my_chain`.
 
 </details>
 
 <details>
 <summary>Add your own model</summary>
 
-1. Add `imindbench/models/my_model.py`. Start from `mlp_model.py` for PyTorch or
-   `logistic_model.py` for sklearn, and register it with `@register_model("my_model")`.
-2. For PyTorch, subclass `TorchBaseModel` and implement
-   `_create_network(input_shape, n_classes)` and
-   `build_model(input_shape, n_classes, device=None)`. The runner owns training.
-   For sklearn, implement `fit` and `predict_proba`, set `classes_`, and use
-   `prepare_batch` to adapt inputs if necessary. Probabilities must follow `classes_` order.
-3. Add `imindbench/conf/model/my_model.yaml` with `name: my_model`, input requirements
-   and training settings. Select it with `imindbench-grid --model my_model` and the
-   dataset/preprocessor/path arguments from the custom experiment example.
+1. Add `imindbench/models/my_model.py` and register it with `@register_model("my_model")`.
+   Modules in this directory are discovered automatically.
+2. Implement the interface for your model type:
 
-Modules in `imindbench/models/` are discovered automatically. Start with one
-unit/task, check the input shape and class probabilities, then omit `--task`
-and `--target` to evaluate the full catalog for that dataset. Repeat for all
-three datasets with matching preprocessors to evaluate a custom model completely.
+| Type | Starting point | Interface |
+| --- | --- | --- |
+| PyTorch | `mlp_model.py` | Subclass `TorchBaseModel`; implement `_create_network(input_shape, n_classes)` and `build_model(input_shape, n_classes, device=None)`. The runner owns training. |
+| sklearn | `logistic_model.py` | Implement `fit` and `predict_proba`, set `classes_`, and use `prepare_batch` if input adaptation is needed. Probabilities must follow `classes_` order. |
+
+3. Add `imindbench/conf/model/my_model.yaml` with `name: my_model`, input requirements
+   and training settings.
+4. Select `--model my_model` with the dataset, preprocessor and path arguments
+   from the custom experiment example.
+
+Start with one task/target and check input shapes and class probabilities.
+Then omit `--task` and `--target` to run the full catalog for that dataset.
+Repeat for all three datasets with matching preprocessors.
 
 </details>
 
@@ -307,28 +325,29 @@ class GainPreprocessor(BasePreprocessor):
         return [{**sample, "x": sample["x"] * self.cfg.factor} for sample in samples]
 ```
 
-Add `- {name: gain, factor: 2.0}` to a copied preprocessor chain. Preserve sample
-metadata and keep shapes, channel labels and coordinates aligned. If a transform
-learns statistics, use `execution_type = "fold_fit_transform"` and implement
-`fit_split`, `get_state`, `set_state` and `reset_state`; fit on training data only.
-See `standardization_preprocessor.py` for a stateful example.
+- Add `- {name: gain, factor: 2.0}` to a copied preprocessor chain.
+- Preserve sample metadata; keep shapes, channel labels and coordinates aligned.
+- For transforms that learn statistics, use `execution_type = "fold_fit_transform"`
+  and implement `fit_split`, `get_state`, `set_state` and `reset_state`.
+  Fit on training data only.
+- See `standardization_preprocessor.py` for a stateful example.
 
 </details>
 
 ## Outputs and resume
 
 Each run writes `population_*.json`, resolved Hydra config, `launch.json` and
-`launcher.log`. Use a separate output root for each configuration or independent
-worker; one launcher locks its root while executing.
+`launcher.log`.
 
-Dataset scripts skip an evaluation whenever its output JSON already exists,
-matching the original experiment scripts. No saved-command match or checksum
-is required. Evaluations without a result JSON run from the beginning; this does
-not restore training checkpoints. Use a new output root when changing settings,
-since an existing result is reused based on its filename alone.
+| Situation | Behavior |
+| --- | --- |
+| Output JSON exists | Skip the evaluation; no command match or checksum is required |
+| Output JSON is missing | Run from the beginning; training checkpoints are not restored |
+| Settings change | Use a new output root; existing results are reused by filename alone |
+| Independent workers | Use separate output roots; one launcher locks its root while running |
 
-Execution and skipping existing results are also the defaults for `imindbench-grid`.
-Use `--dry-run` to print commands without running, or `--count` to count the grid.
+Dataset scripts and `imindbench-grid` execute and skip existing results by default.
+For the CLI, `--dry-run` prints commands without running; `--count` counts the grid.
 
 <details>
 <summary>Development checks</summary>
