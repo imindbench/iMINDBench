@@ -67,15 +67,16 @@ python -m imindbench.launch --dataset neuroprobev2 --model logistic --experiment
 ```
 
 This baseline needs no pretrained weights. Existing output JSONs are skipped.
-Remote logging is disabled by default. For full experiments, edit a dataset script:
+Remote logging is disabled by default. For full experiments, see below. 
 
+## Evaluate the complete benchmark
+
+We provide scripts to run for each dataset: 
 | Script | What it does |
 | --- | --- |
 | [run_neuroprobev2.sh](scripts/run_neuroprobev2.sh) | NeuroprobeV2: within-session, optional transfer and sample efficiency |
 | [run_kelesbyd2024.sh](scripts/run_kelesbyd2024.sh) | BYD: within-session and optional transfer |
 | [run_berezutskayapippi2022.sh](scripts/run_berezutskayapippi2022.sh) | PIPPI: within-session and optional transfer |
-
-## Evaluate the complete benchmark
 
 Open the script for your dataset. Each file lists all benchmark subject/session
 pairs and all 15 tasks; the default model is Logistic with multi-STFT inputs.
@@ -88,8 +89,7 @@ pairs and all 15 tasks; the default model is Logistic with multi-STFT inputs.
 | Model settings | `imindbench/conf/model/<MODEL>.yaml` |
 | Training overrides | `imindbench/conf/experiment/<EXPERIMENT>.yaml`; these take precedence over model settings |
 
-BrainBERT automatically uses the model device. After configuring the selected
-model, run the dataset script:
+After configuring the selected model, run the dataset script:
 
 ```bash
 bash scripts/run_neuroprobev2.sh
