@@ -33,24 +33,15 @@ class TorchRunner(BaseRunner):
 
     def _configure_determinism(self):
         """Configure PyTorch deterministic settings based on config."""
-        model_cfg = getattr(self.cfg, "model", None)
-        deterministic = (
-            bool(model_cfg.get("deterministic", False)) if model_cfg else False
-        )
-
+        runtime_cfg = getattr(self.cfg, "runtime", {})
+        deterministic = runtime_cfg.get("deterministic", True)
+        # Apply both states explicitly: multiple folds/runners share Torch globals.
         if deterministic:
-            log("[TorchRunner] Deterministic mode enabled", priority=0)
-            torch.backends.cudnn.deterministic = True
-            torch.backends.cudnn.benchmark = False
-            try:
-                torch.use_deterministic_algorithms(True)
-            except (AttributeError, RuntimeError) as exc:
-                log(
-                    f"[TorchRunner] Unable to enforce deterministic algorithms: {exc}",
-                    priority=1,
-                )
-            if torch.cuda.is_available():
-                os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+            os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+        torch.backends.cudnn.deterministic = deterministic
+        torch.backends.cudnn.benchmark = False
+        torch.use_deterministic_algorithms(deterministic)
+        log(f"[TorchRunner] Deterministic mode: {deterministic}", priority=0)
         return deterministic
 
     def _get_device(self, cfg):

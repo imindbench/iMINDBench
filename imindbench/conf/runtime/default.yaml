@@ -1,5 +1,6 @@
 # Runtime controls for evaluation execution.
 seed: 42
+deterministic: true  # Request deterministic Torch kernels for every input type.
 overwrite: false
 verbose: true
 preprocess_torch_num_threads: 4

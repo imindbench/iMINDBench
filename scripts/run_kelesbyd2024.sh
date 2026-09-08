@@ -9,8 +9,8 @@ set -euo pipefail
 # Valid combinations (names refer to YAML configs under imindbench/conf/):
 # MODEL             PREPROCESSOR                                                           EXPERIMENT
 # logistic/mlp/cnn  laplacian_multi_stft_1000Hz                                            multi_stft/<model>
-# logistic/mlp/cnn  laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz  waveform500
-# htnet_500Hz       laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz  waveform500
+# logistic/mlp/cnn  laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz  default
+# htnet_500Hz       laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz  default
 # popt (PopT-v2)    laplacian_multi_stft_1000Hz                                            multi_stft/popt
 # linear_baseline   laplacian_stft_brainbert_1000Hz                                        default
 # barista           laplacian_wav_session_HPF_global_robust_scalar_1000Hz_2048Hz_zscore    barista

@@ -158,6 +158,9 @@ evaluations per model/input pairing**, before folds.
   the bundled experiment presets inherit it.
   This standardizes the former Logistic `1e-3` and MLP `1e-8` defaults, so new
   runs can differ in iteration count, stopping epoch or selected checkpoint.
+- `runtime.deterministic: true` requests deterministic Torch execution for all
+  inputs. Set it to `false` to opt out; `model.deterministic` has been removed.
+  The former `waveform500` experiment is now `default`.
 - Store checkpoint paths in `paths/local.yaml`. DIVER also needs a writable
   `diver_shape_cache_dir` in that same file.
 - Scripts run each enabled block serially and skip existing output JSONs.

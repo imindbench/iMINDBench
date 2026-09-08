@@ -10,6 +10,25 @@ from torch.utils.data import DataLoader
 from imindbench.torch_runner import TorchRunner
 
 
+def test_determinism_can_be_disabled_after_an_enabled_runner(monkeypatch):
+    enabled = torch.are_deterministic_algorithms_enabled()
+    cudnn_deterministic = torch.backends.cudnn.deterministic
+    benchmark = torch.backends.cudnn.benchmark
+    monkeypatch.setenv("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+    try:
+        for requested in (True, False):
+            cfg = OmegaConf.create(
+                {"model": {"device": "cpu"}, "runtime": {"deterministic": requested}}
+            )
+            TorchRunner(cfg)
+            assert torch.are_deterministic_algorithms_enabled() is requested
+            assert torch.backends.cudnn.deterministic is requested
+    finally:
+        torch.use_deterministic_algorithms(enabled)
+        torch.backends.cudnn.deterministic = cudnn_deterministic
+        torch.backends.cudnn.benchmark = benchmark
+
+
 def run_training(runner_class, mode, early_stop=False):
     torch.manual_seed(7)
     cfg = OmegaConf.create(

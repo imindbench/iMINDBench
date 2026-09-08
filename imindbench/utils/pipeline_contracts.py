@@ -976,6 +976,10 @@ def validate_eval_config(cfg: DictConfig) -> None:
 
     # -- runtime --
     runtime_cfg = _require_cfg_mapping(cfg, "runtime")
+    if "deterministic" in cfg.model:
+        raise ValueError("model.deterministic has moved to runtime.deterministic.")
+    if not isinstance(runtime_cfg.get("deterministic", True), bool):
+        raise TypeError("runtime.deterministic must be a bool.")
     if "seed" not in runtime_cfg:
         raise ValueError("runtime.seed is required.")
     seed = runtime_cfg.get("seed")
