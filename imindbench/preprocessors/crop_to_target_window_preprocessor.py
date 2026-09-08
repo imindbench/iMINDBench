@@ -46,22 +46,7 @@ class CropToTargetWindowPreprocessor(BasePreprocessor):
         if hop <= 0:
             raise ValueError(f"context_stft_hop_samples must be positive, got {hop}.")
         padded = bool(sample.get("context_stft_padded", False))
-        if (
-            bool(sample.get("context_stft_use_scipy", False))
-            and sample.get("context_stft_boundary") is None
-        ):
-            nperseg = int(sample["context_stft_nperseg"])
-            if nperseg <= 0:
-                raise ValueError(
-                    f"context_stft_nperseg must be positive, got {nperseg}."
-                )
-            if target_samples < nperseg:
-                n_frames = 1
-            elif padded:
-                n_frames = int(math.ceil((target_samples - nperseg) / hop)) + 1
-            else:
-                n_frames = int((target_samples - nperseg) // hop) + 1
-        elif padded:
+        if padded:
             n_frames = int(math.ceil(target_samples / hop)) + 1
         else:
             n_frames = int(target_samples // hop) + 1

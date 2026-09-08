@@ -10,6 +10,8 @@ chain:
     remove_non_laplacian: true
 
   - name: multi_stft
+    pad_mode: reflect
+    padded: false
     sampling_rate: 2048
     hop_length: 128
     window: hann

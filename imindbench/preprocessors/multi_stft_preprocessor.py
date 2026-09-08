@@ -7,10 +7,13 @@ from omegaconf import DictConfig, ListConfig, OmegaConf
 
 from . import register_preprocessor
 from .base_preprocessor import BasePreprocessor
-from .stft_preprocessor import STFTPreprocessor, resolve_stft_overlap
+from .stft_preprocessor import (
+    STFTPreprocessor,
+    resolve_stft_overlap,
+    validate_stft_backend_config,
+)
 
 _STFT_DEFAULT_KEYS = {
-    "boundary",
     "clip_k",
     "freq_channel_cutoff",
     "hop_length",
@@ -24,7 +27,6 @@ _STFT_DEFAULT_KEYS = {
     "poverlap",
     "sampling_rate",
     "torch_dtype",
-    "use_scipy",
     "window",
 }
 _STFT_STRIDE_KEYS = {"hop_length", "noverlap", "poverlap"}
@@ -44,6 +46,7 @@ class MultiSTFTPreprocessor(BasePreprocessor):
 
     def __init__(self, cfg):
         super().__init__(cfg)
+        validate_stft_backend_config(cfg)
         if cfg.get("hop_length", None) is None:
             raise ValueError("multi_stft requires a shared top-level hop_length.")
         if (
@@ -107,21 +110,13 @@ class MultiSTFTPreprocessor(BasePreprocessor):
     def _timing_signature(stft_cfg):
         """Return fields that define frame positions before frequency concat."""
         cfg = OmegaConf.create(stft_cfg)
-        nperseg, _, hop_length = resolve_stft_overlap(cfg)
-        use_scipy = bool(stft_cfg.get("use_scipy", False))
-        boundary = stft_cfg.get("boundary", None)
+        _, _, hop_length = resolve_stft_overlap(cfg)
         signature = {
             "hop_length": hop_length,
-            "boundary": boundary,
             "padded": bool(stft_cfg.get("padded", False)),
-            "use_scipy": use_scipy,
             "clip_k": int(stft_cfg.get("clip_k", 0) or 0),
             "pad_mode": stft_cfg.get("pad_mode", "reflect"),
         }
-        # SciPy uses nperseg in the time origin when no boundary extension is
-        # requested, so differing nperseg values would not be aligned in time.
-        if use_scipy and boundary is None:
-            signature["nperseg"] = nperseg
         return tuple(sorted(signature.items()))
 
     def _transform_one(self, sample):

@@ -162,6 +162,11 @@ evaluations per model/input pairing**, before folds.
 | Multi-STFT | Uses the dataset's native sampling rate |
 | 500 Hz waveform baselines | Filter with 15-second context, crop to the target window, apply Laplacian referencing, downsample, and fit robust scaling on training data |
 
+STFT and multi-STFT use Torch with centered windows, `pad_mode: reflect` and
+`padded: false` in the bundled presets. SciPy STFT is no longer supported; remove
+legacy `use_scipy` and `boundary` keys from external configs. SciPy is still used
+for filtering and resampling.
+
 Waveform rate conversion uses one `resample` stage with required positive integer
 `source_rate` and `target_rate` values in Hz. It accepts NumPy arrays or Torch
 tensors shaped `(channels, time)` and returns float32 NumPy arrays, preserving

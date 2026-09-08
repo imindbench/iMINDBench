@@ -10,6 +10,8 @@ chain:
     remove_non_laplacian: true
 
   - name: multi_stft
+    pad_mode: reflect
+    padded: false
     sampling_rate: 1000
     hop_length: 62        # ~62 ms, closest to 128 / 2048 = 62.5 ms
     window: hann

@@ -11,10 +11,19 @@ from numbers import Integral
 import numpy as np
 import torch
 import torch.nn.functional as F
-from scipy import signal
 
 from . import register_preprocessor
 from .base_preprocessor import BasePreprocessor
+
+
+def validate_stft_backend_config(cfg):
+    """Reject retired SciPy options before constructing a Torch STFT stage."""
+    for key in ("use_scipy", "boundary"):
+        if key in cfg:
+            raise ValueError(
+                f"STFT uses Torch only; remove '{key}' from the config. "
+                "Windows are centered; use pad_mode to select padding."
+            )
 
 
 def _optional_int(cfg, key):
@@ -92,6 +101,7 @@ class STFTPreprocessor(BasePreprocessor):
 
     def __init__(self, cfg):
         super().__init__(cfg)
+        validate_stft_backend_config(cfg)
         self.clip_k = cfg.get(
             "clip_k", 0
         )  # Default 0 = no clipping (backwards compatible)
@@ -112,114 +122,77 @@ class STFTPreprocessor(BasePreprocessor):
         x = x.reshape(batch_size * n_electrodes, -1)
 
         # STFT parameters
-        nperseg, noverlap, hop_length = resolve_stft_overlap(self.cfg)
+        nperseg, _, hop_length = resolve_stft_overlap(self.cfg)
         window_type = self.cfg.get("window", "hann")
         sampling_rate = self.cfg.get("sampling_rate", 2048)
         max_frequency = self.cfg.get("max_frequency", 150)
         min_frequency = self.cfg.get("min_frequency", 0)
         normalizing = self.cfg.get("normalizing", "none")
-        boundary = self.cfg.get("boundary", None)
         padded = bool(self.cfg.get("padded", False))
-        use_scipy = bool(self.cfg.get("use_scipy", False))
-
-        if boundary is not None and boundary != "zeros":
-            raise ValueError(f"Unsupported STFT boundary mode: {boundary}")
-
-        if use_scipy:
-            x_np = x.detach().cpu().numpy()
-            f, _, Zxx = signal.stft(
-                x_np,
-                fs=sampling_rate,
-                window=window_type,
-                nperseg=nperseg,
-                noverlap=noverlap,
-                boundary=boundary,
-                padded=padded,
-                return_onesided=True,
-            )
-            freq_channel_cutoff = int(self.cfg.get("freq_channel_cutoff", 0) or 0)
-            if freq_channel_cutoff > 0:
-                Zxx = Zxx[:, :freq_channel_cutoff, :]
-                f = f[:freq_channel_cutoff]
-            else:
-                freq_mask = (f >= min_frequency) & (f <= max_frequency)
-                Zxx = Zxx[:, freq_mask, :]
-            x_np = np.abs(Zxx)
-            if normalizing == "zscore":
-                x_np = zscore(x_np, dim=-1)
-            elif normalizing not in ("none", None):
-                raise ValueError(f"Unsupported STFT normalizing mode: {normalizing}")
-            x_np = x_np.transpose(0, 2, 1)
-            _, n_times, n_freqs = x_np.shape
-            x = torch.from_numpy(
-                x_np.reshape(batch_size, n_electrodes, n_times, n_freqs)
-            )
+        torch_dtype = self.cfg.get("torch_dtype", "float32")
+        if torch_dtype == "float64":
+            x = x.to(dtype=torch.float64)
+            window_dtype = torch.float64
+        elif torch_dtype == "float32" or torch_dtype is None:
+            window_dtype = torch.float32
         else:
-            torch_dtype = self.cfg.get("torch_dtype", "float32")
-            if torch_dtype == "float64":
-                x = x.to(dtype=torch.float64)
-                window_dtype = torch.float64
-            elif torch_dtype == "float32" or torch_dtype is None:
-                window_dtype = torch.float32
-            else:
-                raise ValueError(f"Unsupported torch_dtype: {torch_dtype}")
+            raise ValueError(f"Unsupported torch_dtype: {torch_dtype}")
 
-            if window_type == "hann":
-                window = torch.hann_window(nperseg, device=x.device, dtype=window_dtype)
-            elif window_type == "boxcar":
-                window = torch.ones(nperseg, device=x.device, dtype=window_dtype)
-            else:
-                raise ValueError(f"Invalid window type: {window_type}")
+        if window_type == "hann":
+            window = torch.hann_window(nperseg, device=x.device, dtype=window_dtype)
+        elif window_type == "boxcar":
+            window = torch.ones(nperseg, device=x.device, dtype=window_dtype)
+        else:
+            raise ValueError(f"Invalid window type: {window_type}")
 
-            # Match SciPy: center=True provides symmetric zero padding
-            # (boundary='zeros'). padded=True adds right-end padding so the
-            # number of frames is an integer.
-            if padded:
-                pad = nperseg // 2
-                base_len = x.shape[-1] + 2 * pad
-                remainder = (base_len - nperseg) % hop_length
-                if remainder != 0:
-                    pad_end = hop_length - remainder
-                    x = F.pad(x, (0, pad_end))
+        # Centered frames use pad_mode (reflection by default). padded=True
+        # also pads the right edge to complete the final hop.
+        if padded:
+            pad = nperseg // 2
+            base_len = x.shape[-1] + 2 * pad
+            remainder = (base_len - nperseg) % hop_length
+            if remainder != 0:
+                pad_end = hop_length - remainder
+                x = F.pad(x, (0, pad_end))
 
-            # Compute STFT
-            pad_mode = self.cfg.get("pad_mode", "reflect")
-            x = torch.stft(
-                x,
-                n_fft=nperseg,
-                hop_length=hop_length,
-                win_length=nperseg,
-                window=window,
-                return_complex=True,
-                normalized=False,
-                center=True,
-                pad_mode=pad_mode,
-            )
+        # Compute STFT
+        pad_mode = self.cfg.get("pad_mode", "reflect")
+        x = torch.stft(
+            x,
+            n_fft=nperseg,
+            hop_length=hop_length,
+            win_length=nperseg,
+            window=window,
+            return_complex=True,
+            normalized=False,
+            center=True,
+            pad_mode=pad_mode,
+        )
 
-            # Frequency filtering: use freq_channel_cutoff if specified;
-            # otherwise use Hz-based filtering.
-            freq_channel_cutoff = self.cfg.get("freq_channel_cutoff", 0)
-            if freq_channel_cutoff > 0:
-                # Bin-based cutoff: keep first N frequency bins (PopT-style)
-                x = x[:, :freq_channel_cutoff, :]
-            else:
-                # Hz-based filtering: filter by frequency range (existing behavior)
-                freqs = torch.fft.rfftfreq(nperseg, d=1.0 / sampling_rate)
-                x = x[:, (freqs >= min_frequency) & (freqs <= max_frequency)]
+        # Frequency filtering: use freq_channel_cutoff if specified;
+        # otherwise use Hz-based filtering.
+        freq_channel_cutoff = self.cfg.get("freq_channel_cutoff", 0)
+        if freq_channel_cutoff > 0:
+            # Bin-based cutoff: keep first N frequency bins (PopT-style)
+            x = x[:, :freq_channel_cutoff, :]
+        else:
+            # Hz-based filtering: filter by frequency range (existing behavior)
+            freqs = torch.fft.rfftfreq(nperseg, d=1.0 / sampling_rate)
+            x = x[:, (freqs >= min_frequency) & (freqs <= max_frequency)]
 
-            # Use magnitude (abs) for stft
-            x = torch.abs(x)
+        # Use magnitude (abs) for stft
+        x = torch.abs(x)
 
-            # Reshape back
-            _, n_freqs, n_times = x.shape
-            x = x.reshape(batch_size, n_electrodes, n_freqs, n_times)
+        # Reshape back
+        _, n_freqs, n_times = x.shape
+        x = x.reshape(batch_size, n_electrodes, n_freqs, n_times)
 
-            if normalizing == "zscore":
-                x = zscore(x, dim=-1)
-            elif normalizing not in ("none", None):
-                raise ValueError(f"Unsupported STFT normalizing mode: {normalizing}")
+        if normalizing == "zscore":
+            x = zscore(x, dim=-1)
+        elif normalizing not in ("none", None):
+            raise ValueError(f"Unsupported STFT normalizing mode: {normalizing}")
 
-            x = x.transpose(2, 3)  # (batch_size, n_electrodes, n_timebins, n_freqs)
+        x = x.transpose(2, 3)  # (batch_size, n_electrodes, n_timebins, n_freqs)
 
         # Apply edge clipping if specified (for PopT compatibility)
         if self.clip_k > 0:
@@ -253,14 +226,11 @@ class STFTPreprocessor(BasePreprocessor):
             x_out.squeeze(0).detach().cpu().numpy().astype(np.float32, copy=False)
         )
         if sample.get("context_requested_start_sec") is not None:
-            nperseg, _, hop_length = resolve_stft_overlap(self.cfg)
+            _, _, hop_length = resolve_stft_overlap(self.cfg)
             out["context_time_axis"] = "stft"
             out["context_stft_hop_samples"] = int(hop_length)
-            out["context_stft_nperseg"] = int(nperseg)
             out["context_stft_padded"] = bool(self.cfg.get("padded", False))
             out["context_stft_clip_k"] = int(self.clip_k or 0)
-            out["context_stft_use_scipy"] = bool(self.cfg.get("use_scipy", False))
-            out["context_stft_boundary"] = self.cfg.get("boundary", None)
         return out
 
     def transform_samples(self, samples):

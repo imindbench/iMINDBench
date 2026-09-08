@@ -8,6 +8,8 @@ chain:
 - name: laplacian_rereference
   remove_non_laplacian: true
 - name: stft
+  pad_mode: reflect
+  padded: false
   nperseg: 250
   poverlap: 0.75
   window: hann
