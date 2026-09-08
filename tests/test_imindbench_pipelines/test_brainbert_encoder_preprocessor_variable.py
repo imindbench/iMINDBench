@@ -131,7 +131,7 @@ def test_encoder_inherits_model_device(
                 "paths=example",
                 "model=linear_baseline",
                 f"model.device={device}",
-                f"preprocessor=laplacian_stft_brainbert_{rate}Hz",
+                f"preprocessor=stft_brainbert_{rate}Hz",
                 "paths.brainbert_checkpoint=/tmp/brainbert.pth",
             ],
         )

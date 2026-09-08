@@ -24,7 +24,7 @@ from imindbench.utils.pipeline_contracts import validate_eval_config
 
 with initialize_config_module(config_module="imindbench.conf", version_base="1.1"):
     cfg = compose(config_name="config", overrides=[
-        "paths=example", "model=logistic", "preprocessor=laplacian_multi_stft_2048Hz"
+        "paths=example", "model=logistic", "preprocessor=multi_stft_2048Hz"
     ])
     validate_eval_config(cfg)
     assert build_model(cfg.model).__class__.__name__ == "LogisticModel"

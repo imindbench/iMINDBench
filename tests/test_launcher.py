@@ -24,7 +24,7 @@ def _args(*extra):
             "--model",
             "logistic",
             "--preprocessor",
-            "laplacian_multi_stft_2048Hz",
+            "multi_stft_2048Hz",
             "--experiment",
             "default",
             "--output-root",
@@ -177,7 +177,7 @@ def test_default_preset_does_not_filter_or_cap_training_samples():
             overrides=[
                 "paths=example",
                 "model=logistic",
-                "preprocessor=laplacian_multi_stft_2048Hz",
+                "preprocessor=multi_stft_2048Hz",
                 "experiment=default",
             ],
         )
@@ -193,7 +193,7 @@ def test_retired_cohort_flag_is_not_silently_ignored():
             overrides=[
                 "paths=example",
                 "model=logistic",
-                "preprocessor=laplacian_multi_stft_2048Hz",
+                "preprocessor=multi_stft_2048Hz",
                 "++dataset.train_decodable_subject_sessions_only=true",
             ],
         )
@@ -228,7 +228,7 @@ def test_cli_requires_explicit_task_and_target(missing):
         "--model",
         "logistic",
         "--preprocessor",
-        "laplacian_stft_2048Hz",
+        "stft_2048Hz",
         "--output-root",
         "/runs",
     ]
@@ -245,7 +245,7 @@ def test_transfer_preset_composes_with_packaged_manifest():
             overrides=[
                 "paths=example",
                 "model=popt",
-                "preprocessor=laplacian_multi_stft_2048Hz",
+                "preprocessor=multi_stft_2048Hz",
                 "experiment=decodable",
                 "dataset.regime=hold-in-session",
             ],
@@ -423,7 +423,7 @@ def test_cli_executes_by_default_with_explicit_preview_modes(
         "--model",
         "logistic",
         "--preprocessor",
-        "laplacian_multi_stft_2048Hz",
+        "multi_stft_2048Hz",
         "--output-root",
         str(tmp_path),
         "--task",

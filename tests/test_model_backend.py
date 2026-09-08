@@ -20,7 +20,7 @@ def _config():
             overrides=[
                 "paths=example",
                 "model=logistic",
-                "preprocessor=laplacian_stft_2048Hz",
+                "preprocessor=stft_2048Hz",
             ],
         )
 
@@ -52,7 +52,7 @@ def test_launcher_uses_custom_model_backend_for_device(tmp_path, backend):
             "--model",
             "custom",
             "--preprocessor",
-            "laplacian_stft_2048Hz",
+            "stft_2048Hz",
             "--task",
             "onset",
             "--target",

@@ -38,7 +38,7 @@ from imindbench.utils.logging_utils import (
 _HELP_COMPOSITION_DEFAULTS = (
     "paths=example",
     "model=logistic",
-    "preprocessor=laplacian_stft_2048Hz",
+    "preprocessor=stft_2048Hz",
 )
 
 

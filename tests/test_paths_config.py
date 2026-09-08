@@ -19,7 +19,7 @@ def _compose(tmp_path, paths, model="logistic"):
             overrides=[
                 "paths=local",
                 f"model={model}",
-                "preprocessor=laplacian_stft_2048Hz",
+                "preprocessor=stft_2048Hz",
                 f"hydra.searchpath={json.dumps(['file://' + str(tmp_path)])}",
             ],
         )

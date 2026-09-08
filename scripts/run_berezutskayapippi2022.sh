@@ -7,16 +7,16 @@ set -euo pipefail
 
 # ── Model and input settings ───────────────────────────────────────────────────
 # Valid combinations (names refer to YAML configs under imindbench/conf/):
-# MODEL              PREPROCESSOR                             EXPERIMENT
-# logistic/mlp/cnn   laplacian_multi_stft_2048Hz              default
-# logistic/mlp/cnn   wav_hpf_robust_2048to500Hz               default
-# htnet_500Hz        wav_hpf_robust_2048to500Hz               default
-# popt (PopT-v2)     laplacian_multi_stft_2048Hz              default
-# linear_baseline    laplacian_stft_brainbert_2048Hz          default
-# barista            wav_barista_2048Hz                       default
-# diver              wav_diver_2048to500Hz                    default
+# MODEL              PREPROCESSOR                   EXPERIMENT
+# logistic/mlp/cnn   multi_stft_2048Hz              default
+# logistic/mlp/cnn   wav_hpf_robust_2048to500Hz     default
+# htnet_500Hz        wav_hpf_robust_2048to500Hz     default
+# popt (PopT-v2)     multi_stft_2048Hz              default
+# linear_baseline    stft_brainbert_2048Hz          default
+# barista            wav_barista_2048Hz             default
+# diver              wav_diver_2048to500Hz          default
 MODEL=logistic
-PREPROCESSOR=laplacian_multi_stft_2048Hz
+PREPROCESSOR=multi_stft_2048Hz
 EXPERIMENT=default                  # default or decodable cohort mode.
 TRANSFER_EXPERIMENT=decodable      # Transfer preset: Main cohort and sample cap.
 

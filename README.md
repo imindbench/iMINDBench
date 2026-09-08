@@ -63,7 +63,7 @@ Run one CPU Logistic evaluation:
 
 ```bash
 python -m imindbench.launch --dataset neuroprobev2 --model logistic --experiment default \
-  --preprocessor laplacian_multi_stft_2048Hz --task onset --target sub1_sess1 \
+  --preprocessor multi_stft_2048Hz --task onset --target sub1_sess1 \
   --device cpu --paths local --config-dir /path/to/config --output-root /path/to/runs/logistic
 ```
 
@@ -101,7 +101,7 @@ and targets. For example, NeuroprobeV2 defaults to:
 
 ```bash
 MODEL=logistic
-PREPROCESSOR=laplacian_multi_stft_2048Hz
+PREPROCESSOR=multi_stft_2048Hz
 EXPERIMENT=default
 ```
 
@@ -181,10 +181,17 @@ the dataset scripts, plus 8 variants selected for the paper notebooks' final
 plots. Each additional family below has both `1000` and `2048` Hz versions; replace `{rate}`
 with the dataset's native rate (BYD: 1000; NeuroprobeV2 and PIPPI: 2048).
 
+All bundled presets use Laplacian referencing, so filenames omit the
+`laplacian_` prefix. Spectral preset names are `stft_{rate}Hz`,
+`stft_brainbert_{rate}Hz`, `multi_stft_{rate}Hz`, and
+`multi_stft_{rate}Hz_zscore`. Update existing commands by dropping the prefix;
+processing settings are unchanged. Historical result folders retain their old
+names; new runs use the shorter names. Old preset aliases are not bundled.
+
 | Paper variant | Preprocessor config (without `.yaml`) |
 | --- | --- |
-| Single-STFT | `laplacian_stft_{rate}Hz` |
-| Multi-STFT with per-sample, per-channel normalization | `laplacian_multi_stft_{rate}Hz_zscore` |
+| Single-STFT | `stft_{rate}Hz` |
+| Multi-STFT with per-sample, per-channel normalization | `multi_stft_{rate}Hz_zscore` |
 | 500 Hz waveform with high-pass filtering and per-sample, per-channel normalization | `wav_hpf_zscore_{rate}to500Hz` |
 | 500 Hz waveform without high-pass filtering, with robust scaling | `wav_nohpf_robust_{rate}to500Hz` |
 
@@ -411,7 +418,7 @@ model:
 Select it through the generic launcher:
 
 ```bash
-imindbench-grid --dataset neuroprobev2 --model mlp --preprocessor laplacian_multi_stft_2048Hz --experiment my_trial --task onset --target sub1_sess1 --device cuda:0 --config-dir /path/to/config --paths local --output-root /path/to/runs/my_trial
+imindbench-grid --dataset neuroprobev2 --model mlp --preprocessor multi_stft_2048Hz --experiment my_trial --task onset --target sub1_sess1 --device cuda:0 --config-dir /path/to/config --paths local --output-root /path/to/runs/my_trial
 ```
 
 Keep model settings in the YAML file so the configuration is easy to review and
@@ -427,10 +434,10 @@ Select a different preprocessor config while keeping the model, task and unit
 selection fixed. This runs Logistic on one NeuroprobeV2 task/recording:
 
 ```bash
-imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor laplacian_stft_2048Hz --experiment default --task onset --target sub1_sess1 --device cpu --config-dir /path/to/config --paths local --output-root /path/to/runs/single_stft
+imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor stft_2048Hz --experiment default --task onset --target sub1_sess1 --device cpu --config-dir /path/to/config --paths local --output-root /path/to/runs/single_stft
 ```
 
-- Repeat with `--preprocessor laplacian_multi_stft_2048Hz` and a different output root.
+- Repeat with `--preprocessor multi_stft_2048Hz` and a different output root.
 - Use the 1000 Hz config for BYD and the 2048 Hz config for NeuroprobeV2/PIPPI.
 - For a custom chain, copy a compatible YAML to
   `/path/to/config/preprocessor/my_chain.yaml`, edit `chain`, and select

@@ -28,7 +28,7 @@ def test_dataset_default_covers_all_tasks_targets_and_pairings(
         for target in targets
     }
     rate = 1000 if dataset == "kelesbyd2024" else 2048
-    spectral = f"laplacian_multi_stft_{rate}Hz"
+    spectral = f"multi_stft_{rate}Hz"
     expected_pairings = {("logistic", spectral)}
     actual = set()
     for line in result.stdout.splitlines():

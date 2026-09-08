@@ -27,7 +27,7 @@ def test_cli_composes_required_groups_for_bare_help(monkeypatch):
 
     assert "paths=example" in captured_argv
     assert "model=logistic" in captured_argv
-    assert "preprocessor=laplacian_stft_2048Hz" in captured_argv
+    assert "preprocessor=stft_2048Hz" in captured_argv
     assert sys.argv is original_argv
 
 
@@ -41,7 +41,7 @@ def test_cli_preserves_explicit_help_group_overrides(monkeypatch):
 
     assert "model=logistic" not in captured_argv
     assert "paths=example" not in captured_argv
-    assert "preprocessor=laplacian_stft_2048Hz" in captured_argv
+    assert "preprocessor=stft_2048Hz" in captured_argv
     assert sys.argv is original_argv
 
 
