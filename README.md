@@ -232,6 +232,10 @@ The native-rate waveform presets (`wav_nohpf_pooled_{rate}Hz`, previously
 hidden or unselected in the final plots. The retained single-STFT sweeps can
 still vary their frequency limit independently.
 
+HTNet uses `model=htnet_500Hz` with the 500 Hz waveform presets. The native-rate
+`htnet_1000Hz` and `htnet_2048Hz` model presets have also been removed: all final
+paper notebook selections use the 500 Hz model.
+
 <details>
 <summary>Previous waveform names and migration</summary>
 
