@@ -106,7 +106,6 @@ def test_chunked_and_non_chunked_transform_samples_match():
 
 
 @pytest.mark.parametrize("rate", [1000, 2048])
-@pytest.mark.parametrize("pool", ["", "region_pool_"])
 @pytest.mark.parametrize(
     "device,cuda_available,expected",
     [
@@ -117,7 +116,7 @@ def test_chunked_and_non_chunked_transform_samples_match():
     ],
 )
 def test_encoder_inherits_model_device(
-    rate, pool, device, cuda_available, expected, monkeypatch
+    rate, device, cuda_available, expected, monkeypatch
 ):
     from pathlib import Path
 
@@ -132,7 +131,7 @@ def test_encoder_inherits_model_device(
                 "paths=example",
                 "model=linear_baseline",
                 f"model.device={device}",
-                f"preprocessor=laplacian_stft_brainbert_{pool}{rate}Hz",
+                f"preprocessor=laplacian_stft_brainbert_{rate}Hz",
                 "paths.brainbert_checkpoint=/tmp/brainbert.pth",
             ],
         )

@@ -1,0 +1,37 @@
+# Paper ablation; recovered from matching saved .hydra/config.yaml runs.
+# 2048 Hz Laplacian multi-window STFT chain.
+name: laplacian_multi_stft
+chain:
+  - name: time_domain_filter
+    sampling_rate: 2048
+    high_gamma: false
+    notch_q: 30
+
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+
+  - name: multi_stft
+    pad_mode: reflect
+    padded: false
+    sampling_rate: 2048
+    hop_length: 128
+    window: hann
+    normalizing: none
+    windows:
+      - label: low
+        nperseg: 1024
+        min_frequency: 2
+        max_frequency: 40
+
+      - label: mid
+        nperseg: 512
+        min_frequency: 20
+        max_frequency: 150
+
+      - label: high
+        nperseg: 256
+        min_frequency: 80
+        max_frequency: 400
+
+  - name: standardize
+    mode: per_channel_samples_time_pooled

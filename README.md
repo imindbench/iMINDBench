@@ -159,6 +159,35 @@ evaluations per model/input pairing**, before folds.
 
 **Preprocessing**
 
+The bundled collection contains 22 presets: the 10 main input presets listed in
+the dataset scripts, plus 12 variants used by the paper figure notebooks. Each
+additional family below has both `1000` and `2048` Hz versions; replace `{rate}`
+with the dataset's native rate (BYD: 1000; NeuroprobeV2 and PIPPI: 2048).
+
+| Paper variant | Preprocessor config (without `.yaml`) |
+| --- | --- |
+| Single-STFT | `laplacian_stft_{rate}Hz` |
+| Multi-STFT with per-sample, per-channel normalization | `laplacian_multi_stft_{rate}Hz_zscore` |
+| Multi-STFT with the upper band extended to 400 Hz | `laplacian_multi_stft_high_{rate}Hz` |
+| Native-rate waveform without high-pass filtering | `laplacian_wav_{rate}Hz` |
+| 500 Hz waveform with high-pass filtering and per-sample, per-channel normalization | `laplacian_wav_HPF_sample_per_channel_time_long_context_15s_{rate}Hzto500Hz` |
+| 500 Hz waveform without high-pass filtering, with robust scaling | `laplacian_wav_global_robust_scalar_long_context_15s_{rate}Hzto500Hz` |
+
+Selection follows the source cells and active visualization YAML entries used by
+`torch_brain/examples/neuroprobe_eval/notebooks/paper_figs`, including Figure 4
+preprocessing comparisons and Appendix 3 coverage. The restored Multi-STFT
+variants match the preprocessing settings in the corresponding saved
+`09_neurips/{dataset}/logistic_laplacian_multi_stft*/.../.hydra/config.yaml` runs,
+with Torch padding made explicit. The long-context waveform variants come from
+the original evaluation configs, migrated to `resample`. Historical DIVER output
+folders ending in `1000to500` or `2048to500` correspond to the main DIVER presets
+ending in `1000Hzto500Hz` or `2048Hzto500Hz`.
+
+Other bundled variations have been removed; their YAMLs remain in Git history.
+For an additional ablation, copy a retained config into your external config
+directory and override its settings. Keeping a paper recipe available does not
+establish numerical parity with historical runs made with older implementations.
+
 | Input | Processing |
 | --- | --- |
 | Multi-STFT | Uses the dataset's native sampling rate |
