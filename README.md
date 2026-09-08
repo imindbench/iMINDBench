@@ -145,6 +145,10 @@ evaluations per model/input pairing**, before folds.
 - For a smoke test, keep only the desired entries in `TASKS` and `TARGETS`.
   Keep at least one task and subject/session pair.
 - Set training options such as `max_iter` in the model or experiment YAML.
+  PyTorch `training_mode` accepts `epoch_based` or `steps_based` (default:
+  `epoch_based`); `optimizer` names are case-sensitive PyTorch optimizer classes
+  such as `Adam`, `AdamW` or `SGD` (default: `Adam`). Invalid names fail before
+  evaluation instead of silently selecting a different training setup.
 - Store checkpoint paths in `paths/local.yaml`. DIVER instead uses `upstream_ckpt`
   and `model_dir` in `imindbench/conf/model/diver.yaml`.
 - Scripts run each enabled block serially and skip existing output JSONs.

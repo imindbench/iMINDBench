@@ -837,7 +837,7 @@ class TorchRunner(BaseRunner):
         learning_rate = self.cfg.model.get("learning_rate", 0.001)
         optimizer_name = self.cfg.model.get("optimizer", "Adam")
         weight_decay = self.cfg.model.get("weight_decay", 0.0)
-        optimizer_cls = getattr(torch.optim, optimizer_name, torch.optim.Adam)
+        optimizer_cls = getattr(torch.optim, optimizer_name)
 
         param_groups = None
         if hasattr(model, "get_parameter_groups"):

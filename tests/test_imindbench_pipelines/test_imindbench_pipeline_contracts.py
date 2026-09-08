@@ -52,6 +52,39 @@ def test_validate_eval_config_accepts_top_level_region_intersection_pool():
     validate_eval_config(cfg)
 
 
+@pytest.mark.parametrize(
+    "key,value,error",
+    [
+        ("optimizer", "TypoAdamW", ValueError),
+        ("optimizer", "adam", ValueError),
+        ("optimizer", "Optimizer", ValueError),
+        ("optimizer", "lr_scheduler", ValueError),
+        ("optimizer", None, TypeError),
+        ("optimizer", 1, TypeError),
+        ("training_mode", "step_based", ValueError),
+        ("training_mode", "", ValueError),
+        ("training_mode", None, TypeError),
+        ("training_mode", True, TypeError),
+    ],
+)
+def test_validate_eval_config_rejects_invalid_torch_training_settings(
+    key, value, error
+):
+    cfg = _cfg({"name": "region_intersection_pool"})
+    cfg.model[key] = value
+    with pytest.raises(error, match=f"model.{key}"):
+        validate_eval_config(cfg)
+
+
+@pytest.mark.parametrize("optimizer", ["Adam", "AdamW", "SGD"])
+@pytest.mark.parametrize("training_mode", ["epoch_based", "steps_based"])
+def test_validate_eval_config_accepts_torch_training_settings(optimizer, training_mode):
+    cfg = _cfg({"name": "region_intersection_pool"})
+    cfg.model.optimizer = optimizer
+    cfg.model.training_mode = training_mode
+    validate_eval_config(cfg)
+
+
 def test_validate_eval_config_rejects_missing_region_intersection_pool():
     cfg = _cfg({"name": "raw"})
     with pytest.raises(ValueError, match="requires either a top-level"):

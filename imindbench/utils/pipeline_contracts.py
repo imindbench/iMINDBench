@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from omegaconf import DictConfig, OmegaConf
+from torch import optim
 
 from imindbench.preprocessors import PREPROCESSOR_REGISTRY
 
@@ -885,6 +886,31 @@ def validate_eval_config(cfg: DictConfig) -> None:
     # -- model / channel compatibility --
     model_cfg = _require_cfg_mapping(cfg, "model")
     model_name = _require_non_empty_cfg_str(model_cfg, section="model", key="name")
+    if model_name != "logistic":
+        # Match the current runner routing; reject typos before any fold is built.
+        training_mode = model_cfg.get("training_mode", "epoch_based")
+        if not isinstance(training_mode, str):
+            raise TypeError("model.training_mode must be a str.")
+        if training_mode not in {"epoch_based", "steps_based"}:
+            raise ValueError(
+                "model.training_mode must be one of ['epoch_based', 'steps_based'], "
+                f"got {training_mode!r}."
+            )
+        optimizer_name = model_cfg.get("optimizer", "Adam")
+        if not isinstance(optimizer_name, str):
+            raise TypeError("model.optimizer must be a str.")
+        optimizer_names = sorted(
+            name
+            for name, cls in vars(optim).items()
+            if isinstance(cls, type)
+            and issubclass(cls, optim.Optimizer)
+            and cls is not optim.Optimizer
+        )
+        if optimizer_name not in optimizer_names:
+            raise ValueError(
+                f"model.optimizer must be one of {optimizer_names}, "
+                f"got {optimizer_name!r}."
+            )
     requires_aligned = model_cfg.get("requires_aligned_channels")
     if not isinstance(requires_aligned, bool):
         raise TypeError(
