@@ -317,8 +317,11 @@ imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor laplacian
 | PyTorch | `mlp_model.py` | Subclass `TorchBaseModel`; implement `_create_network(input_shape, n_classes)` and `build_model(input_shape, n_classes, device=None)`. The runner owns training. |
 | sklearn | `logistic_model.py` | Implement `fit` and `predict_proba`, set `classes_`, and use `prepare_batch` if input adaptation is needed. Probabilities must follow `classes_` order. |
 
-3. Add `imindbench/conf/model/my_model.yaml` with `name: my_model`, input requirements
-   and training settings.
+3. Add `imindbench/conf/model/my_model.yaml` with `name: my_model`, required
+   `backend: torch` or `backend: sklearn`, input requirements and training settings.
+   The backend selects the runner and batch handling independently of the model name;
+   the launcher applies `--device` only to Torch models. Existing external model
+   configs must also declare their backend.
 4. Select `--model my_model` with the dataset, preprocessor and path arguments
    from the custom experiment example.
 

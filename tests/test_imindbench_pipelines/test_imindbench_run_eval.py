@@ -87,6 +87,7 @@ def _cfg(*, wandb_enabled: bool = True):
             },
             "model": {
                 "name": "logistic",
+                "backend": "sklearn",
                 "requires_coords": False,
                 "requires_aligned_channels": False,
             },

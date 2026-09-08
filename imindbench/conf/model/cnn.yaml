@@ -1,5 +1,6 @@
 # Convolutional Neural Network model (PyTorch)
 name: cnn
+backend: torch
 requires_aligned_channels: true
 hidden_dims: [128]  # Hidden layer dimensions for FC layers after conv layers
 batch_size: 200

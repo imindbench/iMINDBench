@@ -886,8 +886,11 @@ def validate_eval_config(cfg: DictConfig) -> None:
     # -- model / channel compatibility --
     model_cfg = _require_cfg_mapping(cfg, "model")
     model_name = _require_non_empty_cfg_str(model_cfg, section="model", key="name")
-    if model_name != "logistic":
-        # Match the current runner routing; reject typos before any fold is built.
+    backend = _require_non_empty_cfg_str(model_cfg, section="model", key="backend")
+    if backend not in {"sklearn", "torch"}:
+        raise ValueError(f"model.backend must be sklearn or torch, got {backend!r}.")
+    if backend == "torch":
+        # Reject training-setting typos before any fold is built.
         training_mode = model_cfg.get("training_mode", "epoch_based")
         if not isinstance(training_mode, str):
             raise TypeError("model.training_mode must be a str.")

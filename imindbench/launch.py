@@ -22,6 +22,7 @@ IDENTITY_KEYS = {
     "model",
     "experiment",
     "model.name",
+    "model.backend",
     "preprocessor",
     "dataset.provider",
     "dataset.regime",
@@ -116,8 +117,6 @@ def build_commands(args):
     if args.subset is not None:
         _validate_name(args.subset, "subset")
         base["dataset.subset_tier"] = args.subset
-    if args.model != "logistic":
-        base["model.device"] = args.device
     if args.regime not in {"hold-in-session", "hold-out-session"}:
         base["dataset.train_same_subject_only"] = False
     decodable_dir = args.decodable_dir
@@ -154,6 +153,11 @@ def build_commands(args):
     # Ask Hydra for provider identity instead of inferring it from a config filename.
     with initialize_config_dir(config_dir=str(CONF_DIR), version_base="1.1"):
         cfg = compose(config_name="config", overrides=[*tokens, *searchpath])
+    backend = cfg.model.get("backend")
+    if not isinstance(backend, str) or backend not in {"sklearn", "torch"}:
+        raise ValueError("model.backend must be sklearn or torch")
+    if backend == "torch":
+        tokens.append(f"model.device={args.device}")
     # Transfer presets share their training manifest with target selection.
     # Explicit --decodable-dir/--decodable-rule still take precedence above.
     if decodable_dir is None and cfg.dataset.get(

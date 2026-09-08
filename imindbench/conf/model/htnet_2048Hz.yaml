@@ -3,6 +3,7 @@
 # tuned HTNet on 2 s segments resampled to 250 Hz, so this config should not be
 # treated as the original HTNet experiment configuration.
 name: htnet
+backend: torch
 requires_aligned_channels: true
 requires_coords: false
 

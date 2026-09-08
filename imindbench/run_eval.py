@@ -126,7 +126,7 @@ def main(cfg: DictConfig) -> None:
         # Build components
         preprocessor = build_preprocessor(cfg.preprocessor)
         runner = (
-            SKLearnRunner(cfg) if cfg.model.name == "logistic" else TorchRunner(cfg)
+            SKLearnRunner(cfg) if cfg.model.backend == "sklearn" else TorchRunner(cfg)
         )  # Model will be built per fold
 
         # Pass wandb_run to runner if it's a TorchRunner
@@ -242,7 +242,6 @@ def run_processed_evaluation(
                 fold_helpers.evaluate_variable_fold,
                 cfg=cfg,
                 runner=runner,
-                model_name=model_name,
                 seed=seed,
             ),
             data_load_time=data_load_time,

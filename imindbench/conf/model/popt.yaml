@@ -1,4 +1,5 @@
 name: popt
+backend: torch
 requires_aligned_channels: false
 upstream_ckpt: ${paths.popt_checkpoint}  # Path to pretrained PopT checkpoint
 frozen_upstream: false  # Easy toggle: true = frozen encoder, false = full fine-tuning

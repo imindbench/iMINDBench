@@ -1,4 +1,5 @@
 name: barista
+backend: torch
 
 # BaRISTA has no aligned-channel requirement; it tokenizes per channel and
 # attends over a variable-length token sequence.

@@ -1,4 +1,5 @@
 name: diver
+backend: torch
 requires_aligned_channels: false
 model_dir: null  # Override with a writable MuP shape directory.
 upstream_ckpt: null  # Override with a DIVER checkpoint path.

@@ -1,5 +1,6 @@
 # Multi-Layer Perceptron model (PyTorch)
 name: mlp
+backend: torch
 requires_aligned_channels: true
 hidden_dims: [128, 128]
 batch_size: 200

@@ -1,5 +1,6 @@
 # Logistic Regression model (sklearn)
 name: logistic
+backend: sklearn
 requires_aligned_channels: true
 max_iter: 10000
 tol: 1e-3

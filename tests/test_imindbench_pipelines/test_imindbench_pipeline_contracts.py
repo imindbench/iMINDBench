@@ -33,6 +33,7 @@ def _cfg(preprocessor):
             },
             "model": {
                 "name": "cnn",
+                "backend": "torch",
                 "requires_aligned_channels": True,
                 "requires_coords": False,
             },

@@ -139,7 +139,7 @@ def collect_numpy_from_loader(loader, *, model=None, runner_cfg=None):
     return X, y
 
 
-def merge_eval_splits_for_logistic(
+def merge_eval_splits_for_sklearn(
     X_val: np.ndarray,
     y_val: np.ndarray,
     X_test: np.ndarray,
@@ -152,7 +152,7 @@ def merge_eval_splits_for_logistic(
         return X_val, y_val
     if X_val.ndim != X_test.ndim or X_val.shape[1:] != X_test.shape[1:]:
         raise ValueError(
-            "Cannot merge validation/test splits for logistic evaluation: "
+            "Cannot merge validation/test splits for sklearn evaluation: "
             "feature shapes differ "
             f"{X_val.shape} vs {X_test.shape}."
         )
@@ -420,7 +420,6 @@ def evaluate_variable_fold(
     *,
     cfg,
     runner,
-    model_name: str,
     seed: int,
 ):
     """Evaluate one prepared fold and return fold metrics."""
@@ -441,13 +440,13 @@ def evaluate_variable_fold(
             train_class_counts=train_class_counts,
             val_class_counts=val_class_counts,
             test_class_counts=test_class_counts,
-            include_val_metrics=(model_name != "logistic"),
+            include_val_metrics=(cfg.model.backend == "torch"),
         )
 
     runner_cfg = cfg.get("runner", {})
     coord_index_policy = runner_cfg.get("coord_index_policy", "round_clamp")
 
-    if model_name == "logistic":
+    if cfg.model.backend == "sklearn":
         merge_val_into_test = cfg.dataset.merge_val_into_test
         eval_class_counts = dict(test_class_counts)
         if merge_val_into_test:
@@ -494,7 +493,7 @@ def evaluate_variable_fold(
                 )
 
         fold_model = _attach_dataset_cfg(build_model(cfg.model), cfg.dataset)
-        # Logistic evaluation keeps the historical dense-array path rather than
+        # sklearn evaluation uses dense arrays rather than
         # training directly from variable-channel torch batches.
         X_train, y_train = collect_numpy_from_loader(
             train_loader,
@@ -520,7 +519,7 @@ def evaluate_variable_fold(
                 model=fold_model,
                 runner_cfg={"coord_index_policy": coord_index_policy},
             )
-            X_test, y_test = merge_eval_splits_for_logistic(
+            X_test, y_test = merge_eval_splits_for_sklearn(
                 X_val,
                 y_val,
                 X_test,
@@ -528,7 +527,7 @@ def evaluate_variable_fold(
             )
         if X_train.ndim != 2 or X_test.ndim != 2:
             raise ValueError(
-                "Logistic fixed-channel evaluation expects 2D features after "
+                "sklearn evaluation expects 2D features after "
                 "model.prepare_batch materialization, got "
                 f"X_train.shape={X_train.shape}, "
                 f"X_test.shape={X_test.shape}."
@@ -584,12 +583,10 @@ def evaluate_variable_fold(
             )
 
         fold_model = _attach_dataset_cfg(build_model(cfg.model), cfg.dataset)
-        # Variable-channel and aligned non-logistic models share the same
+        # Variable-channel and aligned Torch models share the same
         # TorchRunner path once split loaders have been built.
         if not isinstance(runner, TorchRunner):
-            raise NotImplementedError(
-                "Non-logistic models in dataset_variable_channel mode require TorchRunner."
-            )
+            raise NotImplementedError("model.backend=torch requires TorchRunner.")
         fold_result = runner.run_fold(
             fold_model,
             train_loader=train_loader,
