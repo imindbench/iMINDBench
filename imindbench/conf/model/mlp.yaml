@@ -7,7 +7,7 @@ batch_size: 200
 learning_rate: 0.0001
 max_iter: 100
 patience: 10
-tol: 1e-8
+tol: 1e-4  # Minimum validation-score improvement for epoch-based early stopping.
 random_state: 42
 # Device: 'auto' (default, auto-detect), 'cuda', 'cpu', or specific device like 'cuda:0'
 device: auto

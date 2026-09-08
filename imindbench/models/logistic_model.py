@@ -23,7 +23,7 @@ class LogisticModel(BaseModel):
             solver=cfg.get("solver", "lbfgs"),
             class_weight=cfg.get("class_weight", None),
             max_iter=cfg.get("max_iter", 10000),
-            tol=cfg.get("tol", 1e-3),
+            tol=cfg.get("tol", 1e-4),
             random_state=cfg.get("random_state", 42),
         )
 

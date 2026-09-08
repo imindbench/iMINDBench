@@ -2,5 +2,3 @@
 defaults:
 - /experiment/multi_stft/common
 - _self_
-model:
-  tol: 0.001

@@ -151,6 +151,13 @@ evaluations per model/input pairing**, before folds.
   `epoch_based`); `optimizer` names are case-sensitive PyTorch optimizer classes
   such as `Adam`, `AdamW` or `SGD` (default: `Adam`). Invalid names fail before
   evaluation instead of silently selecting a different training setup.
+- Logistic, MLP, CNN and all HTNet model configs use `tol: 1e-4` across inputs.
+  Logistic uses it for optimizer convergence; epoch-based Torch training uses
+  it as the minimum validation-score improvement (ROC AUC by default) to save
+  a checkpoint and reset early-stopping patience. Model YAMLs own this setting;
+  the bundled experiment presets inherit it.
+  This standardizes the former Logistic `1e-3` and MLP `1e-8` defaults, so new
+  runs can differ in iteration count, stopping epoch or selected checkpoint.
 - Store checkpoint paths in `paths/local.yaml`. DIVER also needs a writable
   `diver_shape_cache_dir` in that same file.
 - Scripts run each enabled block serially and skip existing output JSONs.

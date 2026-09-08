@@ -19,5 +19,4 @@ runtime:
   seed: 42
   preprocess_torch_num_threads: 4
 model:
-  tol: 0.0001
   deterministic: true

@@ -6,4 +6,3 @@ model:
   upstream_lr: 5.0e-05
   head_lr: 0.0005
   learning_rate: 0.0005
-  tol: 0.0001
