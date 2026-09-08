@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from omegaconf import OmegaConf
 
-from imindbench.preprocessors import build_preprocessor
+from imindbench.preprocessors import build_preprocessor, describe_preprocessor
 
 
 def test_torch_stft_centered_frames_and_sine_peak():
@@ -23,6 +23,28 @@ def test_torch_stft_centered_frames_and_sine_peak():
     assert out.dtype == np.float32
     np.testing.assert_array_equal(out[0, 2:-2].argmax(axis=-1), 16)
     np.testing.assert_allclose(out[0, 2:-2, 16], 64, atol=1e-5)
+
+
+def test_unnamed_chain_runs_resample_then_stft():
+    cfg = OmegaConf.create(
+        {
+            "chain": [
+                {"name": "resample", "source_rate": 2048, "target_rate": 1024},
+                {
+                    "name": "stft",
+                    "sampling_rate": 1024,
+                    "nperseg": 256,
+                    "hop_length": 64,
+                    "max_frequency": 512,
+                },
+            ]
+        }
+    )
+    wave = np.sin(2 * np.pi * 64 * np.arange(2048) / 2048)
+    out = build_preprocessor(cfg).transform_samples([{"x": wave[None, :]}])[0]
+    assert describe_preprocessor(cfg) == "resample -> stft"
+    assert out["x"].shape == (1, 17, 129)
+    np.testing.assert_array_equal(out["x"][0, 2:-2].argmax(axis=-1), 16)
 
 
 @pytest.mark.parametrize(

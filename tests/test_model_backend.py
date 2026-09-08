@@ -70,12 +70,15 @@ def test_launcher_uses_custom_model_backend_for_device(tmp_path, backend):
 
 
 @pytest.mark.parametrize("merge_val_into_test", [False, True])
+@pytest.mark.parametrize(
+    "preprocessor", [{"name": "raw"}, {"chain": [{"name": "raw"}]}]
+)
 def test_custom_sklearn_model_runs_through_evaluation_entrypoint(
-    tmp_path, monkeypatch, merge_val_into_test
+    tmp_path, monkeypatch, merge_val_into_test, preprocessor
 ):
     cfg = _config()
     cfg.model.name = "custom_linear"
-    cfg.preprocessor = {"name": "raw"}
+    cfg.preprocessor = preprocessor
     cfg.dataset.merge_val_into_test = merge_val_into_test
     validation_calls = []
 
@@ -116,4 +119,4 @@ def test_custom_sklearn_model_runs_through_evaluation_entrypoint(
     run_eval.main.__wrapped__(cfg)
     assert len(validation_calls) == 1
     assert "custom_linear" in output.read_text()
-    assert json.loads(output.read_text())
+    assert "raw preprocessing" in json.loads(output.read_text())["description"]

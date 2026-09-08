@@ -11,7 +11,7 @@ import numpy as np
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from imindbench.preprocessors import build_preprocessor
+from imindbench.preprocessors import build_preprocessor, describe_preprocessor
 from imindbench.sklearn_runner import SKLearnRunner
 from imindbench.torch_runner import TorchRunner
 from imindbench.utils import fold_helpers, logging_utils
@@ -123,7 +123,9 @@ def main(cfg: DictConfig) -> None:
         if isinstance(runner, TorchRunner) and wandb_run is not None:
             runner.set_wandb_run(wandb_run)
 
-        log(f"Using preprocessor: {cfg.preprocessor.name}", priority=0)
+        log(
+            f"Using preprocessor: {describe_preprocessor(cfg.preprocessor)}", priority=0
+        )
         log(f"Using model: {cfg.model.name}", priority=0)
 
         _run_processed_evaluation(
@@ -177,7 +179,7 @@ def _run_processed_evaluation(
     log(f"Using dataset.regime='{regime}'", priority=0)
     log(f"Using n_folds={n_folds} from dataset class API", priority=0)
 
-    preprocess_type = cfg.preprocessor.name
+    preprocess_type = describe_preprocessor(cfg.preprocessor)
     model_name = cfg.model.name
     # Keep result JSON in the Hydra run folder for per-run portability.
     file_save_path = logging_utils.resolve_result_output_path(

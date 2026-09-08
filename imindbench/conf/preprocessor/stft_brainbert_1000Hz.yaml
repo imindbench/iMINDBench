@@ -1,5 +1,4 @@
 # 1000 Hz Laplacian STFT BrainBERT chain.
-name: laplacian_stft_brainbert
 chain:
   - name: time_domain_filter
     sampling_rate: 1000

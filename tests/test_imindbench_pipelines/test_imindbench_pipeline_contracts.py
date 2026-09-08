@@ -53,6 +53,28 @@ def test_validate_eval_config_accepts_top_level_region_intersection_pool():
     validate_eval_config(cfg)
 
 
+def test_validate_eval_config_accepts_unnamed_chain_with_region_pool():
+    cfg = _cfg({"chain": [{"name": "raw"}, {"name": "region_intersection_pool"}]})
+    validate_eval_config(cfg)
+
+
+@pytest.mark.parametrize(
+    "preprocessor, error, message",
+    [
+        ({"chain": []}, ValueError, "non-empty list"),
+        ({"chain": None}, ValueError, "non-empty list"),
+        ({"chain": {"name": "raw"}}, ValueError, "non-empty list"),
+        ({"chain": [None]}, TypeError, "must be a mapping"),
+        ({"chain": [{}]}, TypeError, "name must be a str"),
+        ({"chain": [{"name": "typo"}]}, ValueError, "unknown preprocessor"),
+        ({"name": "old_label", "chain": [{"name": "raw"}]}, ValueError, "chain-level"),
+    ],
+)
+def test_validate_eval_config_rejects_invalid_chains(preprocessor, error, message):
+    with pytest.raises(error, match=message):
+        validate_eval_config(_cfg(preprocessor))
+
+
 @pytest.mark.parametrize(
     "key,value,error",
     [

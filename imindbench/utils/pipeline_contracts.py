@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 from typing import Any
 
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, ListConfig, OmegaConf
 from torch import optim
 
 from imindbench.preprocessors import PREPROCESSOR_REGISTRY
@@ -802,6 +802,30 @@ def _require_non_empty_cfg_str(section_cfg, *, section: str, key: str) -> str:
     return value
 
 
+def _validate_preprocessor_config(cfg, context="preprocessor") -> set[str]:
+    """Validate pipeline structure and return stage names for compatibility checks."""
+    if not isinstance(cfg, (dict, DictConfig)):
+        raise TypeError(f"{context} must be a mapping.")
+    if "chain" in cfg:
+        if "name" in cfg:
+            raise ValueError(
+                f"{context}: remove the redundant chain-level 'name'; name each stage instead."
+            )
+        chain = cfg["chain"]
+        if not isinstance(chain, (list, ListConfig)) or not chain:
+            raise ValueError(f"{context}.chain must be a non-empty list of stages.")
+        names = set()
+        for index, stage in enumerate(chain):
+            names.update(
+                _validate_preprocessor_config(stage, f"{context}.chain[{index}]")
+            )
+        return names
+    name = _require_non_empty_cfg_str(cfg, section=context, key="name")
+    if name not in PREPROCESSOR_REGISTRY:
+        raise ValueError(f"{context}.name: unknown preprocessor '{name}'.")
+    return {name}
+
+
 def validate_eval_config(cfg: DictConfig) -> None:
     """Validate full eval config: dataset, model, runtime, submitter, runner.
 
@@ -960,24 +984,15 @@ def validate_eval_config(cfg: DictConfig) -> None:
 
     # -- preprocessor --
     preprocessor_cfg = _require_cfg_mapping(cfg, "preprocessor")
-    preprocessor_name = _require_non_empty_cfg_str(
-        preprocessor_cfg, section="preprocessor", key="name"
-    )
-    if pool:
-        chain = preprocessor_cfg.get("chain") or []
-        stage_names = {s.get("name") for s in chain if hasattr(s, "get")}
-        has_top_level_region_pool = preprocessor_name == "region_intersection_pool"
-        if (
-            not has_top_level_region_pool
-            and "region_intersection_pool" not in stage_names
-        ):
-            raise ValueError(
-                "Multi-subject regime with model.requires_aligned_channels=true "
-                "requires either a top-level 'region_intersection_pool' preprocessor "
-                "or a preprocessor chain that includes the "
-                "'region_intersection_pool' stage "
-                f"(dataset.provider='{provider}', dataset.regime='{regime}')."
-            )
+    stage_names = _validate_preprocessor_config(preprocessor_cfg)
+    if pool and "region_intersection_pool" not in stage_names:
+        raise ValueError(
+            "Multi-subject regime with model.requires_aligned_channels=true "
+            "requires either a top-level 'region_intersection_pool' preprocessor "
+            "or a preprocessor chain that includes the "
+            "'region_intersection_pool' stage "
+            f"(dataset.provider='{provider}', dataset.regime='{regime}')."
+        )
 
     # -- runtime --
     runtime_cfg = _require_cfg_mapping(cfg, "runtime")

@@ -1,5 +1,4 @@
 # 2048 Hz Laplacian with 15 s filtering context, HPF, 500 Hz output, and sample normalization.
-name: laplacian_wav_long_context_15s
 chain:
   - name: context_window
     context_window_sec: 15.0

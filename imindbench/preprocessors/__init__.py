@@ -213,6 +213,15 @@ def _validate_context_window_order(preprocessors):
         )
 
 
+def describe_preprocessor(cfg):
+    """Describe a validated pipeline by its ordered stage names, not a preset alias."""
+    if isinstance(cfg, (ListConfig, list)):
+        return " -> ".join(describe_preprocessor(stage) for stage in cfg)
+    if "chain" in cfg:
+        return describe_preprocessor(cfg["chain"])
+    return cfg["name"]
+
+
 def build_preprocessor(cfg):
     """Build a preprocessor or chain of preprocessors from configuration."""
     if isinstance(cfg, ListConfig) or isinstance(cfg, list):

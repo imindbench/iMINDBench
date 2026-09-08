@@ -1,4 +1,3 @@
-name: laplacian_wav_long_context_15s_diverstyle
 chain:
   - name: context_window
     context_window_sec: 15.0

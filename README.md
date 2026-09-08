@@ -190,6 +190,13 @@ moving the Multi-STFT `zscore` suffix before the rate (for example,
 are unchanged. Historical result folders retain their old names; new runs use
 the shorter names. Old preset aliases are not bundled.
 
+Chain configs contain an ordered `chain:` list; each stage has its own `name:`.
+Remove the old top-level `name:` from external chain configs. Single-stage
+configs still require `name:`. Logs and result descriptions show the ordered
+stage names, and result metadata retains the full preprocessing configuration.
+Removing the old field changes cache identities; existing preprocessing caches
+will be rebuilt (or must be refreshed before using `read_only` cache mode).
+
 | Paper variant | Preprocessor config (without `.yaml`) |
 | --- | --- |
 | Single-STFT | `stft_{rate}Hz` |

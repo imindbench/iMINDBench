@@ -22,7 +22,7 @@ import numpy as np
 import torch
 from omegaconf import OmegaConf
 
-from imindbench.preprocessors import build_preprocessor
+from imindbench.preprocessors import build_preprocessor, describe_preprocessor
 from imindbench.utils.logging_utils import log, log_fold_split_sample_counts
 from imindbench.utils.pipeline_contracts import (
     AUTO_MAX_TRAIN_SAMPLES_PER_SUBJECT,
@@ -225,34 +225,6 @@ def _iter_preprocessor_stages(preprocessor: Any) -> list[Any]:
 _PREPROCESSOR_CONFIG_DIR = (
     Path(__file__).resolve().parent.parent / "conf" / "preprocessor"
 )
-
-
-def _resolve_preprocessor_name(
-    *,
-    preprocessor_cfg: Any | None,
-    preprocessor: Any | None,
-) -> str | None:
-    if preprocessor_cfg is not None:
-        getter = getattr(preprocessor_cfg, "get", None)
-        if callable(getter):
-            name = getter("name", None)
-        elif isinstance(preprocessor_cfg, dict):
-            name = preprocessor_cfg.get("name")
-        else:
-            name = getattr(preprocessor_cfg, "name", None)
-        if isinstance(name, str) and name.strip():
-            return name.strip()
-    if preprocessor is not None:
-        cfg = getattr(preprocessor, "cfg", None)
-        if cfg is not None:
-            getter = getattr(cfg, "get", None)
-            if callable(getter):
-                name = getter("name", None)
-            else:
-                name = getattr(cfg, "name", None)
-            if isinstance(name, str) and name.strip():
-                return name.strip()
-    return None
 
 
 def _build_preprocessor_from_name(name: str):
@@ -2678,9 +2650,12 @@ def build_neuroprobe_torch_fold(
         dataset_cfg,
         needs_pool=needs_pool,
     )
-    default_preprocessor_name = _resolve_preprocessor_name(
-        preprocessor_cfg=preprocessor_cfg,
-        preprocessor=preprocessor,
+    # This is display metadata; source config filenames remain separate lookup keys.
+    display_cfg = preprocessor_cfg
+    if display_cfg is None:
+        display_cfg = getattr(preprocessor, "cfg", None)
+    default_preprocessor_name = (
+        describe_preprocessor(display_cfg) if display_cfg is not None else None
     )
     resolved_train_source_cache_dir = _resolve_train_source_cache_dir(
         cache_enabled=train_source_cache_enabled,

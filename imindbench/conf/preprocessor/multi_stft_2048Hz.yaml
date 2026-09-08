@@ -1,5 +1,4 @@
 # 2048 Hz Laplacian multi-window STFT chain.
-name: laplacian_multi_stft
 chain:
   - name: time_domain_filter
     sampling_rate: 2048
