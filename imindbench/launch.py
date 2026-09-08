@@ -283,7 +283,11 @@ def parser():
     result.add_argument(
         "--preprocessor", required=True, help="Hydra preprocessor config"
     )
-    result.add_argument("--experiment", help="Optional Hydra experiment config")
+    result.add_argument(
+        "--experiment",
+        default="default",
+        help="Hydra experiment config (default: default)",
+    )
     result.add_argument("--output-root", type=Path, required=True)
     result.add_argument("--output-group", default="evaluations")
     result.add_argument("--paths", default="example")

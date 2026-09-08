@@ -226,6 +226,22 @@ select the evaluation grid. For the listed PIPPI within-session targets,
 
 **Transfer cohorts and sample caps**
 
+The `default` and `decodable` experiment presets expose the same fields:
+
+| Field | `default` | `decodable` |
+| --- | --- | --- |
+| `paths.decodable_subject_sessions_dir` | `null` | Packaged Main-cohort manifest directory |
+| `dataset.label_mode` | `binary` | `binary` |
+| `dataset.train_same_subject_only` | `false` | `false` |
+| `dataset.train_sample_fraction` | `1.0` | `1.0` |
+| `dataset.max_train_samples_per_subject` | `null` | `auto` |
+| `dataset.train_decodable_subject_sessions_only` | `false` | `true` |
+
+`default` is selected when no experiment is specified; scripts can explicitly
+select `--experiment default`. It replaces the former `baseline` and
+`within_session` presets. The model/input-specific training presets remain
+available while their training defaults are being consolidated.
+
 | Setting | Within-session / sample efficiency | Within-dataset / multi-dataset |
 | --- | --- | --- |
 | Training cohort filter | Disabled | Validation-selected Main cohort |
@@ -329,7 +345,7 @@ Select a different preprocessor config while keeping the model, task and unit
 selection fixed. This runs Logistic on one NeuroprobeV2 task/recording:
 
 ```bash
-imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor laplacian_stft_2048Hz --experiment baseline --task onset --target sub1_sess1 --device cpu --config-dir /path/to/config --paths local --output-root /path/to/runs/single_stft
+imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor laplacian_stft_2048Hz --experiment default --task onset --target sub1_sess1 --device cpu --config-dir /path/to/config --paths local --output-root /path/to/runs/single_stft
 ```
 
 - Repeat with `--preprocessor laplacian_multi_stft_2048Hz` and a different output root.

@@ -26,7 +26,7 @@ def _args(*extra):
             "--preprocessor",
             "laplacian_multi_stft_2048Hz",
             "--experiment",
-            "baseline",
+            "default",
             "--output-root",
             "/runs",
             "--paths",
@@ -170,7 +170,7 @@ def test_population_filter_matches_manifest_and_dry_run_is_read_only(tmp_path):
     assert not args.output_root.exists()
 
 
-def test_baseline_preset_does_not_cap_training_samples():
+def test_default_preset_does_not_filter_or_cap_training_samples():
     with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
         cfg = compose(
             config_name="config",
@@ -178,10 +178,12 @@ def test_baseline_preset_does_not_cap_training_samples():
                 "paths=example",
                 "model=logistic",
                 "preprocessor=laplacian_multi_stft_2048Hz",
-                "experiment=baseline",
+                "experiment=default",
             ],
         )
     assert cfg.dataset.max_train_samples_per_subject is None
+    assert cfg.dataset.train_decodable_subject_sessions_only is False
+    assert cfg.paths.decodable_subject_sessions_dir is None
 
 
 def test_explicit_selections_do_not_require_catalog_membership():

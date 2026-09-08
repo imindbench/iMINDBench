@@ -1,5 +1,0 @@
-# @package _global_
-dataset:
-  label_mode: binary
-  train_same_subject_only: false
-  train_sample_fraction: 1.0
