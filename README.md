@@ -84,11 +84,11 @@ pairs and all 15 tasks; the default model is Logistic with multi-STFT inputs.
 
 | Setting | Where to edit it |
 | --- | --- |
-| Model and inputs | `MODEL`, `PREPROCESSOR` and `EXPERIMENT` in the script; use its compatibility table |
+| Model and inputs | `MODEL` and `PREPROCESSOR` in the script; use its compatibility table |
+| Cohort and training-sample caps | `EXPERIMENT=default` or `EXPERIMENT=decodable` in the script |
 | Paths and evaluation selection | `CONFIG_DIR`, `OUTPUT_ROOT`, `TASKS` and `TARGETS` in the script |
 | Pretrained checkpoints | `popt_checkpoint`, `brainbert_checkpoint`, `barista_checkpoint` or `diver_checkpoint` in `paths/local.yaml` |
-| Model settings | `imindbench/conf/model/<MODEL>.yaml` |
-| Training overrides | `imindbench/conf/experiment/<EXPERIMENT>.yaml`; these take precedence over model settings |
+| Model architecture and training hyperparameters | `imindbench/conf/model/<MODEL>.yaml` |
 
 After configuring the selected model, run the dataset script:
 
@@ -105,8 +105,13 @@ PREPROCESSOR=multi_stft_2048Hz
 EXPERIMENT=default
 ```
 
-`EXPERIMENT` selects training defaults; change it along with the pairing using
-the table in the script. Supported inputs are:
+`EXPERIMENT` selects the cohort and training-sample caps independently of the
+model/input pairing:
+
+- `default`: unfiltered cohort, no training-sample cap.
+- `decodable`: decodable cohort with automatic training-sample caps.
+
+Training hyperparameters live in the model YAML. Supported inputs are:
 
 | Models | Input preprocessing |
 | --- | --- |
@@ -146,7 +151,7 @@ evaluations per model/input pairing**, before folds.
 
 - For a smoke test, keep only the desired entries in `TASKS` and `TARGETS`.
   Keep at least one task and subject/session pair.
-- Set training options such as `max_iter` in the model or experiment YAML.
+- Set training options such as `max_iter` in the model YAML.
   PyTorch `training_mode` accepts `epoch_based` or `steps_based` (default:
   `epoch_based`); `optimizer` names are case-sensitive PyTorch optimizer classes
   such as `Adam`, `AdamW` or `SGD` (default: `Adam`). Invalid names fail before
@@ -283,6 +288,10 @@ establish numerical parity with historical runs made with older implementations.
 | Multi-STFT | Uses the dataset's native sampling rate |
 | 500 Hz waveform baselines | Filter with 15-second context, crop to the target window, apply Laplacian referencing, downsample, and fit robust scaling on training data |
 
+For multi-dataset training, `dataset.train_sources[].preprocessor` selects a
+bundled preprocessor preset by filename without `.yaml`. Omit it to inherit the
+top-level pipeline. Individual stage names such as `raw` are not preset names.
+
 STFT and multi-STFT use Torch with centered windows, `pad_mode: reflect` and
 `padded: false` in the bundled presets. SciPy STFT is no longer supported; remove
 legacy `use_scipy` and `boundary` keys from external configs. SciPy is still used
@@ -414,7 +423,7 @@ brainsets prepare → prepared recordings and labels → dataset task/split
 | Dataset and split settings | `imindbench/conf/dataset/` |
 | Model settings / implementation | `imindbench/conf/model/` / `imindbench/models/` |
 | Preprocessing settings / implementation | `imindbench/conf/preprocessor/` / `imindbench/preprocessors/` |
-| Training / runtime presets | `imindbench/conf/experiment/` / `imindbench/conf/runtime/` |
+| Cohort / runtime presets | `imindbench/conf/experiment/` / `imindbench/conf/runtime/` |
 | Task and recording selections | `TASKS` and `TARGETS` in each dataset script |
 | Launching / single evaluation | `imindbench/launch.py` / `imindbench/run_eval.py` |
 
