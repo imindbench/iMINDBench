@@ -140,6 +140,8 @@ def test_validate_eval_config_rejects_removed_seegnificant_profile():
 def test_removed_preprocessors_are_not_registered():
     assert "channel_subselect" not in PREPROCESSOR_REGISTRY
     assert "downsample_pad" not in PREPROCESSOR_REGISTRY
+    assert "laplacian_stft" not in PREPROCESSOR_REGISTRY
+    assert "laplacian_rereference" in PREPROCESSOR_REGISTRY
     assert "raw" in PREPROCESSOR_REGISTRY
 
 

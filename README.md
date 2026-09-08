@@ -197,6 +197,11 @@ stage names, and result metadata retains the full preprocessing configuration.
 Removing the old field changes cache identities; existing preprocessing caches
 will be rebuilt (or must be refreshed before using `read_only` cache mode).
 
+The old combined `name: laplacian_stft` stage has been removed. External chains
+should use `laplacian_rereference` followed by `stft`, with each stage's settings
+on its own entry. The rereferencing implementation now lives in
+`imindbench.preprocessors.laplacian_rereference_preprocessor`.
+
 | Paper variant | Preprocessor config (without `.yaml`) |
 | --- | --- |
 | Single-STFT | `stft_{rate}Hz` |

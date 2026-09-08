@@ -47,6 +47,39 @@ def test_unnamed_chain_runs_resample_then_stft():
     np.testing.assert_array_equal(out["x"][0, 2:-2].argmax(axis=-1), 16)
 
 
+def test_laplacian_then_stft_preserves_signal_and_channel_alignment():
+    cfg = OmegaConf.create(
+        {
+            "chain": [
+                {"name": "laplacian_rereference", "remove_non_laplacian": True},
+                {
+                    "name": "stft",
+                    "sampling_rate": 1024,
+                    "nperseg": 256,
+                    "hop_length": 64,
+                    "max_frequency": 512,
+                },
+            ]
+        }
+    )
+    wave = np.sin(2 * np.pi * 64 * np.arange(1024) / 1024)
+    # The isolated B1 contact is dropped; A1/A2/A3 reference their neighbors.
+    sample = {
+        "x": np.asarray([wave, 8 * wave, 2 * wave, 4 * wave]),
+        "channel_ids": ["id1", "id2", "id3", "id4"],
+        "channel_names": ["sub1/A1", "sub1/B1", "sub1/A2", "sub1/A3"],
+        "channel_coords": np.arange(12).reshape(4, 3),
+    }
+    out = build_preprocessor(cfg).transform_samples([sample])[0]
+    assert out["x"].shape == (3, 17, 129)
+    np.testing.assert_allclose(out["x"][:, 8, 16], [64, 32, 128], atol=1e-5)
+    assert list(out["channel_ids"]) == ["id1", "id3", "id4"]
+    assert list(out["channel_names"]) == ["sub1/A1", "sub1/A2", "sub1/A3"]
+    np.testing.assert_array_equal(
+        out["channel_coords"], sample["channel_coords"][[0, 2, 3]]
+    )
+
+
 @pytest.mark.parametrize(
     "key,value", [("use_scipy", True), ("use_scipy", False), ("boundary", None)]
 )

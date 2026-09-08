@@ -1,17 +1,16 @@
 """
-Laplacian rereferencing building blocks and Laplacian+STFT chain.
+Laplacian rereferencing with aligned channel metadata.
 """
 
 import numpy as np
 import torch
 
-from . import CompositePreprocessor, register_preprocessor
+from . import register_preprocessor
 from .base_preprocessor import BasePreprocessor
 from .preprocessor_utils import (
     project_channel_metadata,
     validate_named_channel_sample,
 )
-from .stft_preprocessor import STFTPreprocessor
 
 
 def laplacian_rereference_neural_data(
@@ -176,19 +175,3 @@ class LaplacianRereferencePreprocessor(BasePreprocessor):
     def transform_samples(self, samples):
         """Apply Laplacian rereferencing to every sample in the iterable."""
         return [self._transform_one(sample) for sample in samples]
-
-
-@register_preprocessor("laplacian_stft")
-class LaplacianSTFTPreprocessor(CompositePreprocessor):
-    """Backwards-compatible direct class alias for the Laplacian+STFT chain."""
-
-    invalidates_raw_channel_indices = True
-
-    def __init__(self, cfg):
-        laplacian = LaplacianRereferencePreprocessor(cfg)
-        stft = STFTPreprocessor(cfg)
-        super().__init__(cfg, [laplacian, stft])
-
-    def get_context_alignment_samples(self) -> int:
-        """Return the inner STFT stride needed by upstream context_window."""
-        return self.preprocessors[-1].get_context_alignment_samples()
