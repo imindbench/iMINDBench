@@ -30,7 +30,7 @@ with initialize_config_module(config_module="imindbench.conf", version_base="1.1
     assert build_model(cfg.model).__class__.__name__ == "LogisticModel"
     for model, extra in [("barista", "barista,warmup"), ("diver", "diver")]:
         selected = compose(config_name="config", overrides=[
-            "paths=example", "model=" + model, "preprocessor=wav_nohpf_pooled_2048Hz"
+            "paths=example", "model=" + model, "preprocessor=wav_hpf_robust_2048to500Hz"
         ])
         if model == "diver":
             selected.model.upstream_ckpt = "/unused/checkpoint.pt"

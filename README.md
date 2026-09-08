@@ -176,17 +176,15 @@ and `runtime.preprocess_torch_num_threads` for your machine. Use
 
 **Preprocessing**
 
-The bundled collection contains 22 presets: the 10 main input presets listed in
-the dataset scripts, plus 12 variants used by the paper figure notebooks. Each
-additional family below has both `1000` and `2048` Hz versions; replace `{rate}`
+The bundled collection contains 18 presets: the 10 main input presets listed in
+the dataset scripts, plus 8 variants selected for the paper notebooks' final
+plots. Each additional family below has both `1000` and `2048` Hz versions; replace `{rate}`
 with the dataset's native rate (BYD: 1000; NeuroprobeV2 and PIPPI: 2048).
 
 | Paper variant | Preprocessor config (without `.yaml`) |
 | --- | --- |
 | Single-STFT | `laplacian_stft_{rate}Hz` |
 | Multi-STFT with per-sample, per-channel normalization | `laplacian_multi_stft_{rate}Hz_zscore` |
-| Multi-STFT with the upper band extended to 400 Hz | `laplacian_multi_stft_high_{rate}Hz` |
-| Native-rate waveform without high-pass filtering | `wav_nohpf_pooled_{rate}Hz` |
 | 500 Hz waveform with high-pass filtering and per-sample, per-channel normalization | `wav_hpf_zscore_{rate}to500Hz` |
 | 500 Hz waveform without high-pass filtering, with robust scaling | `wav_nohpf_robust_{rate}to500Hz` |
 
@@ -199,14 +197,24 @@ filter and normalization details are explicit in its YAML.
 | `hpf_robust` | Notch + high-pass, 15-second context, cropped to target window | Global robust scaling fitted on training data |
 | `hpf_zscore` | Same filtering/context as `hpf_robust` | Per-sample, per-channel z-score |
 | `nohpf_robust` | Notch without high-pass, 15-second context, cropped to target window | Global robust scaling fitted on training data |
-| `nohpf_pooled` | Notch without high-pass, target window only, native sampling rate | Per-channel statistics pooled over training samples/time |
 | `diver` | DIVER filter, 15-second context, cropped to target window | No standardization stage; DIVER applies its input scaling |
 | `barista` | Session-wise notch + high-pass filtering, 2048 Hz output | Global robust scaling followed by per-sample, per-channel z-score |
 
-The `wav_nohpf_pooled_1000Hz` and `wav_nohpf_pooled_2048Hz` presets retain
-the native-rate "HTNet (no HPF)" paper comparisons. Those series are loaded by
-`plot_fig04_preprocessing_baselines.ipynb` but hidden in its final summary plot;
-they are separate from the 500 Hz, long-context `nohpf_robust` ablation.
+Selection follows the notebooks' active config choices and final model filters,
+excluding commented alternatives and hidden series:
+
+| Notebook selection | Retained inputs |
+| --- | --- |
+| Figure 4 preprocessing baselines, after `HIDE_LAST_PLOT_MODELS` | Single-STFT, standard/z-scored Multi-STFT, and the three 500 Hz baseline waveform recipes |
+| Figure 4 STFT sweeps/selection and Appendix 1 challenge-unit comparison | Single-STFT sweeps and the main 500 Hz waveform recipe |
+| Appendix 3 coverage, with `MODEL_TO_PLOT = 'Logistic (multi-STFT)'` | Standard Multi-STFT |
+| Other scorecards, task breakouts, scaling, sample-efficiency, and input visualization | Main presets and single-STFT |
+
+The native-rate waveform presets (`wav_nohpf_pooled_{rate}Hz`, previously
+`laplacian_wav_{rate}Hz`) and 400 Hz Multi-STFT presets
+(`laplacian_multi_stft_high_{rate}Hz`) have been removed: their entries are
+hidden or unselected in the final plots. The retained single-STFT sweeps can
+still vary their frequency limit independently.
 
 <details>
 <summary>Previous waveform names and migration</summary>
@@ -218,8 +226,6 @@ this mapping. Old preset aliases are not bundled.
 
 | Previous name (without `.yaml`) | New name |
 | --- | --- |
-| `laplacian_wav_1000Hz` | `wav_nohpf_pooled_1000Hz` |
-| `laplacian_wav_2048Hz` | `wav_nohpf_pooled_2048Hz` |
 | `laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz` | `wav_hpf_robust_1000to500Hz` |
 | `laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz` | `wav_hpf_robust_2048to500Hz` |
 | `laplacian_wav_HPF_sample_per_channel_time_long_context_15s_1000Hzto500Hz` | `wav_hpf_zscore_1000to500Hz` |
@@ -233,10 +239,9 @@ this mapping. Old preset aliases are not bundled.
 
 </details>
 
-Selection follows the source cells and active visualization YAML entries used by
-`torch_brain/examples/neuroprobe_eval/notebooks/paper_figs`, including Figure 4
-preprocessing comparisons and Appendix 3 coverage. The restored Multi-STFT
-variants match the preprocessing settings in the corresponding saved
+The audited notebooks live in
+`torch_brain/examples/neuroprobe_eval/notebooks/paper_figs`. The restored z-scored
+Multi-STFT variants match the preprocessing settings in the corresponding saved
 `09_neurips/{dataset}/logistic_laplacian_multi_stft*/.../.hydra/config.yaml` runs,
 with Torch padding made explicit. The long-context waveform variants come from
 the original evaluation configs, migrated to `resample`. Historical DIVER output
