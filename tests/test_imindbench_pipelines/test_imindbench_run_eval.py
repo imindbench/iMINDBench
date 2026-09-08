@@ -125,7 +125,7 @@ def test_main_validates_config_before_wandb_init(monkeypatch):
         run_eval_module, "SKLearnRunner", lambda *_args, **_kwargs: object()
     )
     monkeypatch.setattr(
-        run_eval_module, "run_processed_evaluation", lambda *_args, **_kwargs: None
+        run_eval_module, "_run_processed_evaluation", lambda *_args, **_kwargs: None
     )
     monkeypatch.setattr(
         run_eval_module,
@@ -170,7 +170,7 @@ def test_main_finishes_wandb_when_processed_eval_raises(monkeypatch):
     def _boom(*_args, **_kwargs):
         raise RuntimeError("boom")
 
-    monkeypatch.setattr(run_eval_module, "run_processed_evaluation", _boom)
+    monkeypatch.setattr(run_eval_module, "_run_processed_evaluation", _boom)
 
     with pytest.raises(RuntimeError, match="boom"):
         run_eval_module.main.__wrapped__(cfg)

@@ -120,9 +120,9 @@ def dataset_pairings():
                         "brainbert_checkpoint": "/path/to/stft_large_pretrained.pth"
                     }
                 elif model == "diver":
-                    yaml_updates["model/diver.yaml"] = {
-                        "upstream_ckpt": "/path/to/ieeg_checkpoint.pt",
-                        "model_dir": "/path/to/diver_shapes",
+                    yaml_updates["paths/local.yaml"] = {
+                        "diver_checkpoint": "/path/to/ieeg_checkpoint.pt",
+                        "diver_shape_cache_dir": "/path/to/diver_shapes",
                     }
                 settings["yaml_updates"] = yaml_updates
                 rows.append(settings)

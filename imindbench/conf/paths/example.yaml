@@ -2,28 +2,21 @@
 # and select it with --config-dir <config-dir> paths=local.
 # Use absolute paths for data, checkpoints and caches.
 #
-# Replace dataset_root before running; optional resources can remain null.
-# Every key below must be present even when unused: conf/runtime/default.yaml
-# interpolates preprocessed_split_cache_dir, and a missing key raises
-# InterpolationKeyError before the run starts.
+# Only the dataset fields below are needed for the first baseline.
+# Optional resources inherit null defaults from conf/config.yaml.
 
 # Root holding the processed brainsets, and the directory name under it.
 dataset_root: /path/to/brainsets/processed
 dataset_dirname: neuroprobe_2025
 
-# Pretrained checkpoints. Set only those your model needs to absolute paths.
-barista_checkpoint: null
-brainbert_checkpoint: null
-popt_checkpoint: null
-
-# Caches. When enabled, a null train_source_cache_dir uses
-# <dataset_root>/.neuroprobe_eval_train_source_cache. Set an absolute path to
-# place it elsewhere. preprocessed_split_cache_dir is optional, but keep the key.
-train_source_cache_dir: null
-preprocessed_split_cache_dir: null
-
-# Optional inputs, null unless you are using the feature that reads them.
-clean_laplacian_path: null
-electrode_dir_btb: null
-electrode_dir_byd: null
-decodable_subject_sessions_dir: null
+# Add only the resources you use, for example:
+# popt_checkpoint: /path/to/popt.pt
+# brainbert_checkpoint: /path/to/stft_large_pretrained.pth
+# barista_checkpoint: /path/to/barista.pt
+# diver_checkpoint: /path/to/ieeg_checkpoint.pt
+# diver_shape_cache_dir: /path/to/diver_shapes
+# train_source_cache_dir: /path/to/train_cache
+# preprocessed_split_cache_dir: /path/to/preprocessed_cache
+# decodable_subject_sessions_dir: /path/to/population_manifests
+# With training-source caching enabled, null uses the dataset root's
+# .neuroprobe_eval_train_source_cache directory.

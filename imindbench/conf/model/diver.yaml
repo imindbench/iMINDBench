@@ -1,8 +1,8 @@
 name: diver
 backend: torch
 requires_aligned_channels: false
-model_dir: null  # Override with a writable MuP shape directory.
-upstream_ckpt: null  # Override with a DIVER checkpoint path.
+model_dir: ${paths.diver_shape_cache_dir}  # Writable MuP shape directory.
+upstream_ckpt: ${paths.diver_checkpoint}
 frozen_upstream: true  # Easy toggle: true = frozen encoder, false = full fine-tuning
 
 # Learning rates (from DIVER-1 AdamW_finetune)

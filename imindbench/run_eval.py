@@ -4,7 +4,6 @@ Main evaluation script for neuroprobe using Hydra configuration.
 
 import logging
 import sys
-import time
 from functools import partial
 
 import hydra
@@ -71,21 +70,12 @@ def main(cfg: DictConfig) -> None:
     root_logger = logging.getLogger()
     wandb_run = None
     try:
-        # Hydra automatically configures Python logging to output to both console and log file
-        # No manual setup needed - just use the logger from logging_utils
-
-        # Setup
-        runtime_cfg = cfg.get("runtime")
-        if runtime_cfg is None:
-            raise ValueError("cfg.runtime is required and must be a mapping.")
-        if not hasattr(runtime_cfg, "get"):
-            raise TypeError("cfg.runtime must be a mapping/dict-like object.")
+        # The public evaluation boundary validates once, before external setup.
+        validate_eval_config(cfg)
+        runtime_cfg = cfg.runtime
         set_verbose(runtime_cfg.get("verbose", True))
         log("Starting neuroprobe evaluation", priority=0)
         log(f"Configuration:\n{OmegaConf.to_yaml(cfg, resolve=True)}", priority=1)
-
-        # Validate config before any external service initialization (e.g., wandb).
-        validate_eval_config(cfg)
 
         # Initialize wandb if enabled
         if cfg.get("wandb", {}).get("enabled", False):
@@ -136,13 +126,7 @@ def main(cfg: DictConfig) -> None:
         log(f"Using preprocessor: {cfg.preprocessor.name}", priority=0)
         log(f"Using model: {cfg.model.name}", priority=0)
 
-        if "use_raw_data" in cfg or "raw_data_path" in cfg:
-            raise ValueError(
-                "Raw-data evaluation has been removed. "
-                "Use processed dataset mode via dataset.* config."
-            )
-
-        run_processed_evaluation(
+        _run_processed_evaluation(
             cfg,
             preprocessor,
             runner,
@@ -157,25 +141,21 @@ def main(cfg: DictConfig) -> None:
             wandb.finish()
 
 
-def run_processed_evaluation(
+def _run_processed_evaluation(
     cfg,
     preprocessor,
     runner,
     wandb_run=None,
 ):
-    """Run the canonical processed-data evaluation flow.
+    """Run processed-data evaluation with the config already validated by main.
 
     This path owns dataset-provider routing, fold iteration, result formatting,
     and final output persistence for the variable-channel evaluation stack.
     """
     # Canonical processed path: provider-selected variable-channel datasets.
     log("Loading processed data via variable-channel split adapter", priority=0)
-    setup_start_time = time.time()
-    # Validate config before building providers/models to fail fast on bad inputs.
-    validate_eval_config(cfg)
     dataset_cfg = cfg.dataset
-    data_load_time = time.time() - setup_start_time
-    log(f"Validated eval config in {data_load_time:.2f}s", priority=0)
+    data_load_time = 0.0
 
     subject_id = dataset_cfg.test_subject
     trial_id = dataset_cfg.test_session

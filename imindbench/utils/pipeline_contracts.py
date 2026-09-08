@@ -803,6 +803,11 @@ def validate_eval_config(cfg: DictConfig) -> None:
     Call this once before the evaluation loop. After it returns, callers can
     trust that all cfg sections are well-formed and access them directly.
     """
+    if "use_raw_data" in cfg or "raw_data_path" in cfg:
+        raise ValueError(
+            "Raw-data evaluation has been removed. "
+            "Use processed dataset mode via dataset.* config."
+        )
     # -- dataset --
     # Resolve once into a plain mapping to avoid accidental OmegaConf mutation
     # while applying strict validation checks.

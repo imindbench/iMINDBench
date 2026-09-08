@@ -77,6 +77,13 @@ def test_custom_sklearn_model_runs_through_evaluation_entrypoint(
     cfg.model.name = "custom_linear"
     cfg.preprocessor = {"name": "raw"}
     cfg.dataset.merge_val_into_test = merge_val_into_test
+    validation_calls = []
+
+    def validate(config):
+        validation_calls.append(config)
+        validate_eval_config(config)
+
+    monkeypatch.setattr(run_eval, "validate_eval_config", validate)
     monkeypatch.setitem(MODEL_REGISTRY, "custom_linear", LogisticModel)
     fold = {}
     for split in ("train", "val", "test"):
@@ -107,5 +114,6 @@ def test_custom_sklearn_model_runs_through_evaluation_entrypoint(
         lambda **kwargs: str(output),
     )
     run_eval.main.__wrapped__(cfg)
+    assert len(validation_calls) == 1
     assert "custom_linear" in output.read_text()
     assert json.loads(output.read_text())

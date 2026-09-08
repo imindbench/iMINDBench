@@ -9,6 +9,17 @@ defaults:
   - runtime: default
   - optional experiment: null  # Native Hydra overrides for a named experiment.
 
+# Optional resources inherit these defaults when absent from paths/local.yaml.
+paths:
+  barista_checkpoint: null
+  brainbert_checkpoint: null
+  popt_checkpoint: null
+  diver_checkpoint: null
+  diver_shape_cache_dir: null
+  train_source_cache_dir: null
+  preprocessed_split_cache_dir: null
+  decodable_subject_sessions_dir: null
+
 # Hydra configuration
 hydra:
   job:

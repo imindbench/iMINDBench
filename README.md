@@ -53,8 +53,9 @@ cp imindbench/conf/paths/example.yaml /path/to/config/paths/local.yaml
 ```
 
 Set `dataset_root: /path/to/processed` and `dataset_dirname: neuroprobe_2025`.
-BYD and PIPPI configs select their own subdirectories under that root. Keep every
-key; checkpoint/cache fields can remain `null` for the first baseline.
+BYD and PIPPI configs select their own subdirectories under that root. These two
+fields are enough for the first baseline. Add checkpoint/cache paths only when
+needed; omitted optional resources inherit packaged `null` defaults.
 
 ### 4. Run a first model
 
@@ -85,7 +86,7 @@ pairs and all 15 tasks; the default model is Logistic with multi-STFT inputs.
 | --- | --- |
 | Model and inputs | `MODEL`, `PREPROCESSOR` and `EXPERIMENT` in the script; use its compatibility table |
 | Paths and evaluation selection | `CONFIG_DIR`, `OUTPUT_ROOT`, `TASKS` and `TARGETS` in the script |
-| Pretrained checkpoints | `popt_checkpoint`, `brainbert_checkpoint` or `barista_checkpoint` in `paths/local.yaml` |
+| Pretrained checkpoints | `popt_checkpoint`, `brainbert_checkpoint`, `barista_checkpoint` or `diver_checkpoint` in `paths/local.yaml` |
 | Model settings | `imindbench/conf/model/<MODEL>.yaml` |
 | Training overrides | `imindbench/conf/experiment/<EXPERIMENT>.yaml`; these take precedence over model settings |
 
@@ -150,8 +151,8 @@ evaluations per model/input pairing**, before folds.
   `epoch_based`); `optimizer` names are case-sensitive PyTorch optimizer classes
   such as `Adam`, `AdamW` or `SGD` (default: `Adam`). Invalid names fail before
   evaluation instead of silently selecting a different training setup.
-- Store checkpoint paths in `paths/local.yaml`. DIVER instead uses `upstream_ckpt`
-  and `model_dir` in `imindbench/conf/model/diver.yaml`.
+- Store checkpoint paths in `paths/local.yaml`. DIVER also needs a writable
+  `diver_shape_cache_dir` in that same file.
 - Scripts run each enabled block serially and skip existing output JSONs.
   If a block reports failures, the script stops before the next block.
 - Use a new output root after changing settings.
@@ -222,7 +223,7 @@ Model dependencies are included in the installation above.
 | PopT-v2 | Model weights will be shared upon request. | `paths.popt_checkpoint` |
 | BrainBERT | [Official weights ZIP](https://drive.google.com/file/d/14ZBOafR7RJ4A6TsurOXjFVMXiVH6Kd_Q/view?usp=sharing), linked by the [upstream project](https://github.com/czlwang/BrainBERT#using-brainbert-embeddings); extract `stft_large_pretrained.pth` | `paths.brainbert_checkpoint` |
 | BaRISTA | Model weights will be shared upon request. | `paths.barista_checkpoint` |
-| DIVER-1 | [Official iEEG checkpoint](https://drive.google.com/file/d/1svTMyxABZ-9kvk-BiiZ6-2sNyZ5io8mg/view), linked by the [upstream project](https://github.com/DIVER-Project/DIVER-1#weights) | `model.upstream_ckpt` and writable `model.model_dir` |
+| DIVER-1 | [Official iEEG checkpoint](https://drive.google.com/file/d/1svTMyxABZ-9kvk-BiiZ6-2sNyZ5io8mg/view), linked by the [upstream project](https://github.com/DIVER-Project/DIVER-1#weights) | `paths.diver_checkpoint` and writable `paths.diver_shape_cache_dir` |
 
 <details>
 <summary>Checkpoint compatibility and DIVER configuration</summary>
@@ -233,12 +234,11 @@ Model dependencies are included in the installation above.
 | BrainBERT | Expects the upstream `model_cfg`/`model` format. |
 | BaRISTA | Use the weights shared upon request and prepared Destrieux metadata. The `barista` preset selects `localization_Destrieux` for NeuroprobeV2 or `label_destrieux` for BYD/PIPPI. |
 
-For DIVER, select its table entry and edit these fields in
-`imindbench/conf/model/diver.yaml`:
+For DIVER, select its table entry and add these fields to `paths/local.yaml`:
 
 ```yaml
-upstream_ckpt: /path/to/ieeg_checkpoint.pt
-model_dir: /path/to/diver_shapes
+diver_checkpoint: /path/to/ieeg_checkpoint.pt
+diver_shape_cache_dir: /path/to/diver_shapes
 ```
 
 - **Default architecture:** width 256, depth 12, patch size 50; DeepSpeed `module` format.
