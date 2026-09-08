@@ -12,7 +12,6 @@ from pathlib import Path
 
 from hydra import compose, initialize_config_dir
 from hydra.errors import HydraException
-from omegaconf import OmegaConf
 
 CONF_DIR = Path(__file__).resolve().parent / "conf"
 POPULATION_DIR = Path(__file__).resolve().parent / "decodable_subject_sessions"
@@ -52,15 +51,6 @@ def _validate_names(value, name, allow_empty=False):
         raise ValueError(f"{name} must contain unique names")
 
 
-def _select(available, requested, name):
-    if requested is None:
-        return available
-    _validate_names(requested, name)
-    if set(requested) - set(available):
-        raise ValueError(f"{name} must select entries from {available}")
-    return requested
-
-
 def _value(value):
     if isinstance(value, str) and re.fullmatch(r"[\w./:+-]+", value):
         return value
@@ -83,7 +73,6 @@ def build_commands(args):
         "model",
         "preprocessor",
         "paths",
-        "unit_set",
         "output_group",
     ):
         _validate_name(getattr(args, name), name)
@@ -166,28 +155,18 @@ def build_commands(args):
         decodable_dir = Path(cfg.paths.decodable_subject_sessions_dir)
     provider = cfg.dataset.provider
     _validate_name(provider, "dataset.provider")
-    catalog = OmegaConf.to_container(
-        OmegaConf.load(CONF_DIR / "units/catalog.yaml"), resolve=True
-    )
-    _validate_names(catalog["tasks"], "tasks")
-    tasks = _select(catalog["tasks"], args.task, "task")
-    pairs = catalog["datasets"][provider]["targets"][args.unit_set]
-    if (
-        not isinstance(pairs, list)
-        or not pairs
-        or any(
-            not isinstance(pair, list)
-            or len(pair) != 2
-            or any(type(v) is not int or v < 0 for v in pair)
-            for pair in pairs
-        )
-        or len({tuple(pair) for pair in pairs}) != len(pairs)
-    ):
-        raise ValueError(
-            "Population targets must be unique nonnegative [subject, session] pairs"
-        )
-    targets = {f"sub{s}_sess{t}": (s, t) for s, t in pairs}
-    selected_targets = _select(list(targets), args.target, "target")
+    # Scripts own selection; the launcher validates syntax without a second catalog.
+    _validate_names(args.task, "task")
+    _validate_names(args.target, "target")
+    tasks = args.task
+    targets = {}
+    for target in args.target:
+        match = re.fullmatch(r"sub(0|[1-9][0-9]*)_sess(0|[1-9][0-9]*)", target)
+        if match is None:
+            raise ValueError(
+                f"Invalid target {target!r}; expected sub<S>_sess<T> (e.g. sub1_sess1)"
+            )
+        targets[target] = tuple(int(value) for value in match.groups())
     population = None
     if decodable_dir is not None:
         population = json.loads((decodable_dir / f"{provider}.json").read_text())[
@@ -212,7 +191,7 @@ def build_commands(args):
     commands = []
     output = args.output_root.expanduser().resolve()
     for values, task, target in itertools.product(
-        itertools.product(*sweeps.values()), tasks, selected_targets
+        itertools.product(*sweeps.values()), tasks, targets
     ):
         if (
             population is not None
@@ -320,18 +299,17 @@ def parser():
             "hold-out-subject",
         ],
     )
-    result.add_argument(
-        "--unit-set", default="all", help="Named set of evaluation units"
-    )
     result.add_argument("--subset", help="Dataset subset tier")
     result.add_argument(
         "--task",
         nargs="+",
+        required=True,
         help="Select tasks; the last --task replaces earlier selections",
     )
     result.add_argument(
         "--target",
         nargs="+",
+        required=True,
         help="Select sub<S>_sess<T>; the last --target replaces earlier selections",
     )
     result.add_argument(

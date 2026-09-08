@@ -10,6 +10,21 @@ from omegaconf import OmegaConf
 
 
 @pytest.fixture
+def dataset_selections():
+    """Read the task/target lists owned by each editable dataset script."""
+
+    def read_selections(dataset):
+        script = Path(__file__).resolve().parents[1] / "scripts" / f"run_{dataset}.sh"
+        source = script.read_text()
+        return tuple(
+            shlex.split(re.search(rf"^{key}=\(([\s\S]*?)^\)", source, re.M)[1])
+            for key in ("TASKS", "TARGETS")
+        )
+
+    return read_selections
+
+
+@pytest.fixture
 def dataset_script(tmp_path):
     root = Path(__file__).resolve().parents[1]
     config = tmp_path / "local config"

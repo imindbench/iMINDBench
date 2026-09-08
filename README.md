@@ -135,7 +135,8 @@ evaluations per model/input pairing**, before folds.
 
 - Covers the benchmark selection, not every recording in the original datasets.
 - Applies no decodable-target filter.
-- Coverage tests compare the scripts with [units/catalog.yaml](imindbench/conf/units/catalog.yaml).
+- Scripts own the task/target selections; coverage tests check that launch previews
+  match those explicit lists.
 
 <details>
 <summary>Smaller runs and cohort details</summary>
@@ -262,7 +263,7 @@ brainsets prepare → prepared recordings and labels → dataset task/split
 | Model settings / implementation | `imindbench/conf/model/` / `imindbench/models/` |
 | Preprocessing settings / implementation | `imindbench/conf/preprocessor/` / `imindbench/preprocessors/` |
 | Training / runtime presets | `imindbench/conf/experiment/` / `imindbench/conf/runtime/` |
-| Task and unit catalog | `imindbench/conf/units/catalog.yaml` |
+| Task and recording selections | `TASKS` and `TARGETS` in each dataset script |
 | Launching / single evaluation | `imindbench/launch.py` / `imindbench/run_eval.py` |
 
 Preparation pipelines and dataset loader implementations live in TorchBrain,
@@ -296,10 +297,10 @@ reuse. Dataset scripts select the model, preprocessor and experiment; use
 <summary>Compare preprocessors using a baseline model</summary>
 
 Select a different preprocessor config while keeping the model, task and unit
-selection fixed. This runs Logistic on all NeuroprobeV2 units/tasks:
+selection fixed. This runs Logistic on one NeuroprobeV2 task/recording:
 
 ```bash
-imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor laplacian_stft_2048Hz --experiment baseline --unit-set all --device cpu --config-dir /path/to/config --paths local --output-root /path/to/runs/single_stft
+imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor laplacian_stft_2048Hz --experiment baseline --task onset --target sub1_sess1 --device cpu --config-dir /path/to/config --paths local --output-root /path/to/runs/single_stft
 ```
 
 - Repeat with `--preprocessor laplacian_multi_stft_2048Hz` and a different output root.
@@ -331,7 +332,9 @@ imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor laplacian
    from the custom experiment example.
 
 Start with one task/target and check input shapes and class probabilities.
-Then omit `--task` and `--target` to run the full catalog for that dataset.
+Then expand `TASKS` and `TARGETS` in the dataset script for a larger run.
+The CLI requires both selections explicitly; automatic all-target expansion and
+`--unit-set` have been removed.
 Repeat for all three datasets with matching preprocessors.
 
 </details>
@@ -385,7 +388,7 @@ python -m ruff format --check .
 python -m pytest -q
 ```
 
-Tests cover configurations, full-catalog launch previews and synthetic runtime
+Tests cover configurations, script-selected launch previews and synthetic runtime
 contracts without downloading complete datasets or rerunning benchmark experiments.
 Some tests need external checkpoints and skip when those are unavailable.
 

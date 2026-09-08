@@ -5,7 +5,6 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from omegaconf import OmegaConf
 
 from imindbench.utils.pipeline_contracts import validate_eval_config
 
@@ -16,17 +15,17 @@ ROOT = Path(__file__).resolve().parents[1]
     "dataset", ["neuroprobev2", "kelesbyd2024", "berezutskayapippi2022"]
 )
 def test_dataset_default_covers_all_tasks_targets_and_pairings(
-    tmp_path, dataset_script, dataset
+    tmp_path, dataset_script, dataset_selections, dataset
 ):
     script = dataset_script(dataset=dataset)
     result = subprocess.run(
         ["bash", script], cwd=tmp_path, text=True, capture_output=True, check=True
     )
-    catalog = OmegaConf.load(ROOT / "imindbench/conf/units/catalog.yaml")
+    tasks, targets = dataset_selections(dataset)
     expected_units = {
-        (task, str(subject), str(session))
-        for task in catalog.tasks
-        for subject, session in catalog.datasets[dataset].targets.all
+        (task, *target.removeprefix("sub").split("_sess"))
+        for task in tasks
+        for target in targets
     }
     rate = 1000 if dataset == "kelesbyd2024" else 2048
     spectral = f"laplacian_multi_stft_{rate}Hz"
@@ -102,7 +101,7 @@ def test_optional_transfer_uses_main_cohort(tmp_path, dataset_script, family, da
 
 @pytest.mark.parametrize("model", ["logistic", "mlp", "cnn", "popt"])
 def test_neuroprobe_sample_efficiency_covers_models_units_and_fractions(
-    tmp_path, dataset_script, model
+    tmp_path, dataset_script, dataset_selections, model
 ):
     script = dataset_script(
         family="sample_efficiency", MODEL=model, EXPERIMENT=f"multi_stft/{model}"
@@ -110,12 +109,12 @@ def test_neuroprobe_sample_efficiency_covers_models_units_and_fractions(
     result = subprocess.run(
         ["bash", script], text=True, capture_output=True, check=True
     )
-    catalog = OmegaConf.load(ROOT / "imindbench/conf/units/catalog.yaml")
+    tasks, targets = dataset_selections("neuroprobev2")
     expected = {
-        (model, fraction, task, str(subject), str(session))
+        (model, fraction, task, *target.removeprefix("sub").split("_sess"))
         for fraction in ["1.0", "0.5", "0.25", "0.125", "0.0625"]
-        for task in catalog.tasks
-        for subject, session in catalog.datasets.neuroprobev2.targets.all
+        for task in tasks
+        for target in targets
     }
     actual = set()
     paths = set()

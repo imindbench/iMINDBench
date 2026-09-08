@@ -31,6 +31,10 @@ def _args(*extra):
             "/runs",
             "--paths",
             "example",
+            "--task",
+            "onset",
+            "--target",
+            "sub1_sess1",
             "--device",
             "cpu",
             *extra,
@@ -145,7 +149,6 @@ def test_population_filter_matches_manifest_and_dry_run_is_read_only(tmp_path):
         "hold-in-session",
     )
     args.output_root = tmp_path / "runs"
-    jobs = launch.build_commands(args)
     population = json.loads(
         (
             launch.POPULATION_DIR / "stft_or_htnet_500hz_val_mean0p60/neuroprobev2.json"
@@ -156,6 +159,9 @@ def test_population_filter_matches_manifest_and_dry_run_is_read_only(tmp_path):
         for task, entry in population["tasks"].items()
         for target in entry["subject_sessions"]
     }
+    args.task = list(population["tasks"])
+    args.target = sorted({target for _, target in expected})
+    jobs = launch.build_commands(args)
     actual = {
         (_overrides(job["command"])["dataset.task"], Path(job["run_dir"]).name)
         for job in jobs
@@ -176,6 +182,41 @@ def test_baseline_preset_does_not_cap_training_samples():
             ],
         )
     assert cfg.dataset.max_train_samples_per_subject is None
+
+
+def test_explicit_selections_do_not_require_catalog_membership():
+    jobs = launch.build_commands(
+        _args("--task", "custom_task", "--target", "sub99_sess2")
+    )
+    assert len(jobs) == 1
+    overrides = _overrides(jobs[0]["command"])
+    assert overrides["dataset.task"] == "custom_task"
+    assert overrides["dataset.test_subject"] == "99"
+    assert overrides["dataset.test_session"] == "2"
+
+
+@pytest.mark.parametrize("target", ["all", "sub1", "sub01_sess1", "sub1_sess-1"])
+def test_invalid_target_syntax_is_rejected(target):
+    with pytest.raises(ValueError, match="Invalid target"):
+        launch.build_commands(_args("--target", target))
+
+
+@pytest.mark.parametrize("missing", ["--task", "--target"])
+def test_cli_requires_explicit_task_and_target(missing):
+    args = [
+        "--dataset",
+        "neuroprobev2",
+        "--model",
+        "logistic",
+        "--preprocessor",
+        "laplacian_stft_2048Hz",
+        "--output-root",
+        "/runs",
+    ]
+    args += ["--target", "sub1_sess1"] if missing == "--task" else ["--task", "onset"]
+    with pytest.raises(SystemExit) as exc:
+        launch.parser().parse_args(args)
+    assert exc.value.code == 2
 
 
 def test_transfer_preset_composes_with_packaged_manifest():
@@ -366,6 +407,10 @@ def test_cli_executes_by_default_with_explicit_preview_modes(
         "laplacian_multi_stft_2048Hz",
         "--output-root",
         str(tmp_path),
+        "--task",
+        "onset",
+        "--target",
+        "sub1_sess1",
     ]
     if mode:
         argv.append(mode)
