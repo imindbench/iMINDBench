@@ -1,8 +1,0 @@
-# @package _global_
-defaults:
-- /experiment/multi_stft/common
-- _self_
-model:
-  upstream_lr: 5.0e-05
-  head_lr: 0.0005
-  learning_rate: 0.0005

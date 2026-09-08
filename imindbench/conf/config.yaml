@@ -25,14 +25,6 @@ hydra:
   job:
     chdir: true  # Explicitly set working directory behavior to suppress warning
 
-# Runner settings
-runner:
-  num_workers: 0
-  pin_memory: false
-  persistent_workers: false
-  prefetch_factor: 2  # Used only when num_workers>0.
-  coord_index_policy: legacy_truncation  # options: round_clamp | legacy_truncation
-
 # Wandb (Weights & Biases) logging configuration
 wandb:
   enabled: false  # Remote logging is opt-in.

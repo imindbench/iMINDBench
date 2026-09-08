@@ -62,7 +62,7 @@ needed; omitted optional resources inherit packaged `null` defaults.
 Run one CPU Logistic evaluation:
 
 ```bash
-python -m imindbench.launch --dataset neuroprobev2 --model logistic --experiment multi_stft/logistic \
+python -m imindbench.launch --dataset neuroprobev2 --model logistic --experiment default \
   --preprocessor laplacian_multi_stft_2048Hz --task onset --target sub1_sess1 \
   --device cpu --paths local --config-dir /path/to/config --output-root /path/to/runs/logistic
 ```
@@ -102,7 +102,7 @@ and targets. For example, NeuroprobeV2 defaults to:
 ```bash
 MODEL=logistic
 PREPROCESSOR=laplacian_multi_stft_2048Hz
-EXPERIMENT=multi_stft/logistic
+EXPERIMENT=default
 ```
 
 `EXPERIMENT` selects training defaults; change it along with the pairing using
@@ -166,6 +166,13 @@ evaluations per model/input pairing**, before folds.
 - Scripts run each enabled block serially and skip existing output JSONs.
   If a block reports failures, the script stops before the next block.
 - Use a new output root after changing settings.
+
+The shared runtime config defaults to 4 data-loader workers, pinned memory,
+persistent workers, and 6 preprocessing Torch threads, matching the former
+Multi-STFT execution preset. These now apply to every model/input pairing.
+Adjust `runner.num_workers`, `runner.pin_memory`, `runner.persistent_workers`,
+and `runtime.preprocess_torch_num_threads` for your machine. Use
+`experiment=default` in place of the former `multi_stft/*` experiments.
 
 **Preprocessing**
 
@@ -259,8 +266,9 @@ The `default` and `decodable` experiment presets expose the same fields:
 
 `default` is selected when no experiment is specified; scripts can explicitly
 select `--experiment default`. It replaces the former `baseline` and
-`within_session` presets. The model/input-specific training presets remain
-available while their training defaults are being consolidated.
+`within_session` presets. Only these two experiment presets are bundled. Model
+settings live in model configs; runtime settings live in
+`imindbench/conf/runtime/default.yaml`.
 
 | Setting | Within-session / sample efficiency | Within-dataset / multi-dataset |
 | --- | --- | --- |

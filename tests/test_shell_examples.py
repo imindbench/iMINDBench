@@ -104,7 +104,7 @@ def test_neuroprobe_sample_efficiency_covers_models_units_and_fractions(
     tmp_path, dataset_script, dataset_selections, model
 ):
     script = dataset_script(
-        family="sample_efficiency", MODEL=model, EXPERIMENT=f"multi_stft/{model}"
+        family="sample_efficiency", MODEL=model, EXPERIMENT="default"
     )
     result = subprocess.run(
         ["bash", script], text=True, capture_output=True, check=True

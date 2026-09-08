@@ -327,7 +327,7 @@ def test_cli_tuning_overrides_native_experiment_settings():
         "--model",
         "mlp",
         "--experiment",
-        "multi_stft/mlp",
+        "default",
         "--limit",
         "1",
         "--set",

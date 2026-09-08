@@ -279,14 +279,6 @@ def build_torch_split_loaders(
 
     loader_prefetch_factor = prefetch_factor if num_workers > 0 else None
 
-    if num_workers > 0:
-        warnings.warn(
-            "dataset_variable_channel with runner.num_workers>0 can increase memory "
-            "usage due to worker copies of materialized split datasets and may be "
-            "less stable on some systems. V1 recommendation: runner.num_workers=0.",
-            UserWarning,
-            stacklevel=2,
-        )
     train_generator = None
     if seed is not None:
         # Seed only the train loader's sampling order; val/test stay deterministic
