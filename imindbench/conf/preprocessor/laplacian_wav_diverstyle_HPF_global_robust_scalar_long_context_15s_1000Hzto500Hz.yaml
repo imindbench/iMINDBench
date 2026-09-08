@@ -13,7 +13,7 @@ chain:
   - name: laplacian_rereference
     remove_non_laplacian: true
 
-  - name: downsample
+  - name: resample
     source_rate: 1000
     target_rate: 500
 

@@ -18,6 +18,6 @@ chain:
   - name: laplacian_rereference
     remove_non_laplacian: true
 
-  - name: downsample
+  - name: resample
     source_rate: 2048
     target_rate: 500

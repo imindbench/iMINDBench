@@ -10,7 +10,7 @@ chain:
     high_pass_hz: 0.5
     high_pass_order: 4
     high_pass_zero_phase: true
-  - name: upsampler
+  - name: resample
     source_rate: 1000
     target_rate: 2048
   - name: laplacian_rereference

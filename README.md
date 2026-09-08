@@ -162,6 +162,20 @@ evaluations per model/input pairing**, before folds.
 | Multi-STFT | Uses the dataset's native sampling rate |
 | 500 Hz waveform baselines | Filter with 15-second context, crop to the target window, apply Laplacian referencing, downsample, and fit robust scaling on training data |
 
+Waveform rate conversion uses one `resample` stage with required positive integer
+`source_rate` and `target_rate` values in Hz. It accepts NumPy arrays or Torch
+tensors shaped `(channels, time)` and returns float32 NumPy arrays, preserving
+channel metadata and setting `sampling_rate` to the target rate. Output length is
+`ceil(input_length * target_rate / source_rate)`, matching SciPy's polyphase
+resampler. Crop context windows before resampling.
+
+For external preprocessor YAMLs, replace `name: downsample` or `name: upsampler`
+with `name: resample` and specify both rates. The old stages have been removed.
+Upsampling no longer rounds fractional output lengths to the nearest integer;
+it can retain one additional sample. The bundled one-second waveform windows
+still produce 500 samples for the waveform baselines and 2048 for BaRISTA.
+Use a new output root after migrating; existing result JSONs are still skipped.
+
 **Dataset subsets**
 
 | Dataset | Default subset |
