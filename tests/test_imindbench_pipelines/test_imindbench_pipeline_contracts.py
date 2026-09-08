@@ -145,7 +145,13 @@ def test_removed_preprocessors_are_not_registered():
     assert "raw" in PREPROCESSOR_REGISTRY
 
 
-def test_resolve_train_source_configs_inherit_top_level_coordinate_profile():
+@pytest.mark.parametrize(
+    "preprocessors",
+    [(None, None), ("multi_stft_2048Hz", "multi_stft_1000Hz")],
+)
+def test_resolve_train_source_configs_inherit_profile_and_resolve_presets(
+    preprocessors,
+):
     cfg = _cfg({"name": "region_intersection_pool"})
     cfg.dataset.regime = "within-session"
     cfg.dataset.provider = "neuroprobev2"
@@ -173,12 +179,19 @@ def test_resolve_train_source_configs_inherit_top_level_coordinate_profile():
         },
     ]
 
+    for source, preprocessor in zip(
+        cfg.dataset.train_sources, preprocessors, strict=True
+    ):
+        if preprocessor is not None:
+            source.preprocessor = preprocessor
+
     sources = resolve_train_source_configs(cfg.dataset)
 
     assert [source["coordinate_profile"] for source in sources] == [
         "diver_mni",
         "diver_mni",
     ]
+    assert [source["preprocessor"] for source in sources] == list(preprocessors)
 
 
 @pytest.mark.parametrize("submitter", [None, {}, {"author": None}, {"author": "A"}])

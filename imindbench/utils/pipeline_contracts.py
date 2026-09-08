@@ -510,11 +510,7 @@ def _parse_optional_train_source_preprocessor(
             f"leading/trailing whitespace. Got '{value}' for provider "
             f"'{source_provider}'."
         )
-    # Train-source overrides accept either a named config file or a registered
-    # built-in preprocessor such as "raw", which is frequently used in tests
-    # and in direct programmatic fold construction.
-    if value in PREPROCESSOR_REGISTRY:
-        return value
+    # Runtime loads source overrides from preset YAMLs, not the stage registry.
     cfg_path = _PREPROCESSOR_CONFIG_DIR / f"{value}.yaml"
     if not cfg_path.exists():
         raise ValueError(
