@@ -184,14 +184,16 @@ with the dataset's native rate (BYD: 1000; NeuroprobeV2 and PIPPI: 2048).
 All bundled presets use Laplacian referencing, so filenames omit the
 `laplacian_` prefix. Spectral preset names are `stft_{rate}Hz`,
 `stft_brainbert_{rate}Hz`, `multi_stft_{rate}Hz`, and
-`multi_stft_{rate}Hz_zscore`. Update existing commands by dropping the prefix;
-processing settings are unchanged. Historical result folders retain their old
-names; new runs use the shorter names. Old preset aliases are not bundled.
+`multi_stft_zscore_{rate}Hz`. Update existing commands by dropping the prefix and
+moving the Multi-STFT `zscore` suffix before the rate (for example,
+`multi_stft_2048Hz_zscore` becomes `multi_stft_zscore_2048Hz`). Processing settings
+are unchanged. Historical result folders retain their old names; new runs use
+the shorter names. Old preset aliases are not bundled.
 
 | Paper variant | Preprocessor config (without `.yaml`) |
 | --- | --- |
 | Single-STFT | `stft_{rate}Hz` |
-| Multi-STFT with per-sample, per-channel normalization | `multi_stft_{rate}Hz_zscore` |
+| Multi-STFT with per-sample, per-channel normalization | `multi_stft_zscore_{rate}Hz` |
 | 500 Hz waveform with high-pass filtering and per-sample, per-channel normalization | `wav_hpf_zscore_{rate}to500Hz` |
 | 500 Hz waveform without high-pass filtering, with robust scaling | `wav_nohpf_robust_{rate}to500Hz` |
 
