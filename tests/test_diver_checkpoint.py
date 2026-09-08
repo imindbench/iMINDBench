@@ -13,7 +13,9 @@ def test_diver_checkpoint_with_fresh_and_existing_shape_cache(tmp_path):
     from imindbench.models.diver_components.diver import DIVER
     from imindbench.models.diver_model import DIVERModel
 
-    cfg = OmegaConf.load(Path(__file__).parents[1] / "imindbench/conf/model/diver.yaml")
+    cfg = OmegaConf.load(
+        Path(__file__).parents[1] / "imindbench/conf/model/diver.yaml"
+    ).model
     cfg.depth = 1
     cfg.upstream_ckpt = str(tmp_path / "checkpoint.pt")
     cfg.model_dir = str(tmp_path / "shapes")

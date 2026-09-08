@@ -240,6 +240,10 @@ brain-area field and owns the benchmark learning rates (`upstream_lr: 1e-3`,
 Use `experiment=default` or `experiment=decodable`; the separate `barista`
 experiment has been removed.
 
+Selecting `model=diver` selects `dataset.coordinate_profile=diver_mni`.
+Its training settings stay in the model YAML; use `default` or `decodable`
+in place of the former `diver` experiment.
+
 **Transfer cohorts and sample caps**
 
 The `default` and `decodable` experiment presets expose the same fields:

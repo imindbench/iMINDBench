@@ -14,7 +14,7 @@ set -euo pipefail
 # popt (PopT-v2)    laplacian_multi_stft_1000Hz                                            multi_stft/popt
 # linear_baseline   laplacian_stft_brainbert_1000Hz                                        default
 # barista           laplacian_wav_session_HPF_global_robust_scalar_1000Hz_2048Hz_zscore    default
-# diver             laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_1000Hzto500Hz      diver
+# diver             laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_1000Hzto500Hz      default
 MODEL=logistic
 PREPROCESSOR=laplacian_multi_stft_1000Hz
 EXPERIMENT=multi_stft/logistic       # Within-session preset; use the matching table entry.
