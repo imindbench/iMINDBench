@@ -12,6 +12,8 @@ import torch
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import OmegaConf
 
+from imindbench.utils.window_slicing import DEFAULT_WINDOW_SLICING_POLICY
+
 try:
     import psutil
 except ImportError:  # pragma: no cover - exercised via monkeypatch in tests
@@ -238,6 +240,7 @@ def build_public_export_result(
         },
         "config": {
             "preprocess": config_summary["preprocess"],
+            "window_slicing_policy": config_summary["window_slicing_policy"],
             "seed": config_summary["seed"],
             "subject_id": subject_id,
             "trial_id": trial_id,
@@ -259,6 +262,7 @@ def build_internal_eval_result(
     model_name,
     preprocess_type,
     preprocess_parameters,
+    window_slicing_policy,
     seed,
     results_population,
     subject_load_time,
@@ -285,6 +289,7 @@ def build_internal_eval_result(
         },
         "config_summary": {
             "preprocess": preprocess_parameters,
+            "window_slicing_policy": window_slicing_policy,
             "seed": int(seed),
         },
         # Unix timestamp is easier to aggregate in downstream scripts than a
@@ -392,6 +397,9 @@ def format_and_save_results(
         model_name=model_name,
         preprocess_type=preprocess_type,
         preprocess_parameters=preprocess_parameters,
+        window_slicing_policy=cfg.dataset.get(
+            "window_slicing_policy", DEFAULT_WINDOW_SLICING_POLICY
+        ),
         seed=runtime_cfg.seed,
         results_population=results_population,
         subject_load_time=data_load_time,

@@ -4,6 +4,11 @@ from __future__ import annotations
 
 import numpy as np
 
+from imindbench.utils.window_slicing import (
+    DEFAULT_WINDOW_SLICING_POLICY,
+    read_recording_window,
+)
+
 from . import register_preprocessor
 from .base_preprocessor import BasePreprocessor
 
@@ -167,8 +172,13 @@ class ContextWindowPreprocessor(BasePreprocessor):
                 "context_window sampling_rate does not match recording.sampling_rate: "
                 f"{self.sampling_rate} vs {float(recording_sampling_rate)}."
             )
-        window = recording.slice(loaded_start_sec, requested_end_sec)
-        window_data = np.asarray(window.seeg_data.data)
+        # Preserve historical context placement/cropping; the policy controls reads.
+        window_data = read_recording_window(
+            recording,
+            loaded_start_sec,
+            requested_end_sec,
+            sample.get("window_slicing_policy", DEFAULT_WINDOW_SLICING_POLICY),
+        )
         if window_data.ndim != 2:
             raise ValueError(
                 "Context recording slice must return 2D seeg_data.data "

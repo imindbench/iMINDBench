@@ -292,6 +292,28 @@ For multi-dataset training, `dataset.train_sources[].preprocessor` selects a
 bundled preprocessor preset by filename without `.yaml`. Omit it to inherit the
 top-level pipeline. Individual stage names such as `raw` are not preset names.
 
+**Window slicing and historical reproduction**
+
+`dataset.window_slicing_policy` applies to evaluation windows and context-window
+reads across all splits and training sources:
+
+- `ceil` (default): the current TorchBrain behavior, snapping near-grid timestamps
+  before rounding both boundaries up.
+- `legacy_floor`: floor both boundaries without snapping, relative to the
+  recording's time origin, matching the former historical diagnostic launcher.
+
+Historical mode preserves the existing context placement and crop calculations;
+it changes waveform reads, as the former diagnostic did. It does not establish
+parity for unrelated preprocessing or training changes.
+
+Select `dataset.window_slicing_policy=legacy_floor` through the normal evaluator
+or launcher. Logs and result JSON (`config.window_slicing_policy`) record the
+selection. Both preprocessing caches include the policy, and their versions have
+changed to exclude old entries that did not record it. Rebuild caches before
+using `read_only` mode. Caching can be enabled for either policy after this update.
+Use a new output root when changing policy, since completed result JSONs are
+still skipped independently of cache identity.
+
 STFT and multi-STFT use Torch with centered windows, `pad_mode: reflect` and
 `padded: false` in the bundled presets. SciPy STFT is no longer supported; remove
 legacy `use_scipy` and `boundary` keys from external configs. SciPy is still used

@@ -10,6 +10,10 @@ from omegaconf import DictConfig, ListConfig, OmegaConf
 from torch import optim
 
 from imindbench.preprocessors import PREPROCESSOR_REGISTRY
+from imindbench.utils.window_slicing import (
+    DEFAULT_WINDOW_SLICING_POLICY,
+    validate_window_slicing_policy,
+)
 
 AUTO_MAX_TRAIN_SAMPLES_PER_SUBJECT = "auto"
 
@@ -604,6 +608,9 @@ def resolve_train_source_configs(dataset_cfg: Any) -> list[dict[str, Any]]:
         # Keep source configs focused on provider selection; the top-level
         # dataset config continues to own task/label/uniquify semantics.
         "provider": _cfg_like_get(dataset_cfg, "provider", None),
+        "window_slicing_policy": _cfg_like_get(
+            dataset_cfg, "window_slicing_policy", DEFAULT_WINDOW_SLICING_POLICY
+        ),
         "root": _cfg_like_get(dataset_cfg, "root", None),
         "dirname": _cfg_like_get(dataset_cfg, "dirname", None),
         "subset_tier": _cfg_like_get(dataset_cfg, "subset_tier", None),
@@ -840,6 +847,9 @@ def validate_eval_config(cfg: DictConfig) -> None:
     if not isinstance(dataset_cfg, dict):
         raise TypeError("cfg.dataset must resolve to a mapping/dict.")
 
+    validate_window_slicing_policy(
+        dataset_cfg.get("window_slicing_policy", DEFAULT_WINDOW_SLICING_POLICY)
+    )
     _require_non_empty_dataset_str(dataset_cfg, "root")
     _require_non_empty_dataset_str(dataset_cfg, "dirname")
     _require_non_empty_dataset_str(dataset_cfg, "task")

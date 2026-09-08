@@ -31,6 +31,11 @@ from imindbench.utils.pipeline_contracts import (
     resolve_train_source_configs,
     validate_decodable_train_source_regimes,
 )
+from imindbench.utils.window_slicing import (
+    DEFAULT_WINDOW_SLICING_POLICY,
+    read_recording_window,
+    validate_window_slicing_policy,
+)
 
 
 def _normalize_brain_area_array(
@@ -251,8 +256,8 @@ def _build_fresh_preprocessor(
     return None
 
 
-_TRAIN_SOURCE_CACHE_VERSION = 4
-_PREPROCESSED_SPLIT_CACHE_VERSION = 1
+_TRAIN_SOURCE_CACHE_VERSION = 5
+_PREPROCESSED_SPLIT_CACHE_VERSION = 2
 _PREPROCESSED_SPLIT_CACHE_MODES = {"read_only", "read_write", "refresh"}
 
 
@@ -397,6 +402,7 @@ def _build_train_source_cache_identity(
     # repeated eval cycles that land on the same effective train recordings.
     return {
         "cache_version": _TRAIN_SOURCE_CACHE_VERSION,
+        "window_slicing_policy": source_dataset.window_slicing_policy,
         "provider": str(source_cfg["provider"]),
         "root": str(source_cfg["root"]),
         "dirname": str(source_cfg["dirname"]),
@@ -454,6 +460,7 @@ def _build_preprocessed_split_cache_identity(
     """Build the model-independent identity for one prepared fold cache entry."""
     return {
         "cache_version": _PREPROCESSED_SPLIT_CACHE_VERSION,
+        "window_slicing_policy": split_datasets["train"].window_slicing_policy,
         "provider": str(dataset_cfg.provider),
         "root": str(dataset_cfg.root),
         "dirname": str(dataset_cfg.dirname),
@@ -941,6 +948,7 @@ def _build_target_auto_reference_dataset(
     dataset_provider: str,
     require_coords: bool,
     coordinate_profile: str = "popt_lip",
+    window_slicing_policy: str = DEFAULT_WINDOW_SLICING_POLICY,
     brain_area_key: str | None = None,
     include_recording_ids: list[str] | None = None,
     max_samples_setting: int | str | None = None,
@@ -958,6 +966,7 @@ def _build_target_auto_reference_dataset(
         split="train",
         dataset_provider=dataset_provider,
         coordinate_profile=coordinate_profile,
+        window_slicing_policy=window_slicing_policy,
         require_coords=require_coords,
         brain_area_key=brain_area_key,
         include_recording_ids=include_recording_ids,
@@ -984,6 +993,7 @@ def _clone_train_dataset_with_subject_cap(
     cloned.provider_key = dataset.provider_key
     cloned.split = dataset.split
     cloned.coordinate_profile = dataset.coordinate_profile
+    cloned.window_slicing_policy = dataset.window_slicing_policy
     cloned.require_coords = dataset.require_coords
     cloned._brain_area_key = dataset._brain_area_key
     cloned._sample_fraction = dataset._sample_fraction
@@ -1899,6 +1909,7 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
         split: str,
         dataset_provider: str | None = None,
         coordinate_profile: str = "popt_lip",
+        window_slicing_policy: str = DEFAULT_WINDOW_SLICING_POLICY,
         require_coords: bool = False,
         brain_area_key: str | None = None,
         include_recording_ids: list[str] | None = None,
@@ -1910,6 +1921,8 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
         self.provider_key = _validate_provider_key(provider_key)
         self.split = split
         self.coordinate_profile = resolve_coordinate_profile(coordinate_profile)
+        validate_window_slicing_policy(window_slicing_policy)
+        self.window_slicing_policy = window_slicing_policy
         if not isinstance(require_coords, bool):
             raise TypeError(
                 f"require_coords must be a bool, got {type(require_coords).__name__}."
@@ -2085,6 +2098,7 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
         )
         return {
             "split": self.split,
+            "window_slicing_policy": self.window_slicing_policy,
             "n_samples": len(self),
             "n_recordings": len(self._interval_map),
             "recording_ids": sorted(self._interval_map.keys()),
@@ -2510,8 +2524,7 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
 
         rec = self._get_recording(recording_id)
         meta = self._get_channel_meta(recording_id)
-        window = rec.slice(start, end)
-        window_data = np.asarray(window.seeg_data.data)
+        window_data = read_recording_window(rec, start, end, self.window_slicing_policy)
         if window_data.ndim != 2:
             raise ValueError(
                 f"Expected window seeg_data.data to be 2D, got shape {window_data.shape}."
@@ -2550,6 +2563,7 @@ class WindowedNeuroprobeSplitDataset(torch.utils.data.Dataset):
             "recording_id": recording_id,
             "split": self.split,
             "sample_idx": idx,
+            "window_slicing_policy": self.window_slicing_policy,
             "window_start_sec": start,
             "window_end_sec": end,
         }
@@ -2589,6 +2603,9 @@ def build_neuroprobe_torch_fold(
     # Resolve the fold-scoped routing knobs once up front so the rest of the
     # function can branch on a normalized single-source vs multi-source view.
     fold_seed = seed
+    window_slicing_policy = _dataset_cfg_get(
+        dataset_cfg, "window_slicing_policy", DEFAULT_WINDOW_SLICING_POLICY
+    )
     dataset_provider = dataset_cfg.provider
     regime = dataset_cfg.regime
     coordinate_profile = resolve_coordinate_profile(
@@ -2806,6 +2823,7 @@ def build_neuroprobe_torch_fold(
                 dataset_provider=str(dataset_provider),
                 require_coords=require_coords,
                 coordinate_profile=coordinate_profile,
+                window_slicing_policy=window_slicing_policy,
                 brain_area_key=brain_area_key,
                 max_samples_setting=target_source_cfg_for_auto.get(
                     "max_train_samples_per_subject"
@@ -2833,6 +2851,7 @@ def build_neuroprobe_torch_fold(
                     dataset_provider=str(dataset_provider),
                     require_coords=require_coords,
                     coordinate_profile=coordinate_profile,
+                    window_slicing_policy=window_slicing_policy,
                     brain_area_key=None,
                     max_samples_setting=target_source_cfg_for_auto.get(
                         "max_train_samples_per_subject"
@@ -2884,6 +2903,7 @@ def build_neuroprobe_torch_fold(
                     split="train",
                     dataset_provider=source_provider,
                     coordinate_profile=str(source_dataset_cfg.coordinate_profile),
+                    window_slicing_policy=window_slicing_policy,
                     require_coords=require_coords,
                     # Aligned multi-source runs are rejected during config
                     # validation, so v1 train-source datasets never need
@@ -2954,6 +2974,7 @@ def build_neuroprobe_torch_fold(
             dataset_provider=str(dataset_provider),
             require_coords=require_coords,
             coordinate_profile=coordinate_profile,
+            window_slicing_policy=window_slicing_policy,
             brain_area_key=brain_area_key,
             include_recording_ids=train_include_recording_ids,
             max_samples_setting=max_train_samples_per_subject_setting,
@@ -2977,6 +2998,7 @@ def build_neuroprobe_torch_fold(
                 split=split,
                 dataset_provider=str(dataset_provider),
                 coordinate_profile=coordinate_profile,
+                window_slicing_policy=window_slicing_policy,
                 require_coords=require_coords,
                 brain_area_key=brain_area_key,
                 sample_fraction=1.0,
@@ -3001,6 +3023,7 @@ def build_neuroprobe_torch_fold(
                 split="train",
                 dataset_provider=str(dataset_provider),
                 coordinate_profile=coordinate_profile,
+                window_slicing_policy=window_slicing_policy,
                 require_coords=require_coords,
                 brain_area_key=brain_area_key,
                 include_recording_ids=train_include_recording_ids,
@@ -3015,6 +3038,7 @@ def build_neuroprobe_torch_fold(
                 split=split,
                 dataset_provider=str(dataset_provider),
                 coordinate_profile=coordinate_profile,
+                window_slicing_policy=window_slicing_policy,
                 require_coords=require_coords,
                 brain_area_key=brain_area_key,
                 sample_fraction=1.0,
@@ -3303,6 +3327,7 @@ def build_neuroprobe_torch_fold(
                         split="train",
                         dataset_provider=str(dataset_provider),
                         coordinate_profile=coordinate_profile,
+                        window_slicing_policy=window_slicing_policy,
                         require_coords=require_coords,
                         brain_area_key=brain_area_key,
                         max_samples_per_subject=eval_train_max_samples_per_subject,
@@ -3318,6 +3343,7 @@ def build_neuroprobe_torch_fold(
                         split="train",
                         dataset_provider=str(dataset_provider),
                         coordinate_profile=coordinate_profile,
+                        window_slicing_policy=window_slicing_policy,
                         require_coords=require_coords,
                         brain_area_key=brain_area_key,
                         max_samples_per_subject=eval_train_max_samples_per_subject,
@@ -3417,6 +3443,7 @@ def build_neuroprobe_torch_fold(
         "needs_region_intersection_pool": needs_pool,
         "dataset_provider": dataset_provider,
         "fold_seed": fold_seed,
+        "window_slicing_policy": window_slicing_policy,
         "brain_area_key": brain_area_key,
         "test_subject": dataset_cfg.test_subject,
         "test_session": dataset_cfg.test_session,

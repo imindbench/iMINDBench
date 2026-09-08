@@ -4,6 +4,7 @@
 root: ${paths.dataset_root}
 dirname: ${paths.dataset_dirname}
 provider: neuroprobev2
+window_slicing_policy: ceil  # ceil | legacy_floor; shared by all train sources.
 subset_tier: lite  # full|lite|nano
 label_mode: binary  # binary|multiclass
 task: onset

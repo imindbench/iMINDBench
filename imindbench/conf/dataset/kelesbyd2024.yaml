@@ -2,6 +2,7 @@
 root: ${paths.dataset_root}
 dirname: keles_byd_2024
 provider: kelesbyd2024
+window_slicing_policy: ceil  # ceil | legacy_floor; shared by all train sources.
 subset_tier: full
 label_mode: binary  # binary|multiclass
 task: speech

@@ -177,6 +177,10 @@ def _run_processed_evaluation(
 
     log(f"Using dataset.provider='{dataset_provider}'", priority=0)
     log(f"Using dataset.regime='{regime}'", priority=0)
+    log(
+        f"Using window slicing policy: {dataset_cfg.get('window_slicing_policy', 'ceil')}",
+        priority=0,
+    )
     log(f"Using n_folds={n_folds} from dataset class API", priority=0)
 
     preprocess_type = describe_preprocessor(cfg.preprocessor)
