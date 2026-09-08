@@ -20,7 +20,7 @@ train_sample_fraction: 1.0
 max_train_samples_per_subject: null
 # When true, train splits keep only subject/session pairs listed in the
 # provider-specific decodable manifest for dataset.task.
-train_decodable_subject_sessions_only: false
+decodable_subject_sessions_only: false
 # For aligned multi-subject regimes, set brain_area_key=group and use a
 # preprocessor chain that includes region_intersection_pool.
 brain_area_key: null

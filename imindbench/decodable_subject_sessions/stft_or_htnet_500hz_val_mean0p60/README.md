@@ -17,7 +17,7 @@ to the project root) select this named rule.
 `imindbench-grid` filters evaluation targets before creating run directories and
 passes the same directory to training through
 `paths.decodable_subject_sessions_dir`. With
-`dataset.train_decodable_subject_sessions_only=true`, the adapter filters each
+`dataset.decodable_subject_sessions_only=true`, the adapter filters each
 provider's training recordings using the manifest for `dataset.task`.
 
 Subject/session identifiers have the form `sub42_sess1`. For multisource

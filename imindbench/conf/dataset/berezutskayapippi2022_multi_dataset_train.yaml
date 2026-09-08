@@ -23,7 +23,7 @@ max_train_samples_per_subject: null
 # provider-specific decodable manifest for dataset.task.
 # With train_sources, decodable filtering requires every source regime to be
 # hold-in-session so training means all valid task-decodable sessions per source.
-train_decodable_subject_sessions_only: false
+decodable_subject_sessions_only: false
 brain_area_key: null
 destrieux_brain_area_key: label_destrieux  # Selected by BaRISTA.
 uniquify_channel_ids_with_subject: true

@@ -510,10 +510,10 @@ def _build_preprocessed_split_cache_identity(
         "max_train_samples_per_subject": _dataset_cfg_get(
             dataset_cfg, "max_train_samples_per_subject", None
         ),
-        "train_decodable_subject_sessions_only": bool(
+        "decodable_subject_sessions_only": bool(
             _dataset_cfg_get(
                 dataset_cfg,
-                "train_decodable_subject_sessions_only",
+                "decodable_subject_sessions_only",
                 False,
             )
         ),
@@ -786,12 +786,12 @@ def _dataset_cfg_get(dataset_cfg: Any, key: str, default: Any) -> Any:
     return getattr(dataset_cfg, key, default)
 
 
-def _normalize_train_decodable_subject_sessions_only(value: Any) -> bool:
+def _normalize_decodable_subject_sessions_only(value: Any) -> bool:
     if value is None:
         return False
     if not isinstance(value, bool):
         raise TypeError(
-            "dataset.train_decodable_subject_sessions_only must be a bool when set, "
+            "dataset.decodable_subject_sessions_only must be a bool when set, "
             f"got {type(value).__name__}."
         )
     return bool(value)
@@ -1217,7 +1217,7 @@ def _apply_decodable_train_recording_filter(
         if allow_empty:
             return None
         raise ValueError(
-            "dataset.train_decodable_subject_sessions_only=true filtered out all "
+            "dataset.decodable_subject_sessions_only=true filtered out all "
             f"training recordings for dataset.provider='{dataset_provider}', "
             f"task='{task}'."
         )
@@ -1230,7 +1230,7 @@ def _apply_decodable_train_recording_filter(
         if allow_empty:
             return None
         raise ValueError(
-            "dataset.train_decodable_subject_sessions_only=true filtered train set "
+            "dataset.decodable_subject_sessions_only=true filtered train set "
             f"contains no sampled windows for dataset.provider='{dataset_provider}', "
             f"task='{task}'."
         )
@@ -2627,18 +2627,16 @@ def build_neuroprobe_torch_fold(
         str(source_cfg["provider"]): source_cfg for source_cfg in train_sources
     }
     uses_train_sources = bool(train_sources)
-    train_decodable_subject_sessions_only = (
-        _normalize_train_decodable_subject_sessions_only(
-            _dataset_cfg_get(
-                dataset_cfg,
-                "train_decodable_subject_sessions_only",
-                False,
-            )
+    decodable_subject_sessions_only = _normalize_decodable_subject_sessions_only(
+        _dataset_cfg_get(
+            dataset_cfg,
+            "decodable_subject_sessions_only",
+            False,
         )
     )
     validate_decodable_train_source_regimes(
         train_sources,
-        enabled=train_decodable_subject_sessions_only,
+        enabled=decodable_subject_sessions_only,
     )
     decodable_subject_sessions_dir = (
         None
@@ -2723,7 +2721,7 @@ def build_neuroprobe_torch_fold(
     if not uses_train_sources:
         split_providers["train"] = _apply_decodable_train_recording_filter(
             split_providers["train"],
-            enabled=train_decodable_subject_sessions_only,
+            enabled=decodable_subject_sessions_only,
             dataset_provider=str(dataset_provider),
             task=str(dataset_cfg.task),
             manifest_dir=decodable_subject_sessions_dir,
@@ -2768,7 +2766,7 @@ def build_neuroprobe_torch_fold(
             )
             provider = _apply_decodable_train_recording_filter(
                 provider,
-                enabled=train_decodable_subject_sessions_only,
+                enabled=decodable_subject_sessions_only,
                 dataset_provider=source_provider,
                 task=str(source_dataset_cfg.task),
                 manifest_dir=decodable_subject_sessions_dir,
@@ -2921,9 +2919,9 @@ def build_neuroprobe_torch_fold(
                     sample_seed=fold_seed,
                 )
             train_source_datasets.append(source_dataset)
-        if train_decodable_subject_sessions_only and not train_source_datasets:
+        if decodable_subject_sessions_only and not train_source_datasets:
             raise ValueError(
-                "dataset.train_decodable_subject_sessions_only=true filtered out "
+                "dataset.decodable_subject_sessions_only=true filtered out "
                 "all train sources."
             )
 
@@ -3336,7 +3334,7 @@ def build_neuroprobe_torch_fold(
                         sample_fraction=eval_train_sample_fraction,
                         sample_seed=eval_train_sample_seed,
                     )
-                elif train_decodable_subject_sessions_only:
+                elif decodable_subject_sessions_only:
                     eval_train_dataset = split_datasets["train"]
                 else:
                     eval_train_dataset = WindowedNeuroprobeSplitDataset(
@@ -3467,9 +3465,7 @@ def build_neuroprobe_torch_fold(
         "skipped_empty_decodable_train_sources": list(
             skipped_empty_decodable_train_sources
         ),
-        "train_decodable_subject_sessions_only": (
-            train_decodable_subject_sessions_only
-        ),
+        "decodable_subject_sessions_only": decodable_subject_sessions_only,
         "decodable_subject_sessions_dir": decodable_subject_sessions_dir,
         "eval_preprocessor_name": eval_preprocessor_name,
         "train_source_preprocess_states": dict(train_source_preprocess_states),

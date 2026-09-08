@@ -20,7 +20,7 @@ train_sample_fraction: 1.0
 max_train_samples_per_subject: null
 # When true, train splits keep only subject/session pairs listed in the
 # provider-specific decodable manifest for dataset.task.
-train_decodable_subject_sessions_only: false
+decodable_subject_sessions_only: false
 # Derived from channel labels like LOFC1 -> OFC. Used by region-intersection
 # pooling for aligned multi-subject regimes.
 brain_area_key: byd_region_code

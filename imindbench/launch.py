@@ -150,7 +150,7 @@ def build_commands(args):
     # Transfer presets share their training manifest with target selection.
     # Explicit --decodable-dir/--decodable-rule still take precedence above.
     if decodable_dir is None and cfg.dataset.get(
-        "train_decodable_subject_sessions_only", False
+        "decodable_subject_sessions_only", False
     ):
         decodable_dir = Path(cfg.paths.decodable_subject_sessions_dir)
     provider = cfg.dataset.provider

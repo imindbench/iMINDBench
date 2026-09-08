@@ -115,7 +115,7 @@ def test_family_shell_configs_compose_and_pass_runtime_contract(
                 "auto" if family in {"within_dataset", "multi_dataset"} else None
             )
             assert cfg.dataset.max_train_samples_per_subject == expected_cap
-            assert cfg.dataset.train_decodable_subject_sessions_only == (
+            assert cfg.dataset.decodable_subject_sessions_only == (
                 family in {"within_dataset", "multi_dataset"}
             )
             if cfg.model.name == "linear_baseline":
@@ -182,8 +182,25 @@ def test_default_preset_does_not_filter_or_cap_training_samples():
             ],
         )
     assert cfg.dataset.max_train_samples_per_subject is None
-    assert cfg.dataset.train_decodable_subject_sessions_only is False
+    assert cfg.dataset.decodable_subject_sessions_only is False
     assert cfg.paths.decodable_subject_sessions_dir is None
+
+
+def test_retired_cohort_flag_is_not_silently_ignored():
+    with initialize_config_dir(config_dir=str(CONF), version_base="1.1"):
+        cfg = compose(
+            config_name="config",
+            overrides=[
+                "paths=example",
+                "model=logistic",
+                "preprocessor=laplacian_multi_stft_2048Hz",
+                "++dataset.train_decodable_subject_sessions_only=true",
+            ],
+        )
+    with pytest.raises(
+        ValueError, match="renamed to dataset.decodable_subject_sessions_only"
+    ):
+        validate_eval_config(cfg)
 
 
 def test_explicit_selections_do_not_require_catalog_membership():

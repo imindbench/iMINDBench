@@ -262,7 +262,7 @@ The `default` and `decodable` experiment presets expose the same fields:
 | `dataset.train_same_subject_only` | `false` | `false` |
 | `dataset.train_sample_fraction` | `1.0` | `1.0` |
 | `dataset.max_train_samples_per_subject` | `null` | `auto` |
-| `dataset.train_decodable_subject_sessions_only` | `false` | `true` |
+| `dataset.decodable_subject_sessions_only` | `false` | `true` |
 
 `default` is selected when no experiment is specified; scripts can explicitly
 select `--experiment default`. It replaces the former `baseline` and
@@ -277,8 +277,14 @@ settings live in model configs; runtime settings live in
 | Per-subject/session training cap | Disabled | `auto`: capped at the target session's training-sample count |
 
 The `decodable` transfer preset supplies the manifest, sets
-`train_decodable_subject_sessions_only=true`, and enables the sample cap.
+`decodable_subject_sessions_only=true`, and enables the sample cap.
 The cap is an experiment setting, not a PopT-v2 requirement.
+`dataset.decodable_subject_sessions_only` replaces the former
+`dataset.train_decodable_subject_sessions_only` field. The launcher applies the
+manifest to evaluation targets; the data adapter applies it to training
+recordings. Direct `imindbench.run_eval` calls retain their explicit evaluation
+target and apply the training filter. Old external YAMLs must rename the field;
+validation rejects the retired spelling. Use a fresh output root when migrating.
 
 - To use a custom cohort, add `--decodable-rule NAME` or
   `--decodable-dir /path/to/manifests` to the transfer command.

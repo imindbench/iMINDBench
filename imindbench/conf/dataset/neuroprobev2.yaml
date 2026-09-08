@@ -20,7 +20,7 @@ train_sample_fraction: 1.0
 max_train_samples_per_subject: null
 # When true, train splits keep only subject/session pairs listed in the
 # provider-specific decodable manifest for dataset.task.
-train_decodable_subject_sessions_only: false
+decodable_subject_sessions_only: false
 brain_area_key: localization_DesikanKilliany
 destrieux_brain_area_key: localization_Destrieux  # Selected by BaRISTA.
 uniquify_channel_ids_with_subject: true

@@ -351,13 +351,18 @@ def _parse_optional_dataset_train_same_subject_only(
     return value
 
 
-def _parse_optional_dataset_train_decodable_subject_sessions_only(
+def _parse_optional_dataset_decodable_subject_sessions_only(
     dataset_cfg: dict[str, Any],
 ) -> bool:
-    value = dataset_cfg.get("train_decodable_subject_sessions_only", False)
+    if "train_decodable_subject_sessions_only" in dataset_cfg:
+        raise ValueError(
+            "dataset.train_decodable_subject_sessions_only has been renamed to "
+            "dataset.decodable_subject_sessions_only."
+        )
+    value = dataset_cfg.get("decodable_subject_sessions_only", False)
     if not isinstance(value, bool):
         raise TypeError(
-            "dataset.train_decodable_subject_sessions_only must be a bool, got "
+            "dataset.decodable_subject_sessions_only must be a bool, got "
             f"{type(value).__name__}."
         )
     return value
@@ -377,7 +382,7 @@ def validate_decodable_train_source_regimes(
     ]
     if non_hold_in_sources:
         raise ValueError(
-            "dataset.train_decodable_subject_sessions_only=true with "
+            "dataset.decodable_subject_sessions_only=true with "
             "dataset.train_sources requires every "
             "dataset.train_sources[].regime='hold-in-session'. "
             "Decodable multisource training is defined as all valid "
@@ -843,15 +848,15 @@ def validate_eval_config(cfg: DictConfig) -> None:
     train_same_subject_only = _parse_optional_dataset_train_same_subject_only(
         dataset_cfg
     )
-    train_decodable_subject_sessions_only = (
-        _parse_optional_dataset_train_decodable_subject_sessions_only(dataset_cfg)
+    decodable_subject_sessions_only = (
+        _parse_optional_dataset_decodable_subject_sessions_only(dataset_cfg)
     )
     _parse_optional_dataset_train_sample_fraction(dataset_cfg)
     _parse_optional_max_train_samples_per_subject(dataset_cfg)
     _parse_optional_dataset_coordinate_profile(dataset_cfg)
     dataset_brain_area_key = _parse_optional_dataset_brain_area_key(dataset_cfg)
     train_sources = resolve_train_source_configs(dataset_cfg)
-    if train_decodable_subject_sessions_only:
+    if decodable_subject_sessions_only:
         paths_cfg = cfg.get("paths", None)
         decodable_dir = (
             None
@@ -861,7 +866,7 @@ def validate_eval_config(cfg: DictConfig) -> None:
         if not isinstance(decodable_dir, str) or not decodable_dir.strip():
             raise ValueError(
                 "paths.decodable_subject_sessions_dir must be a non-empty str when "
-                "dataset.train_decodable_subject_sessions_only=true."
+                "dataset.decodable_subject_sessions_only=true."
             )
         if decodable_dir.strip() != decodable_dir:
             raise ValueError(
@@ -870,7 +875,7 @@ def validate_eval_config(cfg: DictConfig) -> None:
             )
         validate_decodable_train_source_regimes(
             train_sources,
-            enabled=train_decodable_subject_sessions_only,
+            enabled=decodable_subject_sessions_only,
         )
     if train_same_subject_only:
         if regime not in {"hold-in-session", "hold-out-session"}:
