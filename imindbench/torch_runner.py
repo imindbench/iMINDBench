@@ -123,29 +123,6 @@ class TorchRunner(BaseRunner):
         if not isinstance(test_loader, DataLoader):
             raise TypeError("test_loader must be a torch.utils.data.DataLoader.")
 
-        return self._run_fold_with_loaders(
-            model,
-            train_loader=train_loader,
-            val_loader=val_loader,
-            test_loader=test_loader,
-            fold_idx=fold_idx,
-        )
-
-    def _run_fold_with_loaders(
-        self,
-        model,
-        *,
-        train_loader: DataLoader,
-        val_loader: DataLoader,
-        test_loader: DataLoader,
-        fold_idx=None,
-    ):
-        """Train/evaluate a fold from split-specific DataLoaders.
-
-        The runner preserves raw dataset labels in ``model.classes_`` for
-        metrics/reporting while encoding them into contiguous indices only at
-        the loss boundary.
-        """
         classes = self._infer_classes_from_loader(train_loader)
         n_classes = len(classes)
         class_to_index = self._build_class_index_map(classes)
@@ -520,6 +497,56 @@ class TorchRunner(BaseRunner):
             )
         return criterion(outputs, batch_y_encoded)
 
+    def _train_batch(
+        self, model, raw_batch, *, optimizer, scheduler, criterion, class_to_index
+    ):
+        """Update one batch; the caller owns validation and stopping cadence."""
+        batch = self._prepare_model_batch(model, raw_batch)
+        batch_x, batch_y, batch_coords, batch_seq_id, model_kwargs = (
+            self._extract_batch_tensors(batch)
+        )
+        batch_x = batch_x.to(self.device)
+        batch_y = batch_y.to(self.device)
+        batch_y_encoded = self._encode_targets_for_loss(
+            batch_y,
+            class_to_index=class_to_index,
+            context="train batch",
+        )
+
+        optimizer.zero_grad()
+        outputs = self._forward_model(
+            model.model,
+            batch_x,
+            batch_coords,
+            batch_seq_id,
+            accepts_coords=getattr(model, "accepts_coords", False),
+            model_kwargs=model_kwargs,
+        )
+        loss = self._compute_model_loss(
+            model,
+            outputs,
+            batch_y=batch_y,
+            batch_y_encoded=batch_y_encoded,
+            criterion=criterion,
+            model_kwargs=model_kwargs,
+        )
+        loss.backward()
+
+        grad_clip = self.cfg.model.get("grad_clip", None)
+        if grad_clip:
+            torch.nn.utils.clip_grad_norm_(model.model.parameters(), grad_clip)
+
+        optimizer.step()
+        self._apply_model_constraints(model)
+        if scheduler is not None:
+            scheduler.step(loss.item())
+        # Use the predictions from this update for online training metrics.
+        probabilities = (
+            torch.nn.functional.softmax(outputs.detach(), dim=1).cpu().numpy()
+        )
+        targets = batch_y.detach().cpu().numpy()
+        return float(loss.item()), probabilities, targets
+
     def _train_with_early_stopping_loader(
         self,
         model,
@@ -557,54 +584,18 @@ class TorchRunner(BaseRunner):
             train_prob_chunks: list[np.ndarray] = []
             train_target_chunks: list[np.ndarray] = []
             for raw_batch in train_loader:
-                batch = self._prepare_model_batch(model, raw_batch)
-                batch_x, batch_y, batch_coords, batch_seq_id, model_kwargs = (
-                    self._extract_batch_tensors(batch)
-                )
-                batch_x = batch_x.to(self.device)
-                batch_y = batch_y.to(self.device)
-                batch_y_encoded = self._encode_targets_for_loss(
-                    batch_y,
-                    class_to_index=class_to_index,
-                    context="train batch",
-                )
-
-                optimizer.zero_grad()
-                outputs = self._forward_model(
-                    model.model,
-                    batch_x,
-                    batch_coords,
-                    batch_seq_id,
-                    accepts_coords=getattr(model, "accepts_coords", False),
-                    model_kwargs=model_kwargs,
-                )
-                loss = self._compute_model_loss(
+                loss, probabilities, targets = self._train_batch(
                     model,
-                    outputs,
-                    batch_y=batch_y,
-                    batch_y_encoded=batch_y_encoded,
+                    raw_batch,
+                    optimizer=optimizer,
+                    scheduler=scheduler,
                     criterion=criterion,
-                    model_kwargs=model_kwargs,
+                    class_to_index=class_to_index,
                 )
-                loss.backward()
-
-                grad_clip = self.cfg.model.get("grad_clip", None)
-                if grad_clip:
-                    torch.nn.utils.clip_grad_norm_(model.model.parameters(), grad_clip)
-
-                optimizer.step()
-                self._apply_model_constraints(model)
-                if scheduler is not None:
-                    scheduler.step(loss.item())
-
-                train_loss += float(loss.item()) * batch_y.size(0)
-                train_total += batch_y.size(0)
-                # Keep online train metrics from the same batches used for updates
-                # to avoid a second full train-loader pass each epoch.
-                train_prob_chunks.append(
-                    torch.nn.functional.softmax(outputs.detach(), dim=1).cpu().numpy()
-                )
-                train_target_chunks.append(batch_y.detach().cpu().numpy())
+                train_loss += loss * len(targets)
+                train_total += len(targets)
+                train_prob_chunks.append(probabilities)
+                train_target_chunks.append(targets)
 
             avg_train_loss = train_loss / train_total if train_total > 0 else 0.0
             val_accuracy, val_auroc, val_f1, val_loss = self._evaluate_loader(
@@ -711,52 +702,16 @@ class TorchRunner(BaseRunner):
                 train_iter = iter(train_loader)
                 raw_batch = next(train_iter)
 
-            batch = self._prepare_model_batch(model, raw_batch)
-            batch_x, batch_y, batch_coords, batch_seq_id, model_kwargs = (
-                self._extract_batch_tensors(batch)
-            )
-            batch_x = batch_x.to(self.device)
-            batch_y = batch_y.to(self.device)
-            batch_y_encoded = self._encode_targets_for_loss(
-                batch_y,
-                class_to_index=class_to_index,
-                context="train batch",
-            )
-
-            optimizer.zero_grad()
-            outputs = self._forward_model(
-                model.model,
-                batch_x,
-                batch_coords,
-                batch_seq_id,
-                accepts_coords=getattr(model, "accepts_coords", False),
-                model_kwargs=model_kwargs,
-            )
-            loss = self._compute_model_loss(
+            loss, probabilities, targets = self._train_batch(
                 model,
-                outputs,
-                batch_y=batch_y,
-                batch_y_encoded=batch_y_encoded,
+                raw_batch,
+                optimizer=optimizer,
+                scheduler=scheduler,
                 criterion=criterion,
-                model_kwargs=model_kwargs,
+                class_to_index=class_to_index,
             )
-            loss.backward()
-
-            grad_clip = self.cfg.model.get("grad_clip", None)
-            if grad_clip:
-                torch.nn.utils.clip_grad_norm_(model.model.parameters(), grad_clip)
-
-            optimizer.step()
-            self._apply_model_constraints(model)
-            if scheduler is not None:
-                scheduler.step(loss.item())
-
-            # Cache train-window predictions/targets so validation checkpoints can
-            # report train metrics without re-iterating the full train loader.
-            train_prob_chunks.append(
-                torch.nn.functional.softmax(outputs.detach(), dim=1).cpu().numpy()
-            )
-            train_target_chunks.append(batch_y.detach().cpu().numpy())
+            train_prob_chunks.append(probabilities)
+            train_target_chunks.append(targets)
 
             step += 1
             if step % validation_interval != 0 and step != total_steps:
@@ -791,7 +746,7 @@ class TorchRunner(BaseRunner):
                 wandb_prefix,
                 val_auroc,
                 val_accuracy,
-                train_loss=float(loss.item()),
+                train_loss=loss,
                 val_loss=val_loss,
                 train_auroc=train_auroc,
                 train_accuracy=train_accuracy,
@@ -806,7 +761,7 @@ class TorchRunner(BaseRunner):
             fold_label = f"Fold {fold_idx}" if fold_idx is not None else "Fold"
             log(
                 f"{fold_label}: train_step={step}/{total_steps} "
-                f"train_loss={float(loss.item()):.4f} "
+                f"train_loss={loss:.4f} "
                 f"train_acc={train_accuracy:.3f} train_roc_auc={train_auroc:.3f} "
                 f"train_f1={train_f1:.3f} "
                 f"val_loss={val_loss_text} "
