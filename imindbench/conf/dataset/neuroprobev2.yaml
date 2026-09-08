@@ -22,6 +22,7 @@ max_train_samples_per_subject: null
 # provider-specific decodable manifest for dataset.task.
 train_decodable_subject_sessions_only: false
 brain_area_key: localization_DesikanKilliany
+destrieux_brain_area_key: localization_Destrieux  # Selected by BaRISTA.
 uniquify_channel_ids_with_subject: true
 uniquify_channel_ids_with_session: true
 merge_val_into_test: false

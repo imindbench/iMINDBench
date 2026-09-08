@@ -24,6 +24,7 @@ train_decodable_subject_sessions_only: false
 # For aligned multi-subject regimes, set brain_area_key=group and use a
 # preprocessor chain that includes region_intersection_pool.
 brain_area_key: null
+destrieux_brain_area_key: label_destrieux  # Selected by BaRISTA.
 uniquify_channel_ids_with_subject: true
 uniquify_channel_ids_with_session: true
 merge_val_into_test: false

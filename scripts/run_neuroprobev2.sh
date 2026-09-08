@@ -13,7 +13,7 @@ set -euo pipefail
 # htnet_500Hz       laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz  default
 # popt (PopT-v2)    laplacian_multi_stft_2048Hz                                            multi_stft/popt
 # linear_baseline   laplacian_stft_brainbert_2048Hz                                        default
-# barista           laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore           barista
+# barista           laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore           default
 # diver             laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_2048Hzto500Hz      diver
 MODEL=logistic
 PREPROCESSOR=laplacian_multi_stft_2048Hz

@@ -24,6 +24,7 @@ train_decodable_subject_sessions_only: false
 # Derived from channel labels like LOFC1 -> OFC. Used by region-intersection
 # pooling for aligned multi-subject regimes.
 brain_area_key: byd_region_code
+destrieux_brain_area_key: label_destrieux  # Selected by BaRISTA.
 uniquify_channel_ids_with_subject: true
 uniquify_channel_ids_with_session: true
 merge_val_into_test: false

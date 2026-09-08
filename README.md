@@ -234,6 +234,12 @@ Subset tiers select eligible recordings and prepared splits; `TASKS` and `TARGET
 select the evaluation grid. For the listed PIPPI within-session targets,
 `high-cov` and `full` use identical splits and channels.
 
+BaRISTA's model config selects `dataset.destrieux_brain_area_key` as the active
+brain-area field and owns the benchmark learning rates (`upstream_lr: 1e-3`,
+`head_lr: 1e-3`) and fixed scheduler (500 warmup updates, decay every 95 updates).
+Use `experiment=default` or `experiment=decodable`; the separate `barista`
+experiment has been removed.
+
 **Transfer cohorts and sample caps**
 
 The `default` and `decodable` experiment presets expose the same fields:

@@ -38,7 +38,7 @@ requires_barista = pytest.mark.skipif(
 
 
 def _barista_cfg(**overrides):
-    cfg = OmegaConf.load(os.path.join(CONF, "model/barista.yaml"))
+    cfg = OmegaConf.load(os.path.join(CONF, "model/barista.yaml")).model
     if overrides:
         cfg = OmegaConf.merge(cfg, OmegaConf.create(overrides))
     return cfg
