@@ -186,9 +186,52 @@ with the dataset's native rate (BYD: 1000; NeuroprobeV2 and PIPPI: 2048).
 | Single-STFT | `laplacian_stft_{rate}Hz` |
 | Multi-STFT with per-sample, per-channel normalization | `laplacian_multi_stft_{rate}Hz_zscore` |
 | Multi-STFT with the upper band extended to 400 Hz | `laplacian_multi_stft_high_{rate}Hz` |
-| Native-rate waveform without high-pass filtering | `laplacian_wav_{rate}Hz` |
-| 500 Hz waveform with high-pass filtering and per-sample, per-channel normalization | `laplacian_wav_HPF_sample_per_channel_time_long_context_15s_{rate}Hzto500Hz` |
-| 500 Hz waveform without high-pass filtering, with robust scaling | `laplacian_wav_global_robust_scalar_long_context_15s_{rate}Hzto500Hz` |
+| Native-rate waveform without high-pass filtering | `wav_nohpf_pooled_{rate}Hz` |
+| 500 Hz waveform with high-pass filtering and per-sample, per-channel normalization | `wav_hpf_zscore_{rate}to500Hz` |
+| 500 Hz waveform without high-pass filtering, with robust scaling | `wav_nohpf_robust_{rate}to500Hz` |
+
+Waveform names use `wav_<recipe>_<source>[to<target>]Hz`. A single rate
+means no resampling. Every bundled waveform recipe uses Laplacian referencing;
+filter and normalization details are explicit in its YAML.
+
+| Recipe | Filtering/context | Normalization |
+| --- | --- | --- |
+| `hpf_robust` | Notch + high-pass, 15-second context, cropped to target window | Global robust scaling fitted on training data |
+| `hpf_zscore` | Same filtering/context as `hpf_robust` | Per-sample, per-channel z-score |
+| `nohpf_robust` | Notch without high-pass, 15-second context, cropped to target window | Global robust scaling fitted on training data |
+| `nohpf_pooled` | Notch without high-pass, target window only, native sampling rate | Per-channel statistics pooled over training samples/time |
+| `diver` | DIVER filter, 15-second context, cropped to target window | No standardization stage; DIVER applies its input scaling |
+| `barista` | Session-wise notch + high-pass filtering, 2048 Hz output | Global robust scaling followed by per-sample, per-channel z-score |
+
+The `wav_nohpf_pooled_1000Hz` and `wav_nohpf_pooled_2048Hz` presets retain
+the native-rate "HTNet (no HPF)" paper comparisons. Those series are loaded by
+`plot_fig04_preprocessing_baselines.ipynb` but hidden in its final summary plot;
+they are separate from the 500 Hz, long-context `nohpf_robust` ablation.
+
+<details>
+<summary>Previous waveform names and migration</summary>
+
+These are filename-only renames: preprocessing chains are unchanged. New run
+folders use the new names; existing paper result folders and notebook paths
+retain their historical names. Update external commands/config references using
+this mapping. Old preset aliases are not bundled.
+
+| Previous name (without `.yaml`) | New name |
+| --- | --- |
+| `laplacian_wav_1000Hz` | `wav_nohpf_pooled_1000Hz` |
+| `laplacian_wav_2048Hz` | `wav_nohpf_pooled_2048Hz` |
+| `laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz` | `wav_hpf_robust_1000to500Hz` |
+| `laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz` | `wav_hpf_robust_2048to500Hz` |
+| `laplacian_wav_HPF_sample_per_channel_time_long_context_15s_1000Hzto500Hz` | `wav_hpf_zscore_1000to500Hz` |
+| `laplacian_wav_HPF_sample_per_channel_time_long_context_15s_2048Hzto500Hz` | `wav_hpf_zscore_2048to500Hz` |
+| `laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_1000Hzto500Hz` | `wav_diver_1000to500Hz` |
+| `laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_2048Hzto500Hz` | `wav_diver_2048to500Hz` |
+| `laplacian_wav_global_robust_scalar_long_context_15s_1000Hzto500Hz` | `wav_nohpf_robust_1000to500Hz` |
+| `laplacian_wav_global_robust_scalar_long_context_15s_2048Hzto500Hz` | `wav_nohpf_robust_2048to500Hz` |
+| `laplacian_wav_session_HPF_global_robust_scalar_1000Hz_2048Hz_zscore` | `wav_barista_1000to2048Hz` |
+| `laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore` | `wav_barista_2048Hz` |
+
+</details>
 
 Selection follows the source cells and active visualization YAML entries used by
 `torch_brain/examples/neuroprobe_eval/notebooks/paper_figs`, including Figure 4
@@ -198,7 +241,7 @@ variants match the preprocessing settings in the corresponding saved
 with Torch padding made explicit. The long-context waveform variants come from
 the original evaluation configs, migrated to `resample`. Historical DIVER output
 folders ending in `1000to500` or `2048to500` correspond to the main DIVER presets
-ending in `1000Hzto500Hz` or `2048Hzto500Hz`.
+named `wav_diver_1000to500Hz` or `wav_diver_2048to500Hz`.
 
 Other bundled variations have been removed; their YAMLs remain in Git history.
 For an additional ablation, copy a retained config into your external config

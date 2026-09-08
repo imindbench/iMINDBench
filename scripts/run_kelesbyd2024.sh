@@ -7,14 +7,14 @@ set -euo pipefail
 
 # ── Model and input settings ───────────────────────────────────────────────────
 # Valid combinations (names refer to YAML configs under imindbench/conf/):
-# MODEL             PREPROCESSOR                                                           EXPERIMENT
-# logistic/mlp/cnn  laplacian_multi_stft_1000Hz                                            default
-# logistic/mlp/cnn  laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz  default
-# htnet_500Hz       laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz  default
-# popt (PopT-v2)    laplacian_multi_stft_1000Hz                                            default
-# linear_baseline   laplacian_stft_brainbert_1000Hz                                        default
-# barista           laplacian_wav_session_HPF_global_robust_scalar_1000Hz_2048Hz_zscore    default
-# diver             laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_1000Hzto500Hz      default
+# MODEL              PREPROCESSOR                             EXPERIMENT
+# logistic/mlp/cnn   laplacian_multi_stft_1000Hz              default
+# logistic/mlp/cnn   wav_hpf_robust_1000to500Hz               default
+# htnet_500Hz        wav_hpf_robust_1000to500Hz               default
+# popt (PopT-v2)     laplacian_multi_stft_1000Hz              default
+# linear_baseline    laplacian_stft_brainbert_1000Hz          default
+# barista            wav_barista_1000to2048Hz                 default
+# diver              wav_diver_1000to500Hz                    default
 MODEL=logistic
 PREPROCESSOR=laplacian_multi_stft_1000Hz
 EXPERIMENT=default                  # default or decodable cohort mode.

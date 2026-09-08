@@ -156,7 +156,7 @@ def test_waveform_baselines_accept_500hz_inputs(model_name):
                 "paths=example",
                 "dataset=neuroprobev2",
                 f"model={model_name}",
-                "preprocessor=laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz",
+                "preprocessor=wav_hpf_robust_2048to500Hz",
                 "experiment=default",
                 "model.device=cpu",
             ],
