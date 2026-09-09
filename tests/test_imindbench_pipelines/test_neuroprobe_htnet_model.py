@@ -102,6 +102,7 @@ def test_htnet_runs_one_torch_runner_fold():
     cfg = OmegaConf.create(
         {
             "model": _make_cfg(),
+            "runtime": {"seed": 0},
             "runner": {"num_workers": 0, "pin_memory": False},
         }
     )

@@ -548,6 +548,14 @@ class GainPreprocessor(BasePreprocessor):
 
 ## Outputs and resume
 
+Torch training resets its random generators to `runtime.seed + fold_idx` before
+each fold's first training-loader iteration and model initialization, matching
+the training shuffle seed. This makes training independent of randomness consumed
+during preprocessing, including BrainBERT construction skipped by a cache hit.
+Keep `runtime.deterministic=true` for deterministic Torch kernels. This replaces
+the previous shared RNG sequence across preprocessing and training; use a new
+output root when comparing results under the new seed policy.
+
 Each run writes `population_*.json`, resolved Hydra config, `launch.json` and
 `launcher.log`.
 

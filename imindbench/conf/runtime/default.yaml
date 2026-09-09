@@ -2,7 +2,7 @@
 # Shared execution settings for every model/input pairing.
 runtime:
   # Runtime controls for evaluation execution.
-  seed: 42
+  seed: 42  # Torch training resets to seed + fold_idx after preprocessing.
   deterministic: true  # Request deterministic Torch kernels for every input type.
   overwrite: false
   verbose: true

@@ -5,6 +5,7 @@ Runner for PyTorch models.
 import gc
 import inspect
 import os
+import random
 from copy import deepcopy
 
 import numpy as np
@@ -98,7 +99,7 @@ class TorchRunner(BaseRunner):
             train_loader: Training DataLoader
             val_loader: Validation DataLoader
             test_loader: Test DataLoader
-            fold_idx: Optional fold index for wandb logging.
+            fold_idx: Fold index for the training seed and wandb logging; None uses 0.
 
         Returns:
             Dictionary with train_accuracy, train_roc_auc, val_accuracy, val_roc_auc, test_accuracy, test_roc_auc
@@ -113,6 +114,14 @@ class TorchRunner(BaseRunner):
             raise TypeError("val_loader must be a torch.utils.data.DataLoader.")
         if not isinstance(test_loader, DataLoader):
             raise TypeError("test_loader must be a torch.utils.data.DataLoader.")
+
+        # Cache misses may initialize pretrained encoders and consume global RNG.
+        # Start training independently, using the same fold offset as sampling.
+        fold_seed = self.cfg.runtime.seed + (0 if fold_idx is None else fold_idx)
+        random.seed(fold_seed)
+        np.random.seed(fold_seed % (2**32))
+        torch.manual_seed(fold_seed)  # Seeds CPU and all CUDA devices.
+        log(f"[TorchRunner] Training seed: {fold_seed}", priority=0)
 
         classes = self._infer_classes_from_loader(train_loader)
         n_classes = len(classes)

@@ -23,7 +23,7 @@ class TorchBaseModel(BaseModel):
         self.device = None
         self.model = None
         self.random_state = cfg.get("random_state", 42)
-        # Global RNG seeding is owned by the runtime entrypoint (run_eval).
+        # TorchRunner seeds each fold before building the network.
         # Model construction must not override that seed.
 
     @staticmethod

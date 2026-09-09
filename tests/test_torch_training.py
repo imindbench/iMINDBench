@@ -33,6 +33,7 @@ def run_training(runner_class, mode, early_stop=False):
     torch.manual_seed(7)
     cfg = OmegaConf.create(
         {
+            "runtime": {"seed": 7},
             "model": {
                 "device": "cpu",
                 "training_mode": mode,
@@ -45,7 +46,7 @@ def run_training(runner_class, mode, early_stop=False):
                 "total_steps": 7,
                 "validation_interval": 3,
                 "scheduler": {"name": "cosine_annealing", "total_steps": 9},
-            }
+            },
         }
     )
     network = torch.nn.Sequential(
