@@ -402,6 +402,34 @@ def test_execution_skips_existing_results_and_retries_missing_results(tmp_path):
     assert json.loads((result.parent / "launch.json").read_text()) == command
 
 
+@pytest.mark.parametrize("contents", [b'{"partial":', b"\xff"])
+def test_execution_recovers_invalid_results_through_evaluator_resume(
+    tmp_path, contents
+):
+    result = tmp_path / "job" / "population.json"
+    result.parent.mkdir()
+    result.write_bytes(contents)
+    command = [
+        sys.executable,
+        "-c",
+        f"""
+from omegaconf import OmegaConf
+from imindbench.utils.logging_utils import save_results, should_skip_existing_output
+cfg = OmegaConf.create({{"runtime": {{"overwrite": False}}}})
+path = {str(result)!r}
+if not should_skip_existing_output(cfg, path):
+    save_results({{"recovered": True}}, path)
+""",
+    ]
+    job = {"command": command, "run_dir": str(result.parent), "result": str(result)}
+    assert launch.execute_commands([job], tmp_path) == 0
+    assert json.loads(result.read_text()) == {"recovered": True}
+    # A zero-exit subprocess that leaves malformed JSON must still count as failed.
+    result.write_bytes(contents)
+    job["command"] = [sys.executable, "-c", "pass"]
+    assert launch.execute_commands([job], tmp_path) == 1
+
+
 @pytest.mark.parametrize("mode", [None, "--dry-run", "--count"])
 def test_cli_executes_by_default_with_explicit_preview_modes(
     tmp_path, monkeypatch, mode

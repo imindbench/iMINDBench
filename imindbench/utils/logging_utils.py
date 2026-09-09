@@ -2,7 +2,6 @@
 Logging and result formatting utilities.
 """
 
-import json
 import logging
 import os
 import time
@@ -12,6 +11,7 @@ import torch
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import OmegaConf
 
+from imindbench.utils.result_io import is_valid_result_file, write_result_json
 from imindbench.utils.window_slicing import DEFAULT_WINDOW_SLICING_POLICY
 
 try:
@@ -153,10 +153,17 @@ def resolve_result_output_path(
 
 
 def should_skip_existing_output(cfg, file_save_path: str) -> bool:
-    """Whether the current run should skip because the result file exists."""
-    if os.path.exists(file_save_path) and not cfg.runtime.overwrite:
-        log(f"Skipping {file_save_path} because it already exists", priority=0)
+    """Skip readable result JSONs; retry missing or malformed output files."""
+    if cfg.runtime.overwrite:
+        return False
+    if is_valid_result_file(file_save_path):
+        log(
+            f"Skipping {file_save_path} because it contains valid result JSON",
+            priority=0,
+        )
         return True
+    if os.path.exists(file_save_path):
+        log(f"Invalid result JSON; rerunning {file_save_path}", priority=0)
     return False
 
 
@@ -424,8 +431,5 @@ def save_results(results, file_path):
         results: Results dictionary
         file_path: Path to save file
     """
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    with open(file_path, "w") as f:
-        # Human-readable JSON helps spot-checking run outputs during sweeps.
-        json.dump(results, f, indent=4)
+    write_result_json(results, file_path)
     log(f"Results saved to {file_path}", priority=0)

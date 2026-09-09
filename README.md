@@ -168,7 +168,7 @@ evaluations per model/input pairing**, before folds.
   The former `waveform500` experiment is now `default`.
 - Store checkpoint paths in `paths/local.yaml`. DIVER also needs a writable
   `diver_shape_cache_dir` in that same file.
-- Scripts run each enabled block serially and skip existing output JSONs.
+- Scripts run each enabled block serially and skip valid existing output JSONs.
   If a block reports failures, the script stops before the next block.
 - Use a new output root after changing settings.
 
@@ -549,7 +549,7 @@ class GainPreprocessor(BasePreprocessor):
 ## Outputs and resume
 
 Torch training resets its random generators to `runtime.seed + fold_idx` before
-each fold's first training-loader iteration and model initialization, matching
+the runner inspects each fold's loaders and initializes its model, matching
 the training shuffle seed. This makes training independent of randomness consumed
 during preprocessing, including BrainBERT construction skipped by a cache hit.
 Keep `runtime.deterministic=true` for deterministic Torch kernels. This replaces
@@ -561,12 +561,18 @@ Each run writes `population_*.json`, resolved Hydra config, `launch.json` and
 
 | Situation | Behavior |
 | --- | --- |
-| Output JSON exists | Skip the evaluation; no command match or checksum is required |
-| Output JSON is missing | Run from the beginning; training checkpoints are not restored |
+| Valid output JSON exists | Skip the evaluation; no command match or checksum is required |
+| Output JSON is missing or malformed | Run from the beginning; training checkpoints are not restored |
 | Settings change | Use a new output root; existing results are reused by filename alone |
 | Independent workers | Use separate output roots; one launcher locks its root while running |
 
-Dataset scripts and `imindbench-grid` execute and skip existing results by default.
+Dataset scripts and `imindbench-grid` execute and skip valid existing results by default.
+Results are written to a temporary sibling file and atomically replace the final
+JSON only after writing completes. Both the grid launcher and direct evaluation
+retry missing, truncated, or malformed result JSONs. Resume accepts readable JSON
+objects from older releases without requiring new metadata; it does not check
+whether their settings match the requested run. A forcibly stopped writer can
+leave a hidden `.tmp` file, which resume ignores.
 For the CLI, `--dry-run` prints commands without running; `--count` counts the grid.
 
 <details>

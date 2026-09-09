@@ -192,7 +192,7 @@ def _run_processed_evaluation(
         trial_id=trial_id,
     )
     require_coords = cfg.model.requires_coords
-    # Short-circuit before fold construction if result already exists.
+    # Short-circuit before fold construction only for readable result JSON.
     if logging_utils.should_skip_existing_output(cfg, file_save_path):
         return
 

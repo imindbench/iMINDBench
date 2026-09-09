@@ -13,6 +13,8 @@ from pathlib import Path
 from hydra import compose, initialize_config_dir
 from hydra.errors import HydraException
 
+from imindbench.utils.result_io import is_valid_result_file
+
 CONF_DIR = Path(__file__).resolve().parent / "conf"
 POPULATION_DIR = Path(__file__).resolve().parent / "decodable_subject_sessions"
 IDENTITY_KEYS = {
@@ -237,7 +239,7 @@ def build_commands(args):
 
 
 def execute_commands(commands, output_root):
-    """Run serially, skipping evaluations whose output JSON already exists."""
+    """Run serially, skipping readable results and retrying malformed JSONs."""
     output_root.mkdir(parents=True, exist_ok=True)
     with (output_root / ".grid.lock").open("a") as lock:
         try:
@@ -247,9 +249,11 @@ def execute_commands(commands, output_root):
         failures = 0
         for job in commands:
             directory = Path(job["run_dir"])
-            if Path(job["result"]).is_file():
+            if is_valid_result_file(job["result"]):
                 print(f"Skipping existing result: {job['result']}")
                 continue
+            if Path(job["result"]).exists():
+                print(f"Invalid result JSON; rerunning {job['result']}")
             directory.mkdir(parents=True, exist_ok=True)
             record = directory / "launch.json"
             record.write_text(json.dumps(job["command"], indent=2) + "\n")
@@ -258,20 +262,12 @@ def execute_commands(commands, output_root):
                 result = subprocess.run(
                     job["command"], stdout=log, stderr=subprocess.STDOUT
                 )
-            if result.returncode or not Path(job["result"]).is_file():
+            if result.returncode or not is_valid_result_file(job["result"]):
                 failures += 1
                 print(
                     f"Failed evaluation; see {directory / 'launcher.log'}",
                     file=sys.stderr,
                 )
-            else:
-                payload = Path(job["result"]).read_bytes()
-                try:
-                    json.loads(payload)
-                except (ValueError, UnicodeDecodeError):
-                    failures += 1
-                    print(f"Invalid result JSON: {job['result']}", file=sys.stderr)
-                    continue
         return failures
 
 
