@@ -1,12 +1,27 @@
 """Exercise interrupted result writes and direct-evaluator resume behavior."""
 
 import json
+import stat
 
 import pytest
 from omegaconf import OmegaConf
 
 from imindbench.utils import result_io
 from imindbench.utils.logging_utils import save_results, should_skip_existing_output
+
+
+def test_result_writes_preserve_normal_file_permissions(tmp_path):
+    ordinary = tmp_path / "ordinary.json"
+    ordinary.write_text("{}")
+    destination = tmp_path / "population.json"
+    save_results({"new": True}, destination)
+    assert stat.S_IMODE(destination.stat().st_mode) == stat.S_IMODE(
+        ordinary.stat().st_mode
+    )
+    # Overwriting a shared result must retain its explicitly configured mode.
+    destination.chmod(0o640)
+    save_results({"replacement": True}, destination)
+    assert stat.S_IMODE(destination.stat().st_mode) == 0o640
 
 
 @pytest.mark.parametrize("existing", [False, True])

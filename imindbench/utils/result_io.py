@@ -2,8 +2,9 @@
 
 import json
 import os
-import tempfile
+import stat
 from pathlib import Path
+from uuid import uuid4
 
 
 def is_valid_result_file(file_path: str | Path) -> bool:
@@ -22,16 +23,18 @@ def write_result_json(results: dict, file_path: str | Path) -> None:
     temporary = None
     try:
         # A sibling file keeps replacement atomic on the destination filesystem.
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            encoding="utf-8",
-            dir=destination.parent,
-            prefix=f".{destination.name}.",
-            suffix=".tmp",
-            delete=False,
-        ) as handle:
-            temporary = Path(handle.name)
+        candidate = destination.with_name(f".{destination.name}.{uuid4().hex}.tmp")
+        # Exclusive ordinary creation honors the directory ACL and process umask;
+        # NamedTemporaryFile would make published results owner-only (0600).
+        with candidate.open("x", encoding="utf-8") as handle:
+            temporary = candidate
             json.dump(results, handle, indent=4)
+            try:
+                previous_mode = stat.S_IMODE(destination.stat().st_mode)
+            except FileNotFoundError:
+                pass
+            else:
+                os.fchmod(handle.fileno(), previous_mode)
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, destination)

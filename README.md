@@ -573,6 +573,8 @@ retry missing, truncated, or malformed result JSONs. Resume accepts readable JSO
 objects from older releases without requiring new metadata; it does not check
 whether their settings match the requested run. A forcibly stopped writer can
 leave a hidden `.tmp` file, which resume ignores.
+New files follow normal directory/process permissions; replacements retain the
+existing file's permission bits.
 For the CLI, `--dry-run` prints commands without running; `--count` counts the grid.
 
 <details>
