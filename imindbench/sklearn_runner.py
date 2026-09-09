@@ -5,10 +5,10 @@ Runner for sklearn models (like PopulationTransformer's Runner pattern).
 import gc
 import inspect
 import time
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 
 import numpy as np
-from threadpoolctl import threadpool_limits
+from threadpoolctl import ThreadpoolController
 
 from imindbench.base_runner import BaseRunner
 from imindbench.utils.logging_utils import log
@@ -33,7 +33,19 @@ def _temporary_sklearn_thread_limits(num_threads: int | None):
         yield None
         return
 
-    with threadpool_limits(limits=normalized):
+    controller = ThreadpoolController()
+    with ExitStack() as stack:
+        # This is an upper bound, not a request to grow existing pools. Raising
+        # small OpenBLAS pools can segfault SciPy's L-BFGS native kernel.
+        for library in controller.info():
+            current_threads = library["num_threads"]
+            if current_threads is not None and current_threads > normalized:
+                # NumPy and SciPy can load different libraries with the same prefix.
+                stack.enter_context(
+                    controller.select(filepath=library["filepath"]).limit(
+                        limits=normalized
+                    )
+                )
         yield normalized
 
 

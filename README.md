@@ -179,6 +179,11 @@ Adjust `runner.num_workers`, `runner.pin_memory`, `runner.persistent_workers`,
 and `runtime.preprocess_torch_num_threads` for your machine. Use
 `experiment=default` in place of the former `multi_stft/*` experiments.
 
+`runtime.sklearn_num_threads` caps each loaded BLAS/OpenMP pool during fitting
+(default: 4). Smaller existing limits, including those set by the environment,
+are preserved; previous limits are restored afterward. This avoids enlarging
+small OpenBLAS pools, which can crash SciPy's L-BFGS solver on some builds.
+
 **Preprocessing**
 
 The bundled collection contains 18 presets: the 10 main input presets listed in
