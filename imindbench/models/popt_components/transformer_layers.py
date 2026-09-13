@@ -3,6 +3,9 @@ Custom transformer encoder layers that return attention weights.
 
 A simpler implementation of nn.TransformerEncoder that allows for attention weights to be returned.
 From: https://buomsoo-kim.github.io/attention/2020/04/27/Attention-mechanism-21.md/
+Tutorial by Buomsoo Kim (2020); site notice: copyright 2022, CC BY-NC 4.0.
+Modified for iMINDBench; attribution and license scope are in THIRD_PARTY.md.
+PyTorch-derived portions retain the notices in LICENSES/PyTorch-LICENSE.txt.
 """
 
 import copy

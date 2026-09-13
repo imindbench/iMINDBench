@@ -3,6 +3,8 @@ PopT fine-tuning model for imindbench.
 
 Loads pretrained PopT transformer weights and performs fine-tuning
 with optional freezing of upstream encoder.
+
+PopT source and license status: THIRD_PARTY.md (PopulationTransformer).
 """
 
 import warnings

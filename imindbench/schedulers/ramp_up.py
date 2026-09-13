@@ -11,6 +11,7 @@ class RampUp(BaseScheduler):
     RampUp scheduler with warmup followed by step decay.
 
     Adapted from PopulationTransformer's schedulers/ramp_up.py.
+    Source and license status: THIRD_PARTY.md (PopulationTransformer).
     Uses GradualWarmupScheduler for warmup period, then StepLR for decay.
     Warmup implementation: https://github.com/ildoonet/pytorch-gradual-warmup-lr
     """

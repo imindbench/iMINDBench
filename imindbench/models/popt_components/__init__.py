@@ -3,6 +3,7 @@ PopT transformer components for fine-tuning.
 
 Unified transformer building blocks that work for both simple and coordinate-based models.
 PopT reference: https://github.com/czlwang/PopulationTransformer
+Source and license status: THIRD_PARTY.md (PopulationTransformer).
 """
 
 from .brainbert_encoder import BrainBERTEncoder

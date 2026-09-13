@@ -2,6 +2,8 @@
 Positional encoding variants for transformer models.
 
 Contains both simple sinusoidal and multi-subject brain coordinate encodings.
+Adapted from PopulationTransformer's models/transformer_encoder_input.py.
+Source and license status: THIRD_PARTY.md (PopulationTransformer).
 """
 
 import math

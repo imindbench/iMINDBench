@@ -1,4 +1,8 @@
 # @package _global_
+# Adapted from DIVER-1: https://github.com/DIVER-Project/DIVER-1
+# Source and license details: THIRD_PARTY.md (DIVER-1).
+# Training settings below are the iMINDBench benchmark recipe.
+
 # DIVER consumes MNI coordinates whenever they are available.
 dataset:
   coordinate_profile: diver_mni

@@ -1,4 +1,5 @@
 # PopT reference: https://github.com/czlwang/PopulationTransformer
+# Source and license status: THIRD_PARTY.md (PopulationTransformer).
 # Training settings below are the iMINDBench benchmark recipe.
 name: popt
 backend: torch

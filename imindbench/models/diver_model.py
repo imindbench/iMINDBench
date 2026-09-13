@@ -1,3 +1,6 @@
+# Adapted from DIVER-1: https://github.com/DIVER-Project/DIVER-1
+# Source and license details: THIRD_PARTY.md (DIVER-1).
+
 import numpy as np
 from omegaconf import DictConfig
 

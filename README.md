@@ -600,3 +600,5 @@ Some tests need external checkpoints and skip when those are unavailable.
 
 See [LICENSE.txt](LICENSE.txt) and [third-party notices](THIRD_PARTY.md).
 BaRISTA retains its [upstream license](LICENSES/BaRISTA-LICENSE.md).
+DIVER and PopT include third-party code with unresolved permission terms; see the
+[source review and preserved notices](THIRD_PARTY.md) before redistributing them.

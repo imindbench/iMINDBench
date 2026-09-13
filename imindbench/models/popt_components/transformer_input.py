@@ -3,6 +3,7 @@ Unified transformer input layer that handles both simple and coordinate-based po
 
 Adapted from PopulationTransformer's models/transformer_encoder_input.py:
 https://github.com/czlwang/PopulationTransformer
+Source and license status: THIRD_PARTY.md (PopulationTransformer).
 """
 
 import torch.nn as nn

@@ -1,3 +1,14 @@
+# Portions adapted from Salesforce uni2ts through DIVER-1.
+# Copyright (c) 2024, Salesforce, Inc.
+#
+# The uni2ts-derived portions are licensed under the Apache License, Version 2.0.
+# See LICENSES/uni2ts-LICENSE.txt and http://www.apache.org/licenses/LICENSE-2.0.
+# Distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for permissions and limitations.
+#
+# Modified through module consolidation, typing, imports, and attention changes.
+# DIVER-specific additions have unresolved terms; see THIRD_PARTY.md.
+
 import abc
 import math
 from collections.abc import Callable
