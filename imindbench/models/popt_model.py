@@ -239,7 +239,7 @@ class PopTModel(TorchBaseModel):
             )
 
         if "model_cfg" in checkpoint and "model" in checkpoint:
-            # Native PopT checkpoint format (PopT-BYD-BTB compatible).
+            # Checkpoint stores the model configuration and state dict separately.
             model_cfg = checkpoint["model_cfg"]
             state_dict = checkpoint["model"]
         elif "model_state" in checkpoint and "config" in checkpoint:

@@ -1,7 +1,8 @@
 """
 Unified transformer input layer that handles both simple and coordinate-based positional encoding.
 
-Matches PopT-BYD-BTB architecture: ONE TransformerEncoderInput class that works for both use cases.
+Adapted from PopulationTransformer's models/transformer_encoder_input.py:
+https://github.com/czlwang/PopulationTransformer
 """
 
 import torch.nn as nn
@@ -16,8 +17,6 @@ class TransformerEncoderInput(nn.Module):
     Automatically selects encoding type based on cfg.position_encoding:
     - Default: Simple PositionalEncoding (for feature extraction)
     - "multi_subj_position_encoding": MultiSubjBrainPositionalEncoding (for PopT fine-tuning)
-
-    This matches the PopT-BYD-BTB implementation exactly.
     """
 
     def __init__(self, cfg, dropout=0.1):

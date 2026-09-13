@@ -1,5 +1,5 @@
 """
-Linear baseline model from PopT-BYD-BTB.
+Linear classifier for flattened channel features.
 Single linear layer with optional dropout, batch normalization, and sensor dropout.
 """
 
@@ -14,12 +14,9 @@ from .torch_base_model import TorchBaseModel
 @register_model("linear_baseline")
 class LinearBaselineModel(TorchBaseModel):
     """
-    Linear baseline model from PopT-BYD-BTB.
+    Linear baseline using iMINDBench's TorchBaseModel training interface.
 
-    Differences from PopT-BYD-BTB:
-    - Outputs n_classes instead of 1 (for multi-class neuroprobe tasks)
-    - Inherits from neuroprobe's TorchBaseModel instead of PopT's BaseModel
-    - build_model signature: build_model(input_shape, n_classes) instead of build_model(cfg)
+    Builds a classifier with n_classes outputs from the supplied input shape.
 
     Features:
     - Optional batch normalization

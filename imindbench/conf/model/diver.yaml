@@ -11,19 +11,18 @@ model:
   upstream_ckpt: ${paths.diver_checkpoint}
   frozen_upstream: true  # Easy toggle: true = frozen encoder, false = full fine-tuning
 
-  # Learning rates (from DIVER-1 AdamW_finetune)
-  # Base LR: 5e-4, upstream gets 0.1x = 5e-5
+  # Benchmark learning rates for the encoder and classification head.
   upstream_lr: 2.0e-03   # Transformer encoder learning rate
   head_lr: 2.0e-03       # Classification head learning rate
   learning_rate: 2.0e-03   # Base learning rate (only used for logging, actual LRs come from upstream_lr/head_lr)
 
-  # Optimizer settings (matching PopT-BYD-BTB)
+  # Optimizer settings.
   optimizer: AdamW
   weight_decay: 0.01
   grad_clip: 1.0
 
-  # Training mode: steps_based (PopT replication) or epoch_based (default with early stopping)
-  training_mode: epoch_based  # Use steps_based for exact PopT-BYD-BTB replication
+  # Training mode: fixed optimizer-update budget or epochs with early stopping.
+  training_mode: epoch_based
   total_steps: 1000  # Total training steps (for steps_based mode)
   validation_interval: 100  # Validate every N steps (for steps_based mode)
 
@@ -32,9 +31,9 @@ model:
   patience: 10       # Early stopping patience (for epoch_based mode)
   tol: 0.0         # Early stopping tolerance (for epoch_based mode)
 
-  # LR Scheduler (RampUp from PopT-BYD-BTB)
+  # Cosine annealing learning-rate schedule.
   scheduler:
-    name: cosine_annealing  # Use cosine annealing after warmup
+    name: cosine_annealing
     eta_min_factor: 1e-2 # Minimum LR as a factor of the initial LR
 
   # Training settings

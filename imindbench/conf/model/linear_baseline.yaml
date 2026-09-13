@@ -1,4 +1,4 @@
-# Linear baseline model from PopT-BYD-BTB
+# Linear classifier for flattened channel features.
 name: linear_baseline
 backend: torch
 requires_aligned_channels: true

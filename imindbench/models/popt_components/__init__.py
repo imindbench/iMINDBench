@@ -2,7 +2,7 @@
 PopT transformer components for fine-tuning.
 
 Unified transformer building blocks that work for both simple and coordinate-based models.
-Matches PopT-BYD-BTB architecture.
+PopT reference: https://github.com/czlwang/PopulationTransformer
 """
 
 from .brainbert_encoder import BrainBERTEncoder
