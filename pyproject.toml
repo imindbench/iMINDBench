@@ -14,6 +14,8 @@ license-files = [
     "LICENSES/BaRISTA-LICENSE.md",
     "LICENSES/uni2ts-LICENSE.txt",
     "LICENSES/PyTorch-LICENSE.txt",
+    "LICENSES/PopT-LICENSE.txt",
+    "LICENSES/SciPy-LICENSE.txt",
 ]
 dependencies = [
     "einops>=0.8,<0.9",

@@ -600,5 +600,7 @@ Some tests need external checkpoints and skip when those are unavailable.
 
 See [LICENSE.txt](LICENSE.txt) and [third-party notices](THIRD_PARTY.md).
 BaRISTA retains its [upstream license](LICENSES/BaRISTA-LICENSE.md).
-DIVER and PopT include third-party code with unresolved permission terms; see the
+PopT retains its [upstream MIT license](LICENSES/PopT-LICENSE.txt), with separate
+terms for tutorial, PyTorch, and SciPy portions described in the third-party notices.
+DIVER includes third-party code with unresolved permission terms; see the
 [source review and preserved notices](THIRD_PARTY.md) before redistributing them.

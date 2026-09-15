@@ -4,6 +4,9 @@ STFT (Short-Time Fourier Transform) preprocessor.
 Canonical sample axis convention is ``(channels, time, features...)``. Raw
 time-domain inputs are ``(channels, time)`` and STFT outputs are
 ``(channels, timebins, freqs)``.
+
+NumPy zscore normalization follows SciPy-derived PopT code; attribution and
+modifications are recorded in THIRD_PARTY.md. See LICENSES/SciPy-LICENSE.txt.
 """
 
 from numbers import Integral

@@ -1,21 +1,19 @@
 # Third-party code
 
 Original iMINDBench contributions are offered under Apache-2.0 (see
-`LICENSE.txt`). Incorporated third-party code retains its applicable terms;
-this repository does not grant rights to upstream code whose license is unknown.
+`LICENSE.txt`). Incorporated third-party code retains the terms documented below.
 
-The DIVER and PopT source review below was performed on 2026-09-13. It records
-verified notices and unresolved permissions, not legal clearance for a release.
-An "inspected revision" identifies the source checked during this review; it
-does not establish which revision was originally copied.
+Inspected revisions and reference versions identify the sources checked, which
+may differ from the revisions originally copied.
 
 | Component | License status |
 | --- | --- |
 | BaRISTA | USC educational, research, and non-profit terms; see below. |
 | DIVER-1-specific code | No license grant found in the inspected source; permission unresolved. |
-| PopT-specific code | No license grant found in the inspected source; permission unresolved. |
+| PopT-specific code | MIT; upstream copyright and license preserved in `LICENSES/PopT-LICENSE.txt`. |
 | uni2ts portions within DIVER | Apache-2.0; Salesforce notices preserved below and in the encoder. |
 | Tutorial/PyTorch portions within PopT | Tutorial displays CC BY-NC 4.0; PyTorch portions retain their BSD-style terms. |
+| SciPy normalization portions through PopT | BSD-3-Clause; upstream notice preserved in `LICENSES/SciPy-LICENSE.txt`. |
 
 ---
 
@@ -34,11 +32,6 @@ used, copied, modified, and distributed for educational, research, and non-profi
 purposes when the required USC notice accompanies every copy. Commercial use
 requires separate permission from the USC Stevens Center for Innovation.
 
-`models/barista_components/TSEncoder2D.py` also cites the `pytorch/vision`
-DenseNet weight-initialisation idiom in a docstring. That is a reference to a
-convention rather than a copy, so it raises no separate licensing question.
-`atlas.py` cites the Destrieux/FreeSurfer papers for parcel names, likewise.
-
 ---
 
 ## DIVER-1
@@ -56,14 +49,12 @@ convention rather than a copy, so it raises no separate licensing question.
 - **Paper:** [DIVER-1: Scaling Intracranial EEG Foundation Models for Transferable Representations](https://arxiv.org/abs/2512.19097)
 - **Upstream license:** no grant found. The complete tracked tree at the inspected
   revision contains no license/copying/notice file, and the README and inspected
-  model/utility sources contain no license grant. No DIVER license copy is
-  supplied because none was found; the uni2ts terms below cover only those portions.
+  model/utility sources contain no license grant. Permission for DIVER-specific
+  code remains unresolved; the uni2ts terms below cover only uni2ts-derived code.
 
 The local implementation adapts the upstream model components to iMINDBench's
 batch interface, classification heads, checkpoint loading, and MuP shape cache.
-The YAML records the benchmark training recipe. These adaptations do not establish
-permission for the DIVER-specific contributions; an applicable license or written
-permission from the rights holders still needs to be recorded.
+The YAML records the benchmark training recipe.
 
 ### uni2ts code incorporated through DIVER
 
@@ -82,21 +73,20 @@ changes to imports, typing, and attention behavior.
 - **License:** Apache-2.0; full upstream text in
   [`LICENSES/uni2ts-LICENSE.txt`](LICENSES/uni2ts-LICENSE.txt).
 
-The Salesforce notice applies to the uni2ts-derived portions. It does not license
-the otherwise unresolved DIVER-specific additions.
-
 ---
 
 ## PopulationTransformer (PopT)
 
 - **Upstream:** https://github.com/czlwang/PopulationTransformer
 - **Upstream revision used for the port:** unconfirmed
-- **Inspected revision:** [`dadb55b21daf2809b123d49a9594ff6eebea2c40`](https://github.com/czlwang/PopulationTransformer/tree/dadb55b21daf2809b123d49a9594ff6eebea2c40)
+- **Inspected revision:** [`d237755bbdea123c60bface0cecbb48bab6f42de`](https://github.com/czlwang/PopulationTransformer/tree/d237755bbdea123c60bface0cecbb48bab6f42de)
 - **Paper:** [Population Transformer: Learning Population-level Representations of Neural Activity](https://arxiv.org/abs/2406.03044)
-- **Upstream license:** no grant found. The complete tracked tree at the inspected
-  revision contains no license/copying/notice file, and the README and inspected
-  model/scheduler sources contain no license grant. No PopT license copy is supplied
-  because none was found.
+- **Upstream license:** MIT for original PopulationTransformer code and
+  documentation; incorporated third-party material retains its own terms.
+- **Copyright:** Copyright (c) 2024-2026 PopulationTransformer contributors.
+- **License copy:** [`LICENSES/PopT-LICENSE.txt`](LICENSES/PopT-LICENSE.txt), copied
+  verbatim from the inspected revision's root `LICENSE`.
+- **Upstream scope and notices:** [`THIRD_PARTY.md`](https://github.com/czlwang/PopulationTransformer/blob/d237755bbdea123c60bface0cecbb48bab6f42de/THIRD_PARTY.md).
 
 The following paths are relative to `imindbench/` locally and to the inspected
 PopulationTransformer repository upstream:
@@ -107,13 +97,12 @@ PopulationTransformer repository upstream:
 | `models/popt_components/transformer_input.py`, `models/popt_components/positional_encoding.py` | `models/transformer_encoder_input.py` |
 | `models/popt_components/transformer_layers.py` | Transformer classes in `models/pt_model_custom.py`; earlier sources below |
 | `schedulers/ramp_up.py` | `schedulers/ramp_up.py` |
+| `preprocessors/stft_preprocessor.py` (`zscore` normalization) | `preprocessors/stft.py`; SciPy-derived portions below |
 
 Local adaptations include the benchmark batch interface, multiclass heads,
 checkpoint conversion, variable-channel handling, separated component modules,
 and configurable scheduler intervals. `conf/model/popt.yaml` records the benchmark
-recipe; it is not evidence of exact upstream reproduction. The local linear
-baseline and `brainbert_encoder.py` integration helper are not asserted to be
-files copied from this official PopT repository.
+recipe.
 
 ### Earlier sources within PopT
 
@@ -130,15 +119,22 @@ files copied from this official PopT repository.
   The local encoder retains the corresponding layer structure and helper methods.
   Reference source: [`torch/nn/modules/transformer.py` at v1.5.0](https://github.com/pytorch/pytorch/blob/v1.5.0/torch/nn/modules/transformer.py).
   The full copyright notices, BSD-style conditions, and disclaimer are preserved
-  in [`LICENSES/PyTorch-LICENSE.txt`](LICENSES/PyTorch-LICENSE.txt). This reference
-  version does not establish the precise historical copy revision. Its license
-  does not establish permission for later authors' additions.
+  in [`LICENSES/PyTorch-LICENSE.txt`](LICENSES/PyTorch-LICENSE.txt).
+- **SciPy normalization:** the NumPy path in
+  `preprocessors/stft_preprocessor.py::zscore` retains the normalization pattern
+  from PopT's `preprocessors/stft.py`, which credits
+  [`scipy/stats/_stats_py.py` at v1.9.0](https://github.com/scipy/scipy/blob/v1.9.0/scipy/stats/_stats_py.py).
+  Copyright (c) 2001-2002 Enthought, Inc. 2003-2022, SciPy Developers.
+  The BSD-3-Clause notice is copied verbatim from PopT's inspected revision in
+  [`LICENSES/SciPy-LICENSE.txt`](LICENSES/SciPy-LICENSE.txt). Local changes include
+  a Torch tensor path, array conversion, and the `dim` argument name; the helper
+  replaces zero standard deviations with one.
 - **Positional encoding:** the official PopT implementation additionally credits
   [a PyTorch forum discussion](https://discuss.pytorch.org/t/how-to-modify-the-positional-encoding-in-torch-nn-transformer/104308/2).
   The cited post contains no code, so it does not identify the precise snippet
   used. The original snippet, revision, and applicable terms for any forum-specific
-  contribution remain unverified; this is part of the unresolved PopT provenance.
+  contribution remain unverified.
 - **Warmup dependency:** the scheduler uses `GradualWarmupScheduler` from
   [pytorch-gradual-warmup-lr](https://github.com/ildoonet/pytorch-gradual-warmup-lr),
   installed separately at the revision pinned in `pyproject.toml`. Its package
-  terms do not establish permission for PopT's scheduler adapter.
+  terms remain separate from the MIT license for PopT's scheduler adapter.
