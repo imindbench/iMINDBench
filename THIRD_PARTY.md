@@ -9,7 +9,7 @@ may differ from the revisions originally copied.
 | Component | License status |
 | --- | --- |
 | BaRISTA | USC educational, research, and non-profit terms; see below. |
-| DIVER-1-specific code | No license grant found in the inspected source; permission unresolved. |
+| DIVER-1-specific code | MIT; upstream copyright and license preserved in `LICENSES/DIVER-1-LICENSE.txt`. |
 | PopT-specific code | MIT; upstream copyright and license preserved in `LICENSES/PopT-LICENSE.txt`. |
 | uni2ts portions within DIVER | Apache-2.0; Salesforce notices preserved below and in the encoder. |
 | Tutorial/PyTorch portions within PopT | Tutorial displays CC BY-NC 4.0; PyTorch portions retain their BSD-style terms. |
@@ -41,16 +41,20 @@ requires separate permission from the USC Stevens Center for Innovation.
   `imindbench/conf/model/diver.yaml`
 - **Upstream:** https://github.com/DIVER-Project/DIVER-1
 - **Upstream revision used for the port:** unconfirmed
-- **Inspected revision:** [`fae4d7c5a58f2f795ce767939ad191d9c7ba49b8`](https://github.com/DIVER-Project/DIVER-1/tree/fae4d7c5a58f2f795ce767939ad191d9c7ba49b8)
+- **Inspected source revision:** [`fae4d7c5a58f2f795ce767939ad191d9c7ba49b8`](https://github.com/DIVER-Project/DIVER-1/tree/fae4d7c5a58f2f795ce767939ad191d9c7ba49b8)
 - **Source references:** [model components](https://github.com/DIVER-Project/DIVER-1/tree/fae4d7c5a58f2f795ce767939ad191d9c7ba49b8/models)
   and [utilities](https://github.com/DIVER-Project/DIVER-1/tree/fae4d7c5a58f2f795ce767939ad191d9c7ba49b8/utils).
   Local model component filenames follow upstream; `checkpoint_utils.py` adapts
   `utils/checkpoint.py`, and `mup_utils.py` adapts `utils/mup_utils.py`.
 - **Paper:** [DIVER-1: Scaling Intracranial EEG Foundation Models for Transferable Representations](https://arxiv.org/abs/2512.19097)
-- **Upstream license:** no grant found. The complete tracked tree at the inspected
-  revision contains no license/copying/notice file, and the README and inspected
-  model/utility sources contain no license grant. Permission for DIVER-specific
-  code remains unresolved; the uni2ts terms below cover only uni2ts-derived code.
+- **Upstream license:** MIT, added in commit
+  [`25638eb38ef297b582ab79ae1c96260f57c155b3`](https://github.com/DIVER-Project/DIVER-1/commit/25638eb38ef297b582ab79ae1c96260f57c155b3)
+  (2026-09-15), directly following the inspected source revision.
+- **Copyright:** Copyright (c) 2026 DIVER Project.
+- **License copy:** [`LICENSES/DIVER-1-LICENSE.txt`](LICENSES/DIVER-1-LICENSE.txt),
+  copied verbatim from that commit's root
+  [`LICENSE`](https://github.com/DIVER-Project/DIVER-1/blob/25638eb38ef297b582ab79ae1c96260f57c155b3/LICENSE).
+  The uni2ts-derived portions retain their Apache-2.0 terms and notices below.
 
 The local implementation adapts the upstream model components to iMINDBench's
 batch interface, classification heads, checkpoint loading, and MuP shape cache.

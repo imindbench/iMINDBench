@@ -602,5 +602,5 @@ See [LICENSE.txt](LICENSE.txt) and [third-party notices](THIRD_PARTY.md).
 BaRISTA retains its [upstream license](LICENSES/BaRISTA-LICENSE.md).
 PopT retains its [upstream MIT license](LICENSES/PopT-LICENSE.txt), with separate
 terms for tutorial, PyTorch, and SciPy portions described in the third-party notices.
-DIVER includes third-party code with unresolved permission terms; see the
-[source review and preserved notices](THIRD_PARTY.md) before redistributing them.
+DIVER-1 retains its [upstream MIT license](LICENSES/DIVER-1-LICENSE.txt), with
+separate Apache-2.0 terms for uni2ts portions described in the third-party notices.

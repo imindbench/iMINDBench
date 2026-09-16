@@ -12,6 +12,7 @@ license-files = [
     "LICENSE.txt",
     "THIRD_PARTY.md",
     "LICENSES/BaRISTA-LICENSE.md",
+    "LICENSES/DIVER-1-LICENSE.txt",
     "LICENSES/uni2ts-LICENSE.txt",
     "LICENSES/PyTorch-LICENSE.txt",
     "LICENSES/PopT-LICENSE.txt",

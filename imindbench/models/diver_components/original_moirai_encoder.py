@@ -7,7 +7,8 @@
 # either express or implied. See the License for permissions and limitations.
 #
 # Modified through module consolidation, typing, imports, and attention changes.
-# DIVER-specific additions have unresolved terms; see THIRD_PARTY.md.
+# DIVER-specific additions: Copyright (c) 2026 DIVER Project; MIT license.
+# See LICENSES/DIVER-1-LICENSE.txt and THIRD_PARTY.md.
 
 import abc
 import math
