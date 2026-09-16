@@ -1,0 +1,56 @@
+# @package _global_
+# Adapted from DIVER-1: https://github.com/DIVER-Project/DIVER-1
+# Source and license details: THIRD_PARTY.md (DIVER-1).
+# Training settings below are the iMINDBench benchmark recipe.
+
+# DIVER consumes MNI coordinates whenever they are available.
+dataset:
+  coordinate_profile: diver_mni
+
+model:
+  name: diver
+  backend: torch
+  requires_aligned_channels: false
+  model_dir: ${paths.diver_shape_cache_dir}  # Writable MuP shape directory.
+  upstream_ckpt: ${paths.diver_checkpoint}
+  frozen_upstream: true  # Easy toggle: true = frozen encoder, false = full fine-tuning
+
+  # Benchmark learning rates for the encoder and classification head.
+  upstream_lr: 2.0e-03   # Transformer encoder learning rate
+  head_lr: 2.0e-03       # Classification head learning rate
+  learning_rate: 2.0e-03   # Base learning rate (only used for logging, actual LRs come from upstream_lr/head_lr)
+
+  # Optimizer settings.
+  optimizer: AdamW
+  weight_decay: 0.01
+  grad_clip: 1.0
+
+  # Training mode: fixed optimizer-update budget or epochs with early stopping.
+  training_mode: epoch_based
+  total_steps: 1000  # Total training steps (for steps_based mode)
+  validation_interval: 100  # Validate every N steps (for steps_based mode)
+
+  # For epoch_based mode (alternative to steps_based)
+  max_iter: 40     # Max epochs (for epoch_based mode) # diver defualt
+  patience: 10       # Early stopping patience (for epoch_based mode)
+  tol: 0.0         # Early stopping tolerance (for epoch_based mode)
+
+  # Cosine annealing learning-rate schedule.
+  scheduler:
+    name: cosine_annealing
+    eta_min_factor: 1e-2 # Minimum LR as a factor of the initial LR
+
+  # Training settings
+  batch_size: 32
+  random_state: 42
+  device: auto
+  requires_coords: false
+
+  # Data settings
+  width: 256 #256 for tiny, 512 for small, 1024 for large 2048 for xlarge
+  depth: 12 # 12 for every pretrained model family (tiny/small/large/xlarge)
+  patch_size: 50 #50 for 0.1sec, 500 for 1sec
+  mup_weights: true # whether model is trained on mup, and must set as True since all diver pretrained weights are trained on mup now.
+  ft_mup: false # whether to use mup for finetuning layers.
+  ft_head_style: flatten_linear # options: flatten_linear, flatten_mlp
+  deepspeed_pth_format: true # you need to set it true.

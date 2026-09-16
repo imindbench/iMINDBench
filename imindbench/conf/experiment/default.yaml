@@ -1,0 +1,9 @@
+# @package _global_
+paths:
+  decodable_subject_sessions_dir: null
+dataset:
+  label_mode: binary
+  train_same_subject_only: false
+  train_sample_fraction: 1.0
+  max_train_samples_per_subject: null
+  decodable_subject_sessions_only: false

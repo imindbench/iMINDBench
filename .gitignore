@@ -1,0 +1,31 @@
+# Python/build environments and caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Experiment and Hydra runtime state
+outputs/
+artifacts/*
+!artifacts/parity_reference/
+!artifacts/parity_reference/**
+.hydra/
+wandb/
+.tmp/
+
+# Large local data and model artifacts
+data/
+raw/
+processed/
+*.h5
+*.hdf5
+*.ckpt
+*.pt
+*.pth
+
+# Canonical, reviewed parity references are intentionally tracked.

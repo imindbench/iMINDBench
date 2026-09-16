@@ -1,0 +1,22 @@
+# @package _global_
+# Shared execution settings for every model/input pairing.
+runtime:
+  # Runtime controls for evaluation execution.
+  seed: 42  # Torch training resets to seed + fold_idx after preprocessing.
+  deterministic: true  # Request deterministic Torch kernels for every input type.
+  overwrite: false
+  verbose: true
+  preprocess_torch_num_threads: 6
+  sklearn_num_threads: 4  # Upper bound per native pool; preserve smaller limits.
+  train_source_cache_enabled: true
+  train_source_cache_dir: ${paths.train_source_cache_dir}
+  preprocessed_split_cache_enabled: false
+  preprocessed_split_cache_dir: ${paths.preprocessed_split_cache_dir}
+  preprocessed_split_cache_mode: read_write
+
+runner:
+  num_workers: 4
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 2  # Used only when num_workers > 0.
+  coord_index_policy: legacy_truncation  # round_clamp | legacy_truncation

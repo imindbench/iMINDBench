@@ -1,0 +1,22 @@
+# 1000 Hz Laplacian with 15 s notch-filtering context, no HPF, 500 Hz output, and global normalization.
+chain:
+  - name: context_window
+    context_window_sec: 15.0
+    sampling_rate: 1000
+
+  - name: time_domain_filter
+    sampling_rate: 1000
+    high_gamma: false
+    notch_q: 30
+
+  - name: crop_to_target_window
+
+  - name: laplacian_rereference
+    remove_non_laplacian: true
+
+  - name: resample
+    source_rate: 1000
+    target_rate: 500
+
+  - name: standardize
+    mode: global_robust_scalar

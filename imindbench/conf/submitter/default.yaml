@@ -1,0 +1,4 @@
+# Optional attribution; null values are retained in the result JSON.
+author: null
+organization: null
+organization_url: null

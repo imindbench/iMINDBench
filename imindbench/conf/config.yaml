@@ -1,0 +1,36 @@
+# Main configuration for benchmark evaluation
+defaults:
+  - _self_
+  - paths: ???
+  - dataset: neuroprobev2
+  - model: ???
+  - preprocessor: ???
+  - submitter: default
+  - runtime: default
+  - experiment: default  # Unfiltered cohort; select decodable for Main cohort/caps.
+
+# Optional resources inherit these defaults when absent from paths/local.yaml.
+paths:
+  barista_checkpoint: null
+  brainbert_checkpoint: null
+  popt_checkpoint: null
+  diver_checkpoint: null
+  diver_shape_cache_dir: null
+  train_source_cache_dir: null
+  preprocessed_split_cache_dir: null
+  decodable_subject_sessions_dir: null
+
+# Hydra configuration
+hydra:
+  job:
+    chdir: true  # Explicitly set working directory behavior to suppress warning
+
+# Wandb (Weights & Biases) logging configuration
+wandb:
+  enabled: false  # Remote logging is opt-in.
+  project: neuroprobe_eval  # Wandb project name
+  entity: null  # Wandb entity/team (null for personal account)
+  name: null  # Run name (null for auto-generated)
+  tags: null  # Tags as comma-separated string (e.g., "cnn,hp_sweep,onset") or list
+  notes: null  # Notes/description for this run
+  group: null  # Group runs together (e.g., by HP sweep)

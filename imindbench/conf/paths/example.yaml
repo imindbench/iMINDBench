@@ -1,0 +1,22 @@
+# Example paths config. Copy outside the installation to <config-dir>/paths/local.yaml
+# and select it with --config-dir <config-dir> paths=local.
+# Use absolute paths for data, checkpoints and caches.
+#
+# Only the dataset fields below are needed for the first baseline.
+# Optional resources inherit null defaults from conf/config.yaml.
+
+# Root holding the processed brainsets, and the directory name under it.
+dataset_root: /path/to/brainsets/processed
+dataset_dirname: neuroprobe_2025
+
+# Add only the resources you use, for example:
+# popt_checkpoint: /path/to/popt.pt
+# brainbert_checkpoint: /path/to/stft_large_pretrained.pth
+# barista_checkpoint: /path/to/barista.pt
+# diver_checkpoint: /path/to/ieeg_checkpoint.pt
+# diver_shape_cache_dir: /path/to/diver_shapes
+# train_source_cache_dir: /path/to/train_cache
+# preprocessed_split_cache_dir: /path/to/preprocessed_cache
+# decodable_subject_sessions_dir: /path/to/population_manifests
+# With training-source caching enabled, null uses the dataset root's
+# .neuroprobe_eval_train_source_cache directory.

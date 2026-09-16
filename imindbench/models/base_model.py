@@ -1,0 +1,84 @@
+"""
+Base model interface that all models must implement.
+This provides a unified interface for both sklearn and PyTorch models.
+"""
+
+from abc import ABC, abstractmethod
+
+import numpy as np
+
+
+class BaseModel(ABC):
+    """Base interface shared by sklearn wrappers and torch-backed models."""
+
+    def __init__(self):
+        # Runners store raw task labels here so metrics/predictions can map back
+        # to the dataset label space even when torch losses use remapped indices.
+        self.classes_ = None
+        self.accepts_coords = False
+
+    @abstractmethod
+    def fit(self, X_train, y_train, X_val=None, y_val=None):
+        """
+        Train the model.
+
+        Args:
+            X_train: Training features
+            y_train: Training labels
+            X_val: Optional validation features
+            y_val: Optional validation labels
+        """
+        pass
+
+    @abstractmethod
+    def predict_proba(self, X):
+        """
+        Predict class probabilities.
+
+        Args:
+            X: Input features
+
+        Returns:
+            Array of shape (n_samples, n_classes) with class probabilities
+        """
+        pass
+
+    def predict(self, X):
+        """
+        Predict class labels.
+
+        Args:
+            X: Input features
+
+        Returns:
+            Array of shape (n_samples,) with predicted class labels
+        """
+        if self.classes_ is None:
+            raise RuntimeError(
+                "Model classes are unavailable. Call fit(...) before predict(...)."
+            )
+        probs = self.predict_proba(X)
+        return self.classes_[np.argmax(probs, axis=1)]
+
+    def score(self, X, y):
+        """
+        Compute accuracy score.
+
+        Args:
+            X: Input features
+            y: True labels
+
+        Returns:
+            Accuracy score
+        """
+        predictions = self.predict(X)
+        return np.mean(predictions == y)
+
+    def get_classes(self):
+        """Return unique classes."""
+        return self.classes_
+
+    def prepare_batch(self, batch, **kwargs):
+        """Optional hook to adapt collated batch dicts before runner use."""
+        _ = kwargs
+        return batch

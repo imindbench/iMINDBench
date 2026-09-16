@@ -1,0 +1,25 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install reviewed runtime
+        run: |
+          # CPU tests do not need the large CUDA/NVIDIA dependency bundle.
+          python -m pip install --no-cache-dir torch==2.9.1 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --no-cache-dir "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@e39f48ce0ec8c8f59be2507dca8ae172cce79d28"
+          python -m pip install --no-cache-dir -e '.[dev]'
+          python -m pip check
+          python -c "import torch; assert torch.version.cuda is None, torch.__version__"
+      - run: python -m ruff check .
+      - run: python -m ruff format --check .
+      - run: python -m pytest -q
+      - name: Build Python distributions
+        run: python -m build

@@ -1,0 +1,50 @@
+# PopT reference: https://github.com/czlwang/PopulationTransformer
+# Source and license status: THIRD_PARTY.md (PopulationTransformer).
+# Training settings below are the iMINDBench benchmark recipe.
+name: popt
+backend: torch
+requires_aligned_channels: false
+upstream_ckpt: ${paths.popt_checkpoint}  # Path to pretrained PopT checkpoint
+frozen_upstream: false  # Easy toggle: true = frozen encoder, false = full fine-tuning
+
+# Benchmark learning rates for the encoder and classification head.
+# Base LR: 5e-4, upstream gets 0.1x = 5e-5
+upstream_lr: 5e-5  # Transformer encoder learning rate
+head_lr: 5e-4      # Classification head learning rate
+learning_rate: 5e-4  # Base learning rate (only used for logging, actual LRs come from upstream_lr/head_lr)
+
+# Optimizer settings.
+optimizer: AdamW
+weight_decay: 0.01
+grad_clip: 1.0
+
+# Training mode: fixed optimizer-update budget or epochs with early stopping.
+training_mode: steps_based
+total_steps: 1000  # Total training steps (for steps_based mode)
+validation_interval: 100  # Validate every N steps (for steps_based mode)
+
+# For epoch_based mode (alternative to steps_based)
+max_iter: 100     # Max epochs (for epoch_based mode)
+patience: 10       # Early stopping patience (for epoch_based mode)
+tol: 1e-4          # Early stopping tolerance (for epoch_based mode)
+
+# Linear warmup followed by step decay.
+scheduler:
+  name: ramp_up
+  total_steps: ${model.total_steps}
+  warmup: 0.025  # 2.5% of total_steps (25 updates with the default budget)
+  gamma: 0.99    # Decay factor for StepLR after warmup
+
+# Training settings
+batch_size: 128
+random_state: 42
+device: auto
+
+# Data settings
+# Variable-channel release contract:
+# - Supported mode: cls_only
+# - flatten_output_tokens and cls_plus_input_residual assume a fixed token/channel
+#   count across samples and may fail when channel counts vary.
+head_input_mode: cls_only  # cls_only | flatten_output_tokens | cls_plus_input_residual
+position_table_max_len: 5000  # Positional table length for coord clamp in variable-channel mode
+requires_coords: true  # Enforce channel coordinate presence during variable-channel materialization
