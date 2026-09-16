@@ -1,8 +1,12 @@
 # iMINDBench
 
-Intracranial neural decoding across three movie-watching datasets. TorchBrain
-prepares recordings and supplies dataset loaders; iMINDBench provides
-preprocessing, models and evaluation.
+iEEG Multi-Insitution Neural Decoding Benchmark codebase. Includes preprocessing, models, and evaluation code. Obtain datasets w/ splits from [torch_brain](https://github.com/neuro-galaxy/torch_brain/tree/gc/add-seeg-movie-watching-datasets) (see [Prepare data](#2-prepare-data)).
+
+[![Website](https://img.shields.io/badge/Website-blue)](https://imindbench.github.io/)
+[![Leaderboard](https://img.shields.io/badge/Leaderboard-orange)](https://imindbench.github.io/leaderboard/)
+[![Dataset](https://img.shields.io/badge/Dataset-teal)](https://github.com/neuro-galaxy/torch_brain/tree/gc/add-seeg-movie-watching-datasets)
+
+[Getting started](#getting-started) | [Prepare data](#2-prepare-data) | [Full benchmark](#evaluate-the-complete-benchmark) | [Pretrained weights](#pretrained-weights) | [Customize](#customize) | [Outputs](#outputs)
 
 ## Getting started
 
@@ -408,9 +412,9 @@ Model dependencies are included in the installation above.
 
 | Model | Weights | Configuration |
 | --- | --- | --- |
-| PopT-v2 | Model weights will be shared upon request. | `paths.popt_checkpoint` |
-| BrainBERT | [Official weights ZIP](https://drive.google.com/file/d/14ZBOafR7RJ4A6TsurOXjFVMXiVH6Kd_Q/view?usp=sharing), linked by the [upstream project](https://github.com/czlwang/BrainBERT#using-brainbert-embeddings); extract `stft_large_pretrained.pth` | `paths.brainbert_checkpoint` |
-| BaRISTA | Model weights will be shared upon request. | `paths.barista_checkpoint` |
+| PopT-v2 | Available upon request. | `paths.popt_checkpoint` |
+| BrainBERT | [Official weights ZIP](https://drive.google.com/file/d/14ZBOafR7RJ4A6TsurOXjFVMXiVH6Kd_Q/view?usp=sharing), linked by the [upstream project](https://github.com/czlwang/BrainBERT#using-brainbert-embeddings) | `paths.brainbert_checkpoint` |
+| BaRISTA | Available upon request. | `paths.barista_checkpoint` |
 | DIVER-1 | [Official iEEG checkpoint](https://drive.google.com/file/d/1svTMyxABZ-9kvk-BiiZ6-2sNyZ5io8mg/view), linked by the [upstream project](https://github.com/DIVER-Project/DIVER-1#weights) | `paths.diver_checkpoint` and writable `paths.diver_shape_cache_dir` |
 
 <details>
@@ -438,7 +442,7 @@ diver_shape_cache_dir: /path/to/diver_shapes
 
 </details>
 
-## Customize the pipeline
+## Customize
 
 ```text
 brainsets prepare → prepared recordings and labels → dataset task/split
@@ -551,7 +555,7 @@ class GainPreprocessor(BasePreprocessor):
 
 </details>
 
-## Outputs and resume
+## Outputs
 
 Torch training resets its random generators to `runtime.seed + fold_idx` before
 the runner inspects each fold's loaders and initializes its model, matching
