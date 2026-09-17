@@ -2,11 +2,12 @@
 
 iEEG Multi-Insitution Neural Decoding Benchmark codebase. Includes preprocessing, models, and evaluation code. Obtain datasets w/ splits from [torch_brain](https://github.com/neuro-galaxy/torch_brain/tree/gc/add-seeg-movie-watching-datasets) (see [Prepare data](#2-prepare-data)).
 
+[![Paper](https://img.shields.io/badge/arXiv-2609.18104-red)](http://arxiv.org/abs/2609.18104)
 [![Website](https://img.shields.io/badge/Website-blue)](https://imindbench.github.io/)
 [![Leaderboard](https://img.shields.io/badge/Leaderboard-orange)](https://imindbench.github.io/leaderboard/)
 [![Dataset](https://img.shields.io/badge/Dataset-teal)](https://github.com/neuro-galaxy/torch_brain/tree/gc/add-seeg-movie-watching-datasets)
 
-[Getting started](#getting-started) | [Prepare data](#2-prepare-data) | [Full benchmark](#evaluate-the-complete-benchmark) | [Pretrained weights](#pretrained-weights) | [Customize](#customize) | [Outputs](#outputs)
+[Getting started](#getting-started) | [Prepare data](#2-prepare-data) | [Full benchmark](#evaluate-the-complete-benchmark) | [Pretrained weights](#pretrained-weights) | [Customize](#customize) | [Outputs](#outputs) | [Citation](#citation)
 
 ## Getting started
 
@@ -608,3 +609,17 @@ PopT retains its [upstream MIT license](LICENSES/PopT-LICENSE.txt), with separat
 terms for tutorial, PyTorch, and SciPy portions described in the third-party notices.
 DIVER-1 retains its [upstream MIT license](LICENSES/DIVER-1-LICENSE.txt), with
 separate Apache-2.0 terms for uni2ts portions described in the third-party notices.
+
+## Citation
+
+```bibtex
+@misc{chau2026imindbench,
+  title={{iMINDBench}: {iEEG} Multi-Institution Neural Decoding Benchmark},
+  author={Geeling Chau and Saba Hashemi and Yonghyeon Gwon and Eshani Patel and Jan DeWitt and Christopher Wang and Andrii Zahorodnii and Sabera J Talukder and Danny Dongyeop Han and Chun Kee Chung and Maryam M Shanechi and Yisong Yue},
+  year={2026},
+  eprint={2609.18104},
+  archivePrefix={arXiv},
+  primaryClass={cs.LG},
+  url={http://arxiv.org/abs/2609.18104},
+}
+```
