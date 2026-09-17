@@ -13,7 +13,8 @@ iEEG Multi-Insitution Neural Decoding Benchmark codebase. Includes preprocessing
 
 ### 1. Install
 
-Use Python 3.10. From this project directory:
+CPU evaluation is tested on Python 3.10–3.13; GPU models on newer Python versions
+are not yet validated. The default environment uses Python 3.10. From this project directory:
 
 ```bash
 conda env create -f environment.yml
@@ -558,34 +559,17 @@ class GainPreprocessor(BasePreprocessor):
 
 ## Outputs
 
-Torch training resets its random generators to `runtime.seed + fold_idx` before
-the runner inspects each fold's loaders and initializes its model, matching
-the training shuffle seed. This makes training independent of randomness consumed
-during preprocessing, including BrainBERT construction skipped by a cache hit.
-Keep `runtime.deterministic=true` for deterministic Torch kernels. This replaces
-the previous shared RNG sequence across preprocessing and training; use a new
-output root when comparing results under the new seed policy.
-
 Each run writes `population_*.json`, resolved Hydra config, `launch.json` and
 `launcher.log`.
 
 | Situation | Behavior |
 | --- | --- |
-| Valid output JSON exists | Skip the evaluation; no command match or checksum is required |
-| Output JSON is missing or malformed | Run from the beginning; training checkpoints are not restored |
-| Settings change | Use a new output root; existing results are reused by filename alone |
-| Independent workers | Use separate output roots; one launcher locks its root while running |
+| Valid output JSON exists | Skip the evaluation |
+| Output JSON is missing or malformed | Restart the evaluation; no checkpoint resume |
+| Settings change | Use a new output root; existing results are reused by filename |
+| Concurrent launchers | Use separate output roots |
 
-Dataset scripts and `imindbench-grid` execute and skip valid existing results by default.
-Results are written to a temporary sibling file and atomically replace the final
-JSON only after writing completes. Both the grid launcher and direct evaluation
-retry missing, truncated, or malformed result JSONs. Resume accepts readable JSON
-objects from older releases without requiring new metadata; it does not check
-whether their settings match the requested run. A forcibly stopped writer can
-leave a hidden `.tmp` file, which resume ignores.
-New files follow normal directory/process permissions; replacements retain the
-existing file's permission bits.
-For the CLI, `--dry-run` prints commands without running; `--count` counts the grid.
+The launcher accepts `--dry-run` to preview commands or `--count` to count evaluations.
 
 <details>
 <summary>Development checks</summary>
@@ -597,9 +581,7 @@ python -m ruff format --check .
 python -m pytest -q
 ```
 
-Tests cover configurations, script-selected launch previews and synthetic runtime
-contracts without downloading complete datasets or rerunning benchmark experiments.
-Some tests need external checkpoints and skip when those are unavailable.
+Tests use synthetic data; optional model checks skip when their dependencies are unavailable.
 
 </details>
 
