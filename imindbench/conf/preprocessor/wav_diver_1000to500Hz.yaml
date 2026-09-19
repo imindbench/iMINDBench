@@ -5,6 +5,7 @@ chain:
 
   - name: time_domain_filter_diver_style
     sampling_rate: 1000
+    high_pass_hz: 0.5
     notch_freqs: [60, 120, 180]
 
   - name: crop_to_target_window

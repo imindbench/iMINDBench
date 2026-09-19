@@ -6,8 +6,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import tempfile
 from collections import defaultdict
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -30,12 +32,31 @@ class TimeDomainFilterPreprocessor(BasePreprocessor):
         super().__init__(cfg)
         self.session_wise = bool(self.cfg.get("session_wise", False))
         sampling_rate = float(self.cfg.get("sampling_rate", 2048))
-        if sampling_rate <= 0:
+        if not math.isfinite(sampling_rate) or sampling_rate <= 0:
             raise ValueError(f"sampling_rate must be positive, got {sampling_rate}")
         nyquist = sampling_rate / 2.0
         high_gamma = bool(self.cfg.get("high_gamma", False))
         self.notch_zero_phase = bool(self.cfg.get("notch_zero_phase", False))
-        high_pass_hz = float(self.cfg.get("high_pass_hz", 0.0))
+        # Unlike DIVER, omission means no high-pass filtering; None is invalid.
+        high_pass_hz = self.cfg.get("high_pass_hz", 0.0)
+        if isinstance(high_pass_hz, bool) or not isinstance(high_pass_hz, (int, float)):
+            raise TypeError("high_pass_hz must be a number; use 0.0 to disable it.")
+        if not math.isfinite(high_pass_hz) or not 0 <= high_pass_hz < nyquist:
+            raise ValueError(
+                f"high_pass_hz must be finite and in [0, Nyquist ({nyquist}))."
+            )
+        notch_freqs = self.cfg.get("notch_freqs", self.NOTCH_FREQS)
+        if isinstance(notch_freqs, (str, bytes)) or not isinstance(
+            notch_freqs, Sequence
+        ):
+            raise TypeError("notch_freqs must be a sequence of positive frequencies.")
+        for freq in notch_freqs:
+            if isinstance(freq, bool) or not isinstance(freq, (int, float)):
+                raise TypeError("notch_freqs must contain only numbers.")
+            if not math.isfinite(freq) or freq <= 0:
+                raise ValueError(
+                    "notch_freqs must contain only finite positive frequencies."
+                )
         self.high_pass_zero_phase = bool(
             self.cfg.get("high_pass_zero_phase", self.notch_zero_phase)
         )
@@ -55,7 +76,7 @@ class TimeDomainFilterPreprocessor(BasePreprocessor):
         notch_q = float(self.cfg.get("notch_q", 30))
         self._notch_filters = []
         notch_sos_sections = []
-        for freq in self.NOTCH_FREQS:
+        for freq in notch_freqs:
             w0 = freq / nyquist
             if w0 >= 1.0:
                 continue
@@ -71,10 +92,6 @@ class TimeDomainFilterPreprocessor(BasePreprocessor):
 
         self._high_pass_sos = None
         if high_pass_hz > 0.0:
-            if high_pass_hz >= nyquist:
-                raise ValueError(
-                    f"high_pass_hz must be < Nyquist ({nyquist}), got {high_pass_hz}"
-                )
             self._high_pass_sos = signal.butter(
                 int(self.cfg.get("high_pass_order", 4)),
                 high_pass_hz,
@@ -86,10 +103,11 @@ class TimeDomainFilterPreprocessor(BasePreprocessor):
         self._filter_cache_identity = self._build_filter_cache_identity(
             sampling_rate=sampling_rate,
             high_gamma=high_gamma,
-            high_pass_hz=high_pass_hz,
+            high_pass_hz=float(high_pass_hz),
             high_pass_order=int(self.cfg.get("high_pass_order", 4)),
             high_pass_zero_phase=self.high_pass_zero_phase,
             notch_q=notch_q,
+            notch_freqs=notch_freqs,
             notch_zero_phase=self.notch_zero_phase,
             bandpass_q=int(self.cfg.get("bandpass_q", 5)),
             bandpass_low=float(self.cfg.get("bandpass_low", 70)),
@@ -148,6 +166,7 @@ class TimeDomainFilterPreprocessor(BasePreprocessor):
         high_pass_order: int,
         high_pass_zero_phase: bool,
         notch_q: float,
+        notch_freqs: Sequence[float],
         notch_zero_phase: bool,
         bandpass_q: int,
         bandpass_low: float,
@@ -157,7 +176,7 @@ class TimeDomainFilterPreprocessor(BasePreprocessor):
         return {
             "cache_version": self.FILTER_CACHE_VERSION,
             "preprocessor": "time_domain_filter",
-            "notch_freqs": list(self.NOTCH_FREQS),
+            "notch_freqs": list(notch_freqs),
             "sampling_rate": sampling_rate,
             "high_gamma": high_gamma,
             "high_pass_hz": high_pass_hz,

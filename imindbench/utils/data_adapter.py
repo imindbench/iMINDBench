@@ -256,8 +256,10 @@ def _build_fresh_preprocessor(
     return None
 
 
-_TRAIN_SOURCE_CACHE_VERSION = 5
-_PREPROCESSED_SPLIT_CACHE_VERSION = 2
+# Filter fields formerly ignored in external configs now affect processing.
+# Invalidate outer caches even when the serialized config itself is unchanged.
+_TRAIN_SOURCE_CACHE_VERSION = 6
+_PREPROCESSED_SPLIT_CACHE_VERSION = 3
 _PREPROCESSED_SPLIT_CACHE_MODES = {"read_only", "read_write", "refresh"}
 
 
