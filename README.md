@@ -213,6 +213,30 @@ stage names, and result metadata retains the full preprocessing configuration.
 Removing the old field changes cache identities; existing preprocessing caches
 will be rebuilt (or must be refreshed before using `read_only` cache mode).
 
+Bundled filter stages explicitly declare `high_pass_hz` and `notch_freqs`, so
+exported `config.preprocess.chain` records these settings without an overall
+preprocessing name. Historical external configs retain these defaults:
+
+| Filter stage | Omitted `high_pass_hz` | `high_pass_hz: null` | Omitted `notch_freqs` (Hz) |
+| --- | --- | --- | --- |
+| `time_domain_filter` | `0.0` (disabled) | Invalid | `[60, 120, 180, 240, 300, 360]` |
+| `time_domain_filter_diver_style` | `0.5` | `0.5` | `[60, 120, 180]` |
+
+For either stage, `high_pass_hz: 0.0` disables high-pass filtering; positive
+cutoffs must be below Nyquist. The standard filter applies configured notches in
+order, skipping frequencies at or above Nyquist as before; `notch_freqs: []`
+disables its notch filtering. Changing these values changes processing. Merely
+making the historical defaults explicit preserves numerical results. The standard
+filter's own cache identity includes configured notch frequencies. Old external configs
+and previously saved results can still omit the fields; they are not rewritten
+by the exporter, and readers must apply the stage-specific historical defaults.
+If an external config already declared nondefault standard-filter `notch_freqs`
+or DIVER `high_pass_hz`, those formerly ignored fields now affect filtering.
+Train-source and preprocessed-split cache versions have therefore been bumped:
+old entries are not reused, even if the config text is unchanged. Rebuild these
+caches with `read_write` or `refresh` before using `read_only` mode. The standard
+filter's separate cache remains reusable when its effective settings are unchanged.
+
 The old combined `name: laplacian_stft` stage has been removed. External chains
 should use `laplacian_rereference` followed by `stft`, with each stage's settings
 on its own entry. The rereferencing implementation now lives in
