@@ -3,6 +3,8 @@
 chain:
   - name: time_domain_filter
     sampling_rate: 1000
+    high_pass_hz: 0.0
+    notch_freqs: [60, 120, 180, 240, 300, 360]
     high_gamma: false
     notch_q: 30
 
