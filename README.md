@@ -202,7 +202,9 @@ evaluations per model/input pairing**, before folds.
   applies notch filtering → Laplacian referencing → Multi-STFT → training-fitted
   normalization, with **no time-domain high-pass filter**.
 - **Customize:** copy a preset into your external config's `preprocessor/` folder,
-  edit it, and select its filename. Use a fresh output root. See [Customize](#customize) for new stages.
+  edit it, and select its filename. Keep stage sampling rates consistent and fit
+  learned normalization on training data only. Use a fresh output root.
+  See [Customize](#customize) for new stages.
 - **Submit:** `population_*.json` saves settings in `config.preprocess`.
   Those settings determine the leaderboard track; filenames do not.
 
@@ -213,7 +215,6 @@ evaluations per model/input pairing**, before folds.
 | **Custom** | Routes outside the standard track requirements; document the changes and provide a matched baseline where possible. | `stft_*`, `stft_brainbert_*`, `multi_stft_zscore_*`, `wav_nohpf_robust_*` |
 
 - [Submission guide](https://github.com/imindbench/imindbench.github.io/blob/main/leaderboard/README.md#preprocessing-tracks): eligibility and track checks.
-- [Preprocessing reference](docs/preprocessing-reference.md): preset recipes and processing rules.
 - [Changelog](CHANGELOG.md): behavior changes and upgrade actions.
 
 ## Pretrained weights
