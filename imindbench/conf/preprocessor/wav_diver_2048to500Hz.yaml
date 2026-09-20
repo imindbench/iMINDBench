@@ -5,7 +5,9 @@ chain:
 
   - name: time_domain_filter_diver_style
     sampling_rate: 2048
+    # Hz: omitted or null (Python None) means 0.5; 0.0 disables high-pass.
     high_pass_hz: 0.5
+    # Hz: omission uses [60, 120, 180].
     notch_freqs: [60, 120, 180]
 
   - name: crop_to_target_window

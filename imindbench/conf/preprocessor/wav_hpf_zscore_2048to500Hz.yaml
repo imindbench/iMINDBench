@@ -6,9 +6,12 @@ chain:
 
   - name: time_domain_filter
     sampling_rate: 2048
+    # Hz: omission uses 60 Hz harmonics through 360; [] disables notches.
+    # Applied in order; frequencies at or above Nyquist are skipped.
     notch_freqs: [60, 120, 180, 240, 300, 360]
     high_gamma: false
     notch_q: 30
+    # Hz: 0.0 or omission disables high-pass; null is invalid.
     high_pass_hz: 0.5
     high_pass_order: 4
     high_pass_zero_phase: true
