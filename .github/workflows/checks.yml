@@ -18,7 +18,7 @@ jobs:
         run: |
           # CPU tests do not need the large CUDA/NVIDIA dependency bundle.
           python -m pip install --no-cache-dir torch==2.9.1 torchvision==0.24.1 --index-url https://download.pytorch.org/whl/cpu
-          python -m pip install --no-cache-dir "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@e39f48ce0ec8c8f59be2507dca8ae172cce79d28"
+          python -m pip install --no-cache-dir "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@8afc9df0f79870a0f4d32dc089429687171e2886"
           python -m pip install --no-cache-dir -e '.[dev,diver,warmup]'
           python -m pip check
           python -c "import torch, torchvision; assert torch.version.cuda is None, torch.__version__"
