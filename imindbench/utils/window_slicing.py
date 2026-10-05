@@ -4,6 +4,8 @@ import math
 
 import numpy as np
 
+# ceil uses TorchBrain's near-grid timestamp snapping and upward rounding.
+# legacy_floor floors unsnapped boundaries relative to the recording's time origin.
 DEFAULT_WINDOW_SLICING_POLICY = "ceil"
 
 

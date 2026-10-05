@@ -7,7 +7,7 @@ iEEG Multi-Insitution Neural Decoding Benchmark codebase. Includes preprocessing
 [![Leaderboard](https://img.shields.io/badge/Leaderboard-orange)](https://imindbench.github.io/leaderboard/)
 [![Dataset](https://img.shields.io/badge/Dataset-teal)](https://github.com/neuro-galaxy/torch_brain/tree/gc/add-seeg-movie-watching-datasets)
 
-[Getting started](#getting-started) | [Prepare data](#2-prepare-data) | [Full benchmark](#evaluate-the-complete-benchmark) | [Pretrained weights](#pretrained-weights) | [Customize](#customize) | [Outputs](#outputs) | [Changelog](CHANGELOG.md) | [Citation](#citation)
+[Getting started](#getting-started) | [Prepare data](#2-prepare-data) | [Full benchmark](#evaluate-the-complete-benchmark) | [Preprocessing](#preprocessing) | [Pretrained weights](#pretrained-weights) | [Customize](#customize) | [Outputs](#outputs) | [Changelog](CHANGELOG.md) | [Citation](#citation)
 
 ## Getting started
 
@@ -155,194 +155,13 @@ evaluations per model/input pairing**, before folds.
 
 **Smaller runs and settings**
 
-- For a smoke test, keep only the desired entries in `TASKS` and `TARGETS`.
-  Keep at least one task and subject/session pair.
-- Set training options such as `max_iter` in the model YAML.
-  PyTorch `training_mode` accepts `epoch_based` or `steps_based` (default:
-  `epoch_based`); `optimizer` names are case-sensitive PyTorch optimizer classes
-  such as `Adam`, `AdamW` or `SGD` (default: `Adam`). Invalid names fail before
-  evaluation instead of silently selecting a different training setup.
-- Logistic, MLP, CNN and all HTNet model configs use `tol: 1e-4` across inputs.
-  Logistic uses it for optimizer convergence; epoch-based Torch training uses
-  it as the minimum validation-score improvement (ROC AUC by default) to save
-  a checkpoint and reset early-stopping patience. Model YAMLs own this setting;
-  the bundled experiment presets inherit it.
-  This standardizes the former Logistic `1e-3` and MLP `1e-8` defaults, so new
-  runs can differ in iteration count, stopping epoch or selected checkpoint.
-- `runtime.deterministic: true` requests deterministic Torch execution for all
-  inputs. Set it to `false` to opt out; `model.deterministic` has been removed.
-  The former `waveform500` experiment is now `default`.
-- Store checkpoint paths in `paths/local.yaml`. DIVER also needs a writable
-  `diver_shape_cache_dir` in that same file.
-- Scripts run each enabled block serially and skip valid existing output JSONs.
-  If a block reports failures, the script stops before the next block.
-- Use a new output root after changing settings.
-
-The shared runtime config defaults to 4 data-loader workers, pinned memory,
-persistent workers, and 6 preprocessing Torch threads, matching the former
-Multi-STFT execution preset. These now apply to every model/input pairing.
-Adjust `runner.num_workers`, `runner.pin_memory`, `runner.persistent_workers`,
-and `runtime.preprocess_torch_num_threads` for your machine. Use
-`experiment=default` in place of the former `multi_stft/*` experiments.
-
-`runtime.sklearn_num_threads` caps each loaded BLAS/OpenMP pool during fitting
-(default: 4). Smaller existing limits, including those set by the environment,
-are preserved; previous limits are restored afterward. This avoids enlarging
-small OpenBLAS pools, which can crash SciPy's L-BFGS solver on some builds.
-
-**Preprocessing**
-
-The bundled collection contains 18 presets: the 10 main input presets listed in
-the dataset scripts, plus 8 variants selected for the paper notebooks' final
-plots. Each additional family below has both `1000` and `2048` Hz versions; replace `{rate}`
-with the dataset's native rate (BYD: 1000; NeuroprobeV2 and PIPPI: 2048).
-
-All bundled presets use Laplacian referencing, so filenames omit the
-`laplacian_` prefix. Spectral preset names are `stft_{rate}Hz`,
-`stft_brainbert_{rate}Hz`, `multi_stft_{rate}Hz`, and
-`multi_stft_zscore_{rate}Hz`. Update existing commands by dropping the prefix and
-moving the Multi-STFT `zscore` suffix before the rate (for example,
-`multi_stft_2048Hz_zscore` becomes `multi_stft_zscore_2048Hz`). Processing settings
-are unchanged. Historical result folders retain their old names; new runs use
-the shorter names. Old preset aliases are not bundled.
-
-Chain configs contain an ordered `chain:` list; each stage has its own `name:`.
-Remove the old top-level `name:` from external chain configs. Single-stage
-configs still require `name:`. Logs and result descriptions show the ordered
-stage names, and result metadata retains the full preprocessing configuration.
-Removing the old field changes cache identities; existing preprocessing caches
-will be rebuilt (or must be refreshed before using `read_only` cache mode).
-
-The old combined `name: laplacian_stft` stage has been removed. External chains
-should use `laplacian_rereference` followed by `stft`, with each stage's settings
-on its own entry. The rereferencing implementation now lives in
-`imindbench.preprocessors.laplacian_rereference_preprocessor`.
-
-| Paper variant | Preprocessor config (without `.yaml`) |
-| --- | --- |
-| Single-STFT | `stft_{rate}Hz` |
-| Multi-STFT with per-sample, per-channel normalization | `multi_stft_zscore_{rate}Hz` |
-| 500 Hz waveform with high-pass filtering and per-sample, per-channel normalization | `wav_hpf_zscore_{rate}to500Hz` |
-| 500 Hz waveform without high-pass filtering, with robust scaling | `wav_nohpf_robust_{rate}to500Hz` |
-
-Waveform names use `wav_<recipe>_<source>[to<target>]Hz`. A single rate
-means no resampling. Every bundled waveform recipe uses Laplacian referencing;
-filter and normalization details are explicit in its YAML.
-
-| Recipe | Filtering/context | Normalization |
-| --- | --- | --- |
-| `hpf_robust` | Notch + high-pass, 15-second context, cropped to target window | Global robust scaling fitted on training data |
-| `hpf_zscore` | Same filtering/context as `hpf_robust` | Per-sample, per-channel z-score |
-| `nohpf_robust` | Notch without high-pass, 15-second context, cropped to target window | Global robust scaling fitted on training data |
-| `diver` | DIVER filter, 15-second context, cropped to target window | No standardization stage; DIVER applies its input scaling |
-| `barista` | Session-wise notch + high-pass filtering, 2048 Hz output | Global robust scaling followed by per-sample, per-channel z-score |
-
-Selection follows the notebooks' active config choices and final model filters,
-excluding commented alternatives and hidden series:
-
-| Notebook selection | Retained inputs |
-| --- | --- |
-| Figure 4 preprocessing baselines, after `HIDE_LAST_PLOT_MODELS` | Single-STFT, standard/z-scored Multi-STFT, and the three 500 Hz baseline waveform recipes |
-| Figure 4 STFT sweeps/selection and Appendix 1 challenge-unit comparison | Single-STFT sweeps and the main 500 Hz waveform recipe |
-| Appendix 3 coverage, with `MODEL_TO_PLOT = 'Logistic (multi-STFT)'` | Standard Multi-STFT |
-| Other scorecards, task breakouts, scaling, sample-efficiency, and input visualization | Main presets and single-STFT |
-
-The native-rate waveform presets (`wav_nohpf_pooled_{rate}Hz`, previously
-`laplacian_wav_{rate}Hz`) and 400 Hz Multi-STFT presets
-(`laplacian_multi_stft_high_{rate}Hz`) have been removed: their entries are
-hidden or unselected in the final plots. The retained single-STFT sweeps can
-still vary their frequency limit independently.
-
-HTNet uses `model=htnet_500Hz` with the 500 Hz waveform presets. The native-rate
-`htnet_1000Hz` and `htnet_2048Hz` model presets have also been removed: all final
-paper notebook selections use the 500 Hz model.
-
-<details>
-<summary>Previous waveform names and migration</summary>
-
-These are filename-only renames: preprocessing chains are unchanged. New run
-folders use the new names; existing paper result folders and notebook paths
-retain their historical names. Update external commands/config references using
-this mapping. Old preset aliases are not bundled.
-
-| Previous name (without `.yaml`) | New name |
-| --- | --- |
-| `laplacian_wav_HPF_global_robust_scalar_long_context_15s_1000Hzto500Hz` | `wav_hpf_robust_1000to500Hz` |
-| `laplacian_wav_HPF_global_robust_scalar_long_context_15s_2048Hzto500Hz` | `wav_hpf_robust_2048to500Hz` |
-| `laplacian_wav_HPF_sample_per_channel_time_long_context_15s_1000Hzto500Hz` | `wav_hpf_zscore_1000to500Hz` |
-| `laplacian_wav_HPF_sample_per_channel_time_long_context_15s_2048Hzto500Hz` | `wav_hpf_zscore_2048to500Hz` |
-| `laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_1000Hzto500Hz` | `wav_diver_1000to500Hz` |
-| `laplacian_wav_diverstyle_HPF_noSTD_long_context_15s_2048Hzto500Hz` | `wav_diver_2048to500Hz` |
-| `laplacian_wav_global_robust_scalar_long_context_15s_1000Hzto500Hz` | `wav_nohpf_robust_1000to500Hz` |
-| `laplacian_wav_global_robust_scalar_long_context_15s_2048Hzto500Hz` | `wav_nohpf_robust_2048to500Hz` |
-| `laplacian_wav_session_HPF_global_robust_scalar_1000Hz_2048Hz_zscore` | `wav_barista_1000to2048Hz` |
-| `laplacian_wav_session_HPF_global_robust_scalar_2048Hz_zscore` | `wav_barista_2048Hz` |
-
-</details>
-
-The audited notebooks live in
-`torch_brain/examples/neuroprobe_eval/notebooks/paper_figs`. The restored z-scored
-Multi-STFT variants match the preprocessing settings in the corresponding saved
-`09_neurips/{dataset}/logistic_laplacian_multi_stft*/.../.hydra/config.yaml` runs,
-with Torch padding made explicit. The long-context waveform variants come from
-the original evaluation configs, migrated to `resample`. Historical DIVER output
-folders ending in `1000to500` or `2048to500` correspond to the main DIVER presets
-named `wav_diver_1000to500Hz` or `wav_diver_2048to500Hz`.
-
-Other bundled variations have been removed; their YAMLs remain in Git history.
-For an additional ablation, copy a retained config into your external config
-directory and override its settings. Keeping a paper recipe available does not
-establish numerical parity with historical runs made with older implementations.
-
-| Input | Processing |
-| --- | --- |
-| Multi-STFT | Uses the dataset's native sampling rate |
-| 500 Hz waveform baselines | Filter with 15-second context, crop to the target window, apply Laplacian referencing, downsample, and fit robust scaling on training data |
-
-For multi-dataset training, `dataset.train_sources[].preprocessor` selects a
-bundled preprocessor preset by filename without `.yaml`. Omit it to inherit the
-top-level pipeline. Individual stage names such as `raw` are not preset names.
-
-**Window slicing and historical reproduction**
-
-`dataset.window_slicing_policy` applies to evaluation windows and context-window
-reads across all splits and training sources:
-
-- `ceil` (default): the current TorchBrain behavior, snapping near-grid timestamps
-  before rounding both boundaries up.
-- `legacy_floor`: floor both boundaries without snapping, relative to the
-  recording's time origin, matching the former historical diagnostic launcher.
-
-Historical mode preserves the existing context placement and crop calculations;
-it changes waveform reads, as the former diagnostic did. It does not establish
-parity for unrelated preprocessing or training changes.
-
-Select `dataset.window_slicing_policy=legacy_floor` through the normal evaluator
-or launcher. Logs and result JSON (`config.window_slicing_policy`) record the
-selection. Both preprocessing caches include the policy, and their versions have
-changed to exclude old entries that did not record it. Rebuild caches before
-using `read_only` mode. Caching can be enabled for either policy after this update.
-Use a new output root when changing policy, since completed result JSONs are
-still skipped independently of cache identity.
-
-STFT and multi-STFT use Torch with centered windows, `pad_mode: reflect` and
-`padded: false` in the bundled presets. SciPy STFT is no longer supported; remove
-legacy `use_scipy` and `boundary` keys from external configs. SciPy is still used
-for filtering and resampling.
-
-Waveform rate conversion uses one `resample` stage with required positive integer
-`source_rate` and `target_rate` values in Hz. It accepts NumPy arrays or Torch
-tensors shaped `(channels, time)` and returns float32 NumPy arrays, preserving
-channel metadata and setting `sampling_rate` to the target rate. Output length is
-`ceil(input_length * target_rate / source_rate)`, matching SciPy's polyphase
-resampler. Crop context windows before resampling.
-
-For external preprocessor YAMLs, replace `name: downsample` or `name: upsampler`
-with `name: resample` and specify both rates. The old stages have been removed.
-Upsampling no longer rounds fractional output lengths to the nearest integer;
-it can retain one additional sample. The bundled one-second waveform windows
-still produce 500 samples for the waveform baselines and 2048 for BaRISTA.
-Use a new output root after migrating; existing result JSONs are still skipped.
+- **Smoke test:** keep at least one entry each in `TASKS` and `TARGETS`.
+- **Training:** edit the [model YAML](imindbench/conf/model/) for optimizer,
+  stopping criteria, and `epoch_based` or `steps_based` training.
+- **Runtime:** edit [runtime/default.yaml](imindbench/conf/runtime/default.yaml)
+  for loader workers, thread limits, and determinism.
+- **Execution:** enabled script blocks run serially; failures stop the next block.
+- **Results:** valid existing JSONs are skipped. Use a new output root after changing settings.
 
 **Dataset subsets**
 
@@ -352,60 +171,51 @@ Use a new output root after migrating; existing result JSONs are still skipped.
 | BYD | `full` |
 | PIPPI, including DIVER | `high-cov` |
 
-Subset tiers select eligible recordings and prepared splits; `TASKS` and `TARGETS`
-select the evaluation grid. For the listed PIPPI within-session targets,
-`high-cov` and `full` use identical splits and channels.
+- Subset tiers choose recordings/splits; `TASKS` and `TARGETS` choose evaluations.
+- Listed PIPPI within-session targets use identical splits/channels in `high-cov` and `full`.
 
-BaRISTA's model config selects `dataset.destrieux_brain_area_key` as the active
-brain-area field and owns the benchmark learning rates (`upstream_lr: 1e-3`,
-`head_lr: 1e-3`) and fixed scheduler (500 warmup updates, decay every 95 updates).
-Use `experiment=default` or `experiment=decodable`; the separate `barista`
-experiment has been removed.
+**Cohorts and sample caps**
 
-Selecting `model=diver` selects `dataset.coordinate_profile=diver_mni`.
-Its training settings stay in the model YAML; use `default` or `decodable`
-in place of the former `diver` experiment.
-
-**Transfer cohorts and sample caps**
-
-The `default` and `decodable` experiment presets expose the same fields:
-
-| Field | `default` | `decodable` |
+| Preset | Cohort | Per-subject/session training cap |
 | --- | --- | --- |
-| `paths.decodable_subject_sessions_dir` | `null` | Packaged Main-cohort manifest directory |
-| `dataset.label_mode` | `binary` | `binary` |
-| `dataset.train_same_subject_only` | `false` | `false` |
-| `dataset.train_sample_fraction` | `1.0` | `1.0` |
-| `dataset.max_train_samples_per_subject` | `null` | `auto` |
-| `dataset.decodable_subject_sessions_only` | `false` | `true` |
+| [default](imindbench/conf/experiment/default.yaml) | Unfiltered | None |
+| [decodable](imindbench/conf/experiment/decodable.yaml) | Validation-selected Main cohort | `auto`: target session's training-sample count |
 
-`default` is selected when no experiment is specified; scripts can explicitly
-select `--experiment default`. It replaces the former `baseline` and
-`within_session` presets. Only these two experiment presets are bundled. Model
-settings live in model configs; runtime settings live in
-`imindbench/conf/runtime/default.yaml`.
-
-| Setting | Within-session / sample efficiency | Within-dataset / multi-dataset |
-| --- | --- | --- |
-| Training cohort filter | Disabled | Validation-selected Main cohort |
-| Evaluation targets | Listed targets | Listed targets filtered per task by the standard manifest |
-| Per-subject/session training cap | Disabled | `auto`: capped at the target session's training-sample count |
-
-The `decodable` transfer preset supplies the manifest, sets
-`decodable_subject_sessions_only=true`, and enables the sample cap.
-The cap is an experiment setting, not a PopT-v2 requirement.
-`dataset.decodable_subject_sessions_only` replaces the former
-`dataset.train_decodable_subject_sessions_only` field. The launcher applies the
-manifest to evaluation targets; the data adapter applies it to training
-recordings. Direct `imindbench.run_eval` calls retain their explicit evaluation
-target and apply the training filter. Old external YAMLs must rename the field;
-validation rejects the retired spelling. Use a fresh output root when migrating.
-
-- To use a custom cohort, add `--decodable-rule NAME` or
-  `--decodable-dir /path/to/manifests` to the transfer command.
+- `default` is selected when no experiment is specified.
+- Dataset scripts use `EXPERIMENT` for within-session/sample efficiency and
+  `TRANSFER_EXPERIMENT=decodable` for transfer. The sample cap is independent of the model.
+- The launcher filters evaluation targets; the data adapter filters training recordings.
+  Direct `imindbench.run_eval` calls keep their explicit evaluation target.
+- For custom transfer cohorts, add `--decodable-rule NAME` or `--decodable-dir /path/to/manifests`.
 - The loader calls within-dataset training `hold-in-session`.
 
 </details>
+
+## Preprocessing
+
+- **Select:** choose a YAML from [imindbench/conf/preprocessor/](imindbench/conf/preprocessor/).
+  Use its filename without `.yaml` as script `PREPROCESSOR` or launcher `--preprocessor`.
+- **Input rate:** BYD uses 1000 Hz; NeuroprobeV2/PIPPI use 2048 Hz.
+- **Structure:** `chain:` lists stages in order. Each stage has a `name:` and parameters;
+  the overall chain has no name.
+- **Example:** [multi_stft_2048Hz.yaml](imindbench/conf/preprocessor/multi_stft_2048Hz.yaml)
+  applies notch filtering → Laplacian referencing → Multi-STFT → training-fitted
+  normalization, with **no time-domain high-pass filter**.
+- **Customize:** copy a preset into your external config's `preprocessor/` folder,
+  edit it, and select its filename. Keep stage sampling rates consistent and fit
+  learned normalization on training data only. Use a fresh output root.
+  See [Customize](#customize) for new stages.
+- **Submit:** `population_*.json` saves settings in `config.preprocess`.
+  Those settings determine the leaderboard track; filenames do not.
+
+| Track | Required preprocessing | Bundled configs |
+| --- | --- | --- |
+| **Multi-STFT** | Standard notch filtering and Laplacian referencing; the benchmark's three STFT resolutions; training-fitted normalization per channel/frequency bin. | `multi_stft_{rate}Hz` |
+| **Waveform** | 0.5 Hz high-pass filtering, supported notch filtering, and Laplacian referencing; supported sampling and normalization variants are allowed. | `wav_hpf_robust_*`, `wav_hpf_zscore_*`, `wav_barista_*`, `wav_diver_*` |
+| **Custom** | Routes outside the standard track requirements; document the changes and provide a matched baseline where possible. | `stft_*`, `stft_brainbert_*`, `multi_stft_zscore_*`, `wav_nohpf_robust_*` |
+
+- [Submission guide](https://github.com/imindbench/imindbench.github.io/blob/main/leaderboard/README.md#preprocessing-tracks): eligibility and track checks.
+- [Changelog](CHANGELOG.md): behavior changes and upgrade actions.
 
 ## Pretrained weights
 
@@ -481,9 +291,8 @@ Select it through the generic launcher:
 imindbench-grid --dataset neuroprobev2 --model mlp --preprocessor multi_stft_2048Hz --experiment my_trial --task onset --target sub1_sess1 --device cuda:0 --config-dir /path/to/config --paths local --output-root /path/to/runs/my_trial
 ```
 
-Keep model settings in the YAML file so the configuration is easy to review and
-reuse. Dataset scripts select the model, preprocessor and experiment; use
-`imindbench-grid` for new combinations.
+- Keep model settings in YAML for review and reuse.
+- Dataset scripts select model/preprocessor/experiment; use `imindbench-grid` for new combinations.
 
 </details>
 
@@ -519,17 +328,13 @@ imindbench-grid --dataset neuroprobev2 --model logistic --preprocessor stft_2048
 
 3. Add `imindbench/conf/model/my_model.yaml` with `name: my_model`, required
    `backend: torch` or `backend: sklearn`, input requirements and training settings.
-   The backend selects the runner and batch handling independently of the model name;
-   the launcher applies `--device` only to Torch models. Existing external model
-   configs must also declare their backend.
+   The backend selects the runner; `--device` applies only to Torch models.
 4. Select `--model my_model` with the dataset, preprocessor and path arguments
    from the custom experiment example.
 
-Start with one task/target and check input shapes and class probabilities.
-Then expand `TASKS` and `TARGETS` in the dataset script for a larger run.
-The CLI requires both selections explicitly; automatic all-target expansion and
-`--unit-set` have been removed.
-Repeat for all three datasets with matching preprocessors.
+- Start with one task/target; check input shapes and class probabilities.
+- Expand `TASKS` and `TARGETS`, then repeat across all three datasets with matching preprocessors.
+- Specify both task and target selections explicitly.
 
 </details>
 

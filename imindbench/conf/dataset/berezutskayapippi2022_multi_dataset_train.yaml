@@ -31,6 +31,8 @@ uniquify_channel_ids_with_subject: true
 uniquify_channel_ids_with_session: true
 merge_val_into_test: false
 
+# Each preprocessor selects a preset filename without .yaml; omit it to inherit
+# the top-level pipeline. Match each source dataset's native sampling rate.
 train_sources:
   # Inherits the top-level PIPPI dataset settings.
   - provider: berezutskayapippi2022
