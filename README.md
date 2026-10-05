@@ -19,7 +19,7 @@ are not yet validated. The default environment uses Python 3.10. From this proje
 ```bash
 conda env create -f environment.yml
 conda activate imindbench
-python -m pip install "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@e39f48ce0ec8c8f59be2507dca8ae172cce79d28"
+python -m pip install "torch_brain @ git+https://github.com/neuro-galaxy/torch_brain.git@8afc9df0f79870a0f4d32dc089429687171e2886"
 python -m pip install -e '.[models]'
 python -m pip check
 ```
