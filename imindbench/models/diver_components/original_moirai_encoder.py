@@ -588,7 +588,7 @@ class GroupedQueryAttention(nn.Module):
                 key_flat,
                 value_flat,
                 attn_mask=attn_mask_flat,
-                dropout_p=self.attn_dropout_p,
+                dropout_p=self.attn_dropout_p if self.training else 0.0,
                 scale=self.softmax_scale,
             )
             out = rearrange(
@@ -603,7 +603,7 @@ class GroupedQueryAttention(nn.Module):
                 key,
                 value,
                 attn_mask=attn_mask,
-                dropout_p=self.attn_dropout_p,
+                dropout_p=self.attn_dropout_p if self.training else 0.0,
                 scale=self.softmax_scale,
             )
         out = rearrange(out, "... group hpg q_len dim -> ... q_len (group hpg dim)")

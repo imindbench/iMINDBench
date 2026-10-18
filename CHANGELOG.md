@@ -4,6 +4,13 @@ Notable changes and upgrade actions are recorded here.
 
 ## [Unreleased]
 
+### Fixed
+
+- DIVER: attention dropout no longer runs in eval mode. `GroupedQueryAttention`
+  passed `dropout_p` to `scaled_dot_product_attention` unconditionally, so
+  frozen-backbone features changed on every forward pass. DIVER evaluation
+  results may shift slightly.
+
 ## [0.1.0] - 2026-09-20
 
 ### Added
